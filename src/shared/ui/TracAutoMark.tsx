@@ -33,7 +33,7 @@ export function TracAutoMark({ compact = false }: TracAutoMarkProps) {
 
       <div>
         <div className={`font-semibold tracking-[-0.03em] text-text-primary ${titleClass}`}>
-          Trac<span className="text-brand-cyan">Auto</span>
+          OR<span className="text-brand-cyan">BI</span>
         </div>
         <div className="text-[0.68rem] uppercase tracking-[0.3em] text-text-tertiary">
           {t('common.brandPlatform')}

@@ -2,7 +2,7 @@
   "bootstrap": {
     "status": "Frontend baseline ready for slice 01",
     "eyebrow": "Auth + identity",
-    "title": "Frontend foundation aligned with TracAuto v2.",
+    "title": "Frontend foundation aligned with ORBI.",
     "description": "This bootstrap enables the common frontend stack: visual tokens, i18n, React Query, centralized HTTP client and folder structure for the access and context features.",
     "sidebarEyebrow": "Technical baseline",
     "sidebarTitle": "Active configuration",
@@ -161,7 +161,7 @@
     "testimonials": {
       "title": "What our users say",
       "items": [
-        { "quote": "Since we implemented TracAuto, we reduced fuel costs by 30%. Real-time visibility changed our operation.", "name": "Carlos Mendez", "role": "Dir. of Operations, TransLogic" },
+        { "quote": "Since we implemented ORBI, we reduced fuel costs by 30%. Real-time visibility changed our operation.", "name": "Carlos Mendez", "role": "Dir. of Operations, TransLogic" },
         { "quote": "Claims management improved drastically. We have all vehicle information instantly, without calling the insured.", "name": "Laura Peralta", "role": "Insurance Manager, AsegurAR" },
         { "quote": "I control my car from my phone. It notifies me if someone moves it. Simple, fast and gives me peace of mind every day.", "name": "Martin Garcia", "role": "Individual user" }
       ]
@@ -174,7 +174,7 @@
     },
     "footer": {
       "brandDesc": "Comprehensive vehicle management, telemetry and GPS tracking platform for businesses and individuals.",
-      "copyright": "© 2026 TracAuto. All rights reserved.",
+      "copyright": "© 2026 ORBI. All rights reserved.",
       "product": { "title": "Product", "features": "Features", "plans": "Plans", "integrations": "Integrations", "api": "API" },
       "company": { "title": "Company", "about": "About us", "blog": "Blog", "contact": "Contact", "careers": "Careers" },
       "legal": { "title": "Legal", "terms": "Terms of service", "privacy": "Privacy", "cookies": "Cookies" }
@@ -322,7 +322,7 @@
       },
       "success": {
         "title": "Your account is ready!",
-        "subtitle": "You can now start using TracAuto to track and manage your vehicles.",
+        "subtitle": "You can now start using ORBI to track and manage your vehicles.",
         "cta": "Go to dashboard"
       }
     },
@@ -415,7 +415,7 @@
       "tabRegister": "Create new account",
       "submitLogin": "Accept invitation and sign in",
       "submitRegister": "Create account and accept invitation",
-      "disclaimer": "By accepting, your personal TracAuto account will still exist. You'll be able to use both your personal account and the organization from the same login.",
+      "disclaimer": "By accepting, your personal ORBI account will still exist. You'll be able to use both your personal account and the organization from the same login.",
       "examples": {
         "firstName": "Lucy",
         "lastName": "Fernandez",
