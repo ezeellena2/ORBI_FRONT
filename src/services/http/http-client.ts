@@ -4,6 +4,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios'
 import { appConfig } from '@/config/env'
+import i18n from '@/shared/i18n'
 import { getHttpSessionBridge } from '@/services/session/http-session-bridge'
 
 type RetriableRequestConfig = InternalAxiosRequestConfig & {
@@ -12,12 +13,40 @@ type RetriableRequestConfig = InternalAxiosRequestConfig & {
 
 let refreshPromise: Promise<string | null> | null = null
 
+// Un unico reintento cubre la carrera multi-pestaña: si dos pestañas refrescan a la vez, el backend
+// rota el refresh token de forma single-use (ver backend CONC-01) y la pestaña que pierde recibe 401.
+// Para entonces la ganadora ya dejo en la cookie un refresh token nuevo y valido, asi que un segundo
+// intento —tras un breve respiro para que aterrice el Set-Cookie— lo usa y recupera la sesion sin
+// desloguear. Si el segundo intento tambien falla, la sesion esta genuinamente muerta.
+const REFRESH_RETRY_DELAY_MS = 150
+
+function delay(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+async function refreshWithRetry(
+  refreshSession: () => Promise<string | null>,
+): Promise<string | null> {
+  const firstAttempt = await refreshSession()
+  if (firstAttempt) {
+    return firstAttempt
+  }
+
+  await delay(REFRESH_RETRY_DELAY_MS)
+  return refreshSession()
+}
+
 function attachHeaders(
   config: InternalAxiosRequestConfig,
   accessToken: string | null,
 ) {
   const headers = AxiosHeaders.from(config.headers)
   headers.set('Accept', 'application/json')
+  // Accept-Language coherente con la UI: el backend localiza el fallback title/detail de ProblemDetails
+  // por este header (backend I18N-03). Sin el, ese fallback saldria en el idioma default del backend.
+  headers.set('Accept-Language', i18n.resolvedLanguage ?? appConfig.defaultLocale)
   headers.set('X-TracAuto-Client', 'web')
 
   if (accessToken) {
@@ -65,7 +94,7 @@ httpClient.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    refreshPromise ??= bridge.refreshSession().finally(() => {
+    refreshPromise ??= refreshWithRetry(bridge.refreshSession).finally(() => {
       refreshPromise = null
     })
 

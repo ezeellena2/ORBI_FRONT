@@ -98,17 +98,20 @@ export function resolveApiErrorMessage(apiError: ApiError, translate: Translatio
     return translatedByCode
   }
 
+  // El generico localizado por el front (errors.HTTP_4xx) va ANTES que detail/title: el contrato dice que
+  // detail/title no son copy de UX. Quedan solo como ultimo recurso para status sin clave propia (y ahora
+  // localizados por Accept-Language desde backend I18N-03). Ver auditoria del front.
+  const translatedByStatus = translateKey(translate, resolveStatusFallbackKey(apiError.status))
+  if (translatedByStatus) {
+    return translatedByStatus
+  }
+
   if (apiError.detail?.trim()) {
     return apiError.detail
   }
 
   if (apiError.title.trim()) {
     return apiError.title
-  }
-
-  const translatedByStatus = translateKey(translate, resolveStatusFallbackKey(apiError.status))
-  if (translatedByStatus) {
-    return translatedByStatus
   }
 
   return translate('errors.unexpected')

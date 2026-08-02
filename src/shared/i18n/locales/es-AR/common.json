@@ -506,7 +506,10 @@
     },
     "organizacion_id": {
       "required": "La organizacion es obligatoria."
-    }
+    },
+    "required": "Este campo es obligatorio",
+    "yearMin": "El año debe ser mayor a 1990",
+    "yearMax": "El año no puede superar 2030"
   },
   "errors": {
     "unexpected": "Ocurrio un error inesperado.",
@@ -524,6 +527,8 @@
       "auth": {
         "credenciales_invalidas": "Email o contraseña incorrectos.",
         "cuenta_bloqueada": "Tu cuenta esta bloqueada temporalmente. Intenta mas tarde.",
+        "cuenta_deshabilitada": "Tu cuenta fue deshabilitada. Contacta al administrador de la organizacion.",
+        "rate_limit_exceeded": "Demasiados intentos. Espera {{retry_after_seconds}} segundos antes de reintentar.",
         "email_no_verificado": "Debes verificar tu email antes de iniciar sesion.",
         "token_expirado": "Tu sesion expiro. Inicia sesion nuevamente.",
       "token_invalido": "Tu sesion no es valida.",
@@ -704,10 +709,5 @@
       "title": "Sección en construcción",
       "comingSoon": "Próximamente disponible."
     }
-  },
-  "validation": {
-    "required": "Este campo es obligatorio",
-    "yearMin": "El año debe ser mayor a 1990",
-    "yearMax": "El año no puede superar 2030"
   }
 }
