@@ -1,5 +1,8 @@
 <!doctype html>
-<html lang="es">
+<!-- El tema viaja SIEMPRE por `data-theme`, y `dark` es un tema nombrado como
+     los otros tres. En el mockup el oscuro vivía en `:root` sin atributo, así que
+     `[data-theme="dark"]` no existía y elegir "dark" dejaba la app sin estilos. -->
+<html lang="es" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -14,15 +17,17 @@
   </head>
   <body>
     <script>
-      // Anti-flash: apply persisted theme before React mounts
+      // Anti-flash: aplica el tema persistido antes de que React monte.
+      // Escribe el atributo SIEMPRE, `dark` incluido: con los 4 temas nombrados
+      // no hay ningun caso especial que un toggler pueda romper.
       (function() {
+        var tema = 'dark';
         try {
           var p = JSON.parse(localStorage.getItem('tracauto-preferences') || '{}');
           var s = p && p.state;
-          if (s && s.theme && s.theme !== 'dark') {
-            document.documentElement.setAttribute('data-theme', s.theme);
-          }
+          if (s && s.theme) { tema = s.theme; }
         } catch(e) {}
+        document.documentElement.setAttribute('data-theme', tema);
       })();
     </script>
     <div id="root"></div>

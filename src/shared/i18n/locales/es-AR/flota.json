@@ -1,0 +1,336 @@
+{
+  "paginas": {
+    "vehiculosListado": "Vehículos",
+    "vehiculoDetalle": "Vehículo",
+    "vehiculosOnboarding": "Nuevo vehículo"
+  },
+  "estadoConexion": {
+    "en_linea": "En línea",
+    "desconectado": "Desconectado",
+    "incompleto": "Incompleto",
+    "sin_dato": "Sin datos"
+  },
+  "tipoVehiculo": {
+    "auto": "Auto",
+    "camioneta": "Camioneta",
+    "suv": "SUV",
+    "furgon": "Furgón",
+    "camion_chico": "Camión chico",
+    "camion_grande": "Camión grande",
+    "moto": "Moto",
+    "colectivo": "Colectivo",
+    "maquinaria": "Maquinaria",
+    "acoplado": "Acoplado"
+  },
+  "vehiculosListado": {
+    "titulo": "Vehículos",
+    "subtitulo": "Los vehículos de tu organización.",
+    "nuevoVehiculo": "Nuevo vehículo",
+    "sinPermisoCrear": "Necesitás el permiso flota.vehiculos.crear",
+    "buscar": {
+      "etiqueta": "Buscar por patente",
+      "placeholder": "Buscar por patente"
+    },
+    "soloActivos": "Solo activos",
+    "limpiar": "Limpiar filtros",
+    "columnas": {
+      "patente": "Patente",
+      "vehiculo": "Vehículo",
+      "dispositivo": "Dispositivo",
+      "conductores": "Conductor(es)",
+      "estado": "Estado",
+      "ultimaSenal": "Última señal",
+      "creado": "Creado",
+      "acciones": "Acciones"
+    },
+    "celda": {
+      "sinDato": "—",
+      "sinDispositivo": "Sin dispositivo",
+      "sinConductor": "Sin conductor",
+      "conductoresAsignados_one": "{{count}} asignado",
+      "conductoresAsignados_other": "{{count}} asignados",
+      "conductoresExtra": "+{{count}}",
+      "sinSenal": "Sin señal aún",
+      "velocidad": "{{velocidad}} km/h"
+    },
+    "acciones": {
+      "abrirMenu": "Acciones del vehículo",
+      "verDetalle": "Ver detalle",
+      "eliminar": "Eliminar"
+    },
+    "paginacion": {
+      "rango": "Mostrando {{desde}}–{{hasta}} de {{total}} vehículos",
+      "porPagina": "Por página",
+      "anterior": "Página anterior",
+      "siguiente": "Página siguiente"
+    },
+    "vacioSinDatos": {
+      "titulo": "Aún no cargaste vehículos",
+      "descripcion": "Empezá agregando tu primer vehículo. Podés hacerlo manualmente o importar un CSV con tu flota actual.",
+      "cta": "Agregar primer vehículo"
+    },
+    "vacioSinResultados": {
+      "titulo": "Ningún vehículo coincide con tus filtros",
+      "descripcion": "Probá ajustar la búsqueda o limpiar los filtros activos.",
+      "cta": "Limpiar filtros"
+    },
+    "error": {
+      "titulo": "No se pudieron cargar los vehículos",
+      "reintentar": "Reintentar"
+    },
+    "sinAcceso": {
+      "titulo": "Sin acceso",
+      "descripcion": "Necesitás el permiso {{permiso}} para ver esta pantalla",
+      "volver": "Volver al dashboard"
+    },
+    "eliminar": {
+      "titulo": "Eliminar vehículo",
+      "descripcion": "El vehículo deja de aparecer en los listados y en el mapa. Es una baja lógica: podés reactivarlo más adelante.",
+      "etiquetaTipeo": "Para confirmar, escribí la patente",
+      "confirmar": "Eliminar vehículo",
+      "cancelar": "Cancelar"
+    }
+  },
+  "rutaNoEncontrada": {
+    "titulo": "Esta sección de Flota no existe",
+    "descripcion": "Revisá el enlace o volvé al listado de vehículos.",
+    "volver": "Volver a vehículos"
+  },
+  "comun": {
+    "reintentar": "Reintentar",
+    "cancelar": "Cancelar",
+    "volverAVehiculos": "Volver a vehículos"
+  },
+  "forbidden": {
+    "titulo": "Sin acceso",
+    "descripcion": "Necesitás este permiso para ver esta pantalla.",
+    "volver": "Volver al dashboard"
+  },
+  "estadoOperativo": {
+    "operativo": "Operativo",
+    "fuera_de_servicio": "Fuera de servicio",
+    "baja_operativa": "Baja operativa"
+  },
+  "estadoActivo": {
+    "activo": "Activo",
+    "deBaja": "De baja"
+  },
+  "rolConductor": {
+    "principal": "Principal",
+    "secundario": "Secundario"
+  },
+  "detalle": {
+    "cargando": "Cargando el vehículo…",
+    "identidadNoDisponible": "Identidad del vehículo no disponible",
+    "ultimaSenal": "Última señal: {{valor}}",
+    "sinConductor": "Sin conductor asignado",
+    "noEncontrado": {
+      "titulo": "Vehículo no encontrado",
+      "descripcion": "Puede que se haya dado de baja o que el enlace ya no sea válido."
+    },
+    "error": {
+      "titulo": "No se pudo cargar el vehículo",
+      "descripcion": "Volvé a intentarlo en unos segundos."
+    },
+    "acciones": {
+      "verEnMapa": "Ver en mapa",
+      "editar": "Editar",
+      "masAcciones": "Más acciones",
+      "cambiarDispositivo": "Cambiar dispositivo",
+      "gestionarConductores": "Gestionar conductores",
+      "darDeBaja": "Dar de baja",
+      "sinPermiso": "Necesitás el permiso {{permiso}}",
+      "llegaEnOtroSlice": "Las asignaciones de dispositivo y conductor todavía no están disponibles."
+    },
+    "miniStats": {
+      "titulo": "Estado del vehículo",
+      "kmTotales": "Km totales",
+      "pistaKmTotales": "Kilometraje cargado en Flota",
+      "kmHoy": "Km recorridos hoy",
+      "consumo30d": "Consumo últimos 30 d",
+      "alertas30d": "Alertas últimos 30 d",
+      "sinFuente": "Sin fuente de datos todavía"
+    },
+    "tabs": {
+      "info": "Info general",
+      "conductor": "Conductor",
+      "dispositivo": "Dispositivo GPS",
+      "historial": "Historial"
+    },
+    "info": {
+      "titulo": "Datos del vehículo",
+      "patente": "Patente",
+      "tipo": "Tipo",
+      "marca": "Marca",
+      "modelo": "Modelo",
+      "anio": "Año",
+      "color": "Color",
+      "vin": "VIN / Nº chasis",
+      "alias": "Alias",
+      "kilometraje": "Km actuales",
+      "kilometros": "{{valor}} km",
+      "estadoOperativo": "Estado operativo",
+      "estado": "Estado",
+      "notas": "Notas operativas",
+      "creado": "Creado",
+      "modificado": "Última modificación",
+      "porUsuario": "{{cuando}} · por {{nombre}}"
+    },
+    "ubicacion": {
+      "titulo": "Ubicación actual",
+      "sinSenal": "Sin señal",
+      "sinSenalDescripcion": "Todavía no hay datos de telemetría para este vehículo.",
+      "enFlotaDesde": "En la flota desde el {{fecha}}",
+      "abrirMapa": "Abrir en mapa completo"
+    },
+    "conductor": {
+      "titulo": "Conductores asignados",
+      "vacioTitulo": "Sin conductor asignado",
+      "vacioDescripcion": "Vas a poder asignar un conductor a este vehículo desde acá cuando esté disponible la gestión de conductores.",
+      "dni": "DNI",
+      "licencia": "Licencia",
+      "telefono": "Teléfono",
+      "asignadoDesde": "Asignado desde"
+    },
+    "dispositivo": {
+      "titulo": "Dispositivo GPS asociado",
+      "vacioTitulo": "Sin dispositivo asociado",
+      "vacioDescripcion": "Vas a poder asociar un dispositivo GPS a este vehículo desde acá cuando esté disponible la gestión de dispositivos.",
+      "alias": "Alias",
+      "imei": "IMEI",
+      "snapshotPendiente": "El estado técnico en vivo (conexión, batería, última posición) todavía no tiene fuente disponible."
+    },
+    "historial": {
+      "periodo": {
+        "etiqueta": "Período",
+        "ultimos7": "Últimos 7 días",
+        "ultimos30": "Últimos 30 días",
+        "esteMes": "Este mes"
+      },
+      "columnas": {
+        "inicio": "Inicio",
+        "fin": "Fin",
+        "duracion": "Duración",
+        "distancia": "Km",
+        "velocidadMax": "Vel. máx",
+        "paradas": "Paradas"
+      },
+      "minutos": "{{valor}} min",
+      "degradadoTitulo": "Telemetría no disponible",
+      "degradadoDescripcion": "El historial de recorridos todavía no tiene fuente: no se guardan las posiciones históricas de los vehículos. No es que este vehículo no haya circulado.",
+      "errorTitulo": "No se pudo cargar el historial",
+      "errorDescripcion": "Volvé a intentarlo en unos segundos.",
+      "vacioTitulo": "Sin recorridos en el período",
+      "vacioDescripcion": "Probá ampliar el período seleccionado."
+    },
+    "editar": {
+      "titulo": "Editar vehículo",
+      "guardar": "Guardar cambios",
+      "alias": "Alias",
+      "aliasAyuda": "Apodo operativo del vehículo dentro de tu organización.",
+      "kilometraje": "Km actuales",
+      "notas": "Notas operativas",
+      "leyendaCanonicos": "La patente, la marca, el modelo, el año y el tipo se editan en la ficha canónica del vehículo, no acá."
+    },
+    "baja": {
+      "titulo": "Dar de baja el vehículo",
+      "descripcion": "El vehículo deja de aparecer en listados y mapa.",
+      "bloqueadaPorAsignaciones": "No se puede dar de baja: el vehículo todavía tiene un conductor o un dispositivo asignado. Primero hay que desasignarlos.",
+      "etiquetaTipeo": "Para confirmar, escribí la patente",
+      "confirmar": "Dar de baja"
+    }
+  },
+  "onboarding": {
+    "bienvenida": "Bienvenido a {{organizacion}}",
+    "titulo": "Dale de alta tu primer vehículo",
+    "subtitulo": "Empezá a rastrear tu flota en minutos. Una vez que cargues el primero vas a ver el mapa en vivo y las alertas en tu dashboard.",
+    "crearYContinuar": "Crear vehículo y continuar",
+    "creando": "Creando vehículo…",
+    "vehiculoCreado": "Listo: el vehículo {{patente}} ya está creado y podés consultarlo aunque salgas del asistente.",
+    "verFicha": "Ver su ficha",
+    "saltarAlDashboard": "Saltar este paso — ir al dashboard",
+    "campos": {
+      "patente": "Patente",
+      "patentePlaceholder": "AB 123 CD",
+      "marca": "Marca",
+      "marcaPlaceholder": "Elegí una marca",
+      "modelo": "Modelo",
+      "anio": "Año",
+      "anioAyuda": "Entre {{min}} y {{max}}.",
+      "tipo": "Tipo",
+      "tipoPlaceholder": "Elegí un tipo",
+      "vin": "VIN / Nº chasis",
+      "color": "Color",
+      "kilometrajeInicial": "Kilometraje inicial",
+      "notasOperativas": "Notas operativas"
+    },
+    "opcionales": {
+      "titulo": "Datos opcionales"
+    },
+    "catalogo": {
+      "cargando": "Cargando catálogo…",
+      "vacio": "Catálogo sin opciones",
+      "fallo": "No se pudo cargar el catálogo. Volvé a intentarlo en unos segundos.",
+      "marcasVacias": "El catálogo de marcas todavía está vacío: no se cargaron las marcas en la plataforma.",
+      "tiposVacios": "El catálogo de tipos de vehículo todavía está vacío."
+    },
+    "errores": {
+      "sinFilaFantasma": "No se creó ningún vehículo: podés reintentar sin miedo a duplicarlo."
+    },
+    "pasos": {
+      "accionNoDisponible": "Todavía no disponible",
+      "saltarAlSiguiente": "Saltar este paso",
+      "finalizar": "Finalizar e ir a vehículos",
+      "vehiculo": {
+        "etiqueta": "Primer vehículo"
+      },
+      "dispositivo": {
+        "etiqueta": "Dispositivo GPS",
+        "titulo": "Asociar un dispositivo GPS",
+        "descripcion": "Opcional. Podés saltarlo y hacerlo más adelante.",
+        "hint": "Vas a poder asociar un dispositivo desde el detalle del vehículo cuando esté disponible la gestión de dispositivos."
+      },
+      "conductor": {
+        "etiqueta": "Conductor",
+        "titulo": "Asignar un conductor",
+        "descripcion": "Opcional. Podés saltarlo y hacerlo más adelante.",
+        "hint": "Vas a poder asignar un conductor desde el detalle del vehículo cuando esté disponible la gestión de conductores."
+      }
+    },
+    "importar": {
+      "titulo": "¿Tenés muchos vehículos?",
+      "descripcion": "Vas a poder importar un CSV con toda tu flota de una vez.",
+      "cta": "Importar CSV",
+      "motivoSlice": "La importación por CSV todavía no está disponible."
+    }
+  },
+  "validation": {
+    "patente": {
+      "required": "La patente es obligatoria.",
+      "max_length": "La patente no puede superar los 20 caracteres."
+    },
+    "marca": {
+      "required": "La marca es obligatoria.",
+      "max_length": "La marca no puede superar los 50 caracteres."
+    },
+    "modelo": {
+      "required": "El modelo es obligatorio.",
+      "max_length": "El modelo no puede superar los 50 caracteres."
+    },
+    "anio": {
+      "range_invalid": "El año debe estar entre 1950 y 2030."
+    },
+    "tipo": {
+      "required": "El tipo de vehículo es obligatorio."
+    },
+    "vin": {
+      "max_length": "El VIN no puede superar los 17 caracteres."
+    },
+    "kilometraje_inicial": {
+      "negative": "El kilometraje no puede ser negativo."
+    },
+    "kilometraje_actual": {
+      "negative": "El kilometraje no puede ser negativo."
+    }
+  }
+}

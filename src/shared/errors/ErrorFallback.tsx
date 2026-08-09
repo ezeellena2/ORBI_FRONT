@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
-import { Alert } from '@/shared/ui/Alert'
-import { Button } from '@/shared/ui/Button'
+import { Alert } from '@/shared/ui/legacy/Alert'
+import { Button } from '@/shared/ui/legacy/Button'
 
 interface ErrorFallbackProps {
   error?: Error | null

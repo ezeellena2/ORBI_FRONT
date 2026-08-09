@@ -1,0 +1,52 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEMA `dark-warm` — DECLARADO COMPLETO, NO EXPUESTO
+   Mismo motivo que `light.css`: los 4 temas se declaran desde el día 1 para
+   que agregar uno sea cambiar un atributo (01-sistema-de-diseno.md §5.3).
+
+   CERO HEX.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root[data-theme='dark-warm'] {
+  /* Superficies y bordes — rampa `calido` */
+  --s-fondo-base: var(--p-calido-950);
+  --s-superficie-1: var(--p-calido-900);
+  --s-superficie-2: var(--p-calido-850);
+  --s-superficie-3: var(--p-calido-800);
+  --s-borde: var(--p-calido-750);
+  --s-borde-hover: var(--p-calido-700);
+
+  /* Texto */
+  --s-fg-primario: var(--p-calido-50);
+  --s-fg-secundario: var(--p-calido-400);
+  --s-fg-terciario: var(--p-calido-500);
+  --s-fg-sobre-color: var(--p-blanco);
+
+  /* Alfas — solo baja el halo (01 §2.4): cyan 0.12 · ámbar 0.15 */
+  --s-marca-tenue: color-mix(in srgb, var(--p-cyan-500) 8%, transparent);
+  --s-marca-suave: color-mix(in srgb, var(--p-cyan-500) 15%, transparent);
+  --s-marca-halo: color-mix(in srgb, var(--p-cyan-500) 12%, transparent);
+  --s-accion-tenue: color-mix(in srgb, var(--p-ambar-500) 8%, transparent);
+  --s-accion-suave: color-mix(in srgb, var(--p-ambar-500) 15%, transparent);
+  --s-accion-halo: color-mix(in srgb, var(--p-ambar-500) 15%, transparent);
+
+  /* Velo, vidrio y modal — base `calido-950` */
+  --s-velo: color-mix(in srgb, var(--p-calido-950) 80%, transparent);
+  --s-velo-fuerte: color-mix(in srgb, var(--p-calido-950) 90%, transparent);
+  --s-modal-fondo: color-mix(in srgb, var(--p-calido-950) 85%, transparent);
+  --s-vidrio: color-mix(in srgb, var(--p-calido-900) 85%, transparent);
+
+  /* Gradiente ambiente — el único tema donde la luz de fondo es ÁMBAR, no cyan */
+  --s-gradiente-ambiente: radial-gradient(
+    ellipse at 20% 50%,
+    color-mix(in srgb, var(--p-ambar-500) 4%, transparent) 0%,
+    transparent 60%
+  );
+
+  /* Sombras — negro con alfa más bajo: más suaves que en `dark` */
+  --s-sombra-sm: 0 1px 2px color-mix(in srgb, var(--p-negro) 30%, transparent);
+  --s-sombra-md: 0 4px 6px color-mix(in srgb, var(--p-negro) 25%, transparent);
+  --s-sombra-lg: 0 10px 15px color-mix(in srgb, var(--p-negro) 30%, transparent);
+  --s-sombra-xl: 0 16px 48px color-mix(in srgb, var(--p-negro) 40%, transparent);
+
+  color-scheme: dark;
+}

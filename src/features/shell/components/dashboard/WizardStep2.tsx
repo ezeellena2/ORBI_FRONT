@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
-import { Input } from '@/shared/ui/Input'
-import { Select } from '@/shared/ui/Select'
+import { Input } from '@/shared/ui/legacy/Input'
+import { Select } from '@/shared/ui/legacy/Select'
 import { step2Schema, type Step2Data } from '../../schemas/onboarding-schemas'
 
 const GPS_MODELOS = ['Queclink GV75W', 'Concox GT06N', 'Teltonika FMB920', 'Jimi JM-VL03', 'Otro']

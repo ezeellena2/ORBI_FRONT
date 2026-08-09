@@ -27,3 +27,10 @@ test-results
 
 *storybook.log
 storybook-static
+
+# Secretos locales. `.env.example` sí se versiona; `.env*` con valores, no.
+.env
+.env.local
+.env.*.local
+
+coverage

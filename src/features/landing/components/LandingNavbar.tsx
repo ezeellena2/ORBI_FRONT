@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Menu, X } from 'lucide-react'
-import { TracAutoMark } from '@/shared/ui/TracAutoMark'
+import { TracAutoMark } from '@/shared/ui/legacy/TracAutoMark'
 import { LandingThemeSwitcher } from './LandingThemeSwitcher'
 
 export function LandingNavbar() {

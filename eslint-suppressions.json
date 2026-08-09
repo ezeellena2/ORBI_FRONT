@@ -1,0 +1,75 @@
+{
+  "src/app/bootstrap/AppBootstrap.tsx": {
+    "orbi/sin-clase-arbitraria-de-color": {
+      "count": 1
+    }
+  },
+  "src/features/access/pages/LoginPage.tsx": {
+    "orbi/sin-color-literal": {
+      "count": 4
+    }
+  },
+  "src/features/access/schemas/aceptar-invitacion-schema.ts": {
+    "no-useless-escape": {
+      "count": 1
+    }
+  },
+  "src/features/access/schemas/google-completion-schema.ts": {
+    "no-useless-escape": {
+      "count": 1
+    }
+  },
+  "src/features/access/schemas/registro-empresa-schema.ts": {
+    "no-useless-escape": {
+      "count": 1
+    }
+  },
+  "src/features/access/schemas/registro-schema.ts": {
+    "no-useless-escape": {
+      "count": 1
+    }
+  },
+  "src/features/access/schemas/restablecer-password-schema.ts": {
+    "no-useless-escape": {
+      "count": 1
+    }
+  },
+  "src/features/landing/components/LandingB2C.tsx": {
+    "orbi/sin-color-literal": {
+      "count": 2
+    }
+  },
+  "src/features/landing/components/LandingCta.tsx": {
+    "orbi/sin-color-literal": {
+      "count": 1
+    }
+  },
+  "src/features/landing/components/LandingHero.tsx": {
+    "orbi/sin-clase-arbitraria-de-color": {
+      "count": 1
+    },
+    "orbi/sin-color-literal": {
+      "count": 6
+    }
+  },
+  "src/features/shell/components/sidebar/SidebarNavGroup.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/shared/errors/parse-api-error.ts": {
+    "no-restricted-imports": {
+      "count": 1
+    }
+  },
+  "src/shared/hooks/useMultiStepUrl.ts": {
+    "react-hooks/refs": {
+      "count": 3
+    }
+  },
+  "src/shared/ui/legacy/TracAutoMark.tsx": {
+    "orbi/sin-clase-arbitraria-de-color": {
+      "count": 1
+    }
+  }
+}

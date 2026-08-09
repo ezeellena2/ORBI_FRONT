@@ -5,9 +5,9 @@ import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSessionStore } from '@/stores/session-store'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
-import { Alert } from '@/shared/ui/Alert'
-import { Button } from '@/shared/ui/Button'
-import { Input } from '@/shared/ui/Input'
+import { Alert } from '@/shared/ui/legacy/Alert'
+import { Button } from '@/shared/ui/legacy/Button'
+import { Input } from '@/shared/ui/legacy/Input'
 import {
   registroEmailVerificationSchema,
   type RegistroEmailVerificationFormData,

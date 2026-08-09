@@ -1,7 +1,15 @@
 {
   "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
+  "compilerOptions": {
+    // Duplicado a proposito del `tsconfig.app.json`. Este archivo es
+    // "solution-style" (`files: []`) y no compila nada, pero es el que leen las
+    // herramientas externas para resolver el alias `@/`. Sin esto, el CLI de
+    // shadcn no resuelve `@/shared/ui` y escribe los componentes en una carpeta
+    // literal llamada `@` en la raiz del repo.
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
 }

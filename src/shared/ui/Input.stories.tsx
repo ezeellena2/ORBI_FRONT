@@ -1,41 +1,33 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Mail } from 'lucide-react';
-import { Input } from './Input';
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { Search, X } from 'lucide-react'
+import { Input } from './Input'
 
 const meta = {
-  title: 'UI/Input',
+  title: 'Primitivas/B Formulario/Input',
   component: Input,
-  argTypes: {
-    label: { control: 'text' },
-    placeholder: { control: 'text' },
-    error: { control: 'text' },
-    type: { control: 'inline-radio', options: ['text', 'email', 'password'] },
-    disabled: { control: 'boolean' },
-  },
-  args: {
-    label: 'Email',
-    placeholder: 'tu@empresa.com',
-    type: 'email',
-  },
-} satisfies Meta<typeof Input>;
+  decorators: [
+    (Story) => (
+      <div className="w-80">
+        <Story />
+      </div>
+    ),
+  ],
+  args: { placeholder: 'Escribí algo…' },
+} satisfies Meta<typeof Input>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = {};
+export const Reposo: Story = {}
+export const ConValor: Story = { args: { defaultValue: 'Camión 12' } }
+export const Invalido: Story = { args: { invalido: true, defaultValue: 'AB12' } }
+export const Deshabilitado: Story = { args: { disabled: true, defaultValue: 'No editable' } }
+export const SoloLectura: Story = { args: { readOnly: true, defaultValue: 'Solo lectura' } }
 
-export const WithError: Story = {
-  args: { error: 'Ingresá un email válido.', value: 'no-es-email' },
-};
+/** Patentes, VIN, IMEI y coordenadas: se comparan carácter por carácter. */
+export const Mono: Story = { args: { mono: true, defaultValue: '8AGXXXXXXXXXXXXXX' } }
 
-export const WithLeadingIcon: Story = {
-  args: { leadingAdornment: <Mail className="h-4 w-4" aria-hidden="true" /> },
-};
-
-export const Password: Story = {
-  args: { label: 'Contraseña', type: 'password', placeholder: '••••••••' },
-};
-
-export const Disabled: Story = {
-  args: { disabled: true, value: 'no-editable@orbi.com' },
-};
+export const ConIconoIzquierda: Story = {
+  args: { iconoIzq: Search, placeholder: 'Buscar por patente o alias' },
+}
+export const ConIconoDerecha: Story = { args: { iconoDer: X, defaultValue: 'Camión 12' } }

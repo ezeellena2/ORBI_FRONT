@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
-import { TracAutoMark } from '@/shared/ui/TracAutoMark'
-import { ThemeSwitcher } from '@/shared/ui/ThemeSwitcher'
+import { TracAutoMark } from '@/shared/ui/legacy/TracAutoMark'
+import { ThemeSwitcher } from '@/shared/ui/legacy/ThemeSwitcher'
 
 /**
  * Shell publico para pantallas de auth (login, registro, invitacion).

@@ -1,0 +1,98 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CAPA A1 — PRIMITIVAS DE COLOR (`--p-*`)
+
+   ESTE ES EL ÚNICO ARCHIVO DEL FRONTEND CON PERMISO DE CONTENER UN HEX.
+   Un `#hex`, un `rgb()` o un `oklch()` en cualquier otro archivo es un bug con
+   el mismo peso que un test que falla (01-sistema-de-diseno.md §0 y §7.5).
+
+   Reglas que este archivo tiene que cumplir, y por qué:
+   - Es CSS PLANO en `:root`. **Nunca entra a un `@theme`.** Si entrara,
+     Tailwind generaría `bg-p-cyan-500` y la regla "los componentes solo
+     consumen semánticas" pasaría de ser arquitectura a ser un pedido por favor
+     (D6 del README · 01 §7.3 bis a).
+   - Solo la capa semántica (`semanticas.css` + `temas/*.css`) lee estos tokens.
+     Un `var(--p-…)` dentro de un componente es un bug (D2 · R1 del doc 02).
+
+   Valores: extraídos de `docs/mockupsv2/_shared/tokens.css` y ya organizados en
+   01-sistema-de-diseno.md §2. **No se inventa ni un paso.**
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Marca (01 §2.1) ────────────────────────────────────────────────────
+     Cyan = identidad / tracking / datos. Ámbar = acción (CTA).
+     PENDIENTE (DA-FE-01 de 01-sistema-de-diseno): los pasos que faltan de cada
+     rampa (100–400, 700, 900) NO se completan con el default de Tailwind hasta
+     que el PO lo ratifique. Hasta entonces, solo existen los de acá abajo. */
+  --p-cyan-500: #06B6D4;
+  --p-cyan-600: #0891B2;
+  --p-cyan-800: #065F73; /* rescatado: en el mockup vivía huérfano dentro del gradiente hero */
+
+  --p-ambar-500: #F59E0B;
+  --p-ambar-600: #D97706;
+  --p-ambar-tinta: #0F0F12; /* tinta legible SOBRE ámbar: blanco sobre ámbar da ~2.2:1 y falla */
+
+  --p-violeta-500: #8B5CF6;
+
+  /* ── Estado (01 §2.1) ──────────────────────────────────────────────────── */
+  --p-verde-500: #10B981;
+  --p-rojo-500: #EF4444;
+
+  /* ── Neutros · rampa `frio` — tema dark, el default (01 §2.2) ───────────
+     Convención: número bajo = claro, número alto = oscuro.
+     El paso 800 es MÁS CLARO que el 850 a propósito: la rampa no es lineal,
+     sube saturación azul en la superficie más alta. Es del mockup y se conserva. */
+  --p-frio-50: #F0F4F8;
+  --p-frio-400: #7A8BA0;
+  --p-frio-500: #4A5568;
+  --p-frio-700: #2A3A50;
+  --p-frio-750: #1E2A3A;
+  --p-frio-800: #1A2035;
+  --p-frio-850: #181D2A;
+  --p-frio-900: #0F1420;
+  --p-frio-950: #080B14;
+
+  /* ── Neutros · rampa `claro` — tema light (01 §2.2) ─────────────────────
+     Incompleta a propósito: en light los bordes NO son gris neutro, son cyan
+     translúcido (01 §5.2), así que la rampa no necesita pasos intermedios. */
+  --p-claro-0: #FFFFFF;
+  --p-claro-50: #F5F9FC;
+  --p-claro-100: #F1F7FB;
+  --p-claro-200: #E8F0F6;
+  --p-claro-400: #64748B;
+  --p-claro-500: #475569;
+  --p-claro-950: #0B1221;
+
+  /* ── Neutros · rampa `calido` — tema dark-warm (01 §2.2) ───────────────── */
+  --p-calido-50: #F5F0EB;
+  --p-calido-400: #A89B8C;
+  --p-calido-500: #6B5E52;
+  --p-calido-700: #4A4038;
+  --p-calido-750: #332C25;
+  --p-calido-800: #2C2621;
+  --p-calido-850: #231F1B;
+  --p-calido-900: #1A1714;
+  --p-calido-950: #12100E;
+
+  /* ── Neutros · rampa `noche` — tema midnight (01 §2.2) ─────────────────── */
+  --p-noche-50: #FAFAFF;
+  --p-noche-400: #8888A0;
+  --p-noche-500: #55556A;
+  --p-noche-700: #2A2A3A;
+  --p-noche-750: #1E1E2A;
+  --p-noche-800: #181822;
+  --p-noche-850: #111118;
+  --p-noche-900: #0A0A0F;
+  --p-noche-950: #050507;
+
+  /* ── Invariantes (01 §2.3) ──────────────────────────────────────────────
+     `--p-mapa` es una decisión de PRODUCTO, no de estética: la cartografía de
+     tracking se lee en oscuro siempre. Ningún tema lo sobreescribe. */
+  --p-blanco: #FFFFFF;
+  --p-mapa: #0D1117;
+
+  /* `--p-negro` materializa el `<negro @ α>` con el que 01 §4.6 escribe las
+     sombras de elevación de dark / dark-warm. El doc lo nombra pero no lo
+     declara como token; se declara acá porque el alfa se compone con
+     `color-mix()` desde la capa semántica y ahí no entran literales. */
+  --p-negro: #000000;
+}

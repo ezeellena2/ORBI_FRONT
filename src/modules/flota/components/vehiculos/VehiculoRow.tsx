@@ -1,0 +1,215 @@
+import { Eye, MoreVertical, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { VehiculoBadgeEstado } from './VehiculoBadgeEstado'
+import type { VehiculoListItemDto } from '@/services/contracts/flota'
+import { BotonIcono } from '@/shared/ui/BotonIcono'
+import { MenuAcciones, type ItemMenuAcciones } from '@/shared/ui/MenuAcciones'
+
+/**
+ * Las celdas de UNA fila de vehiculo.
+ *
+ * No es un `<tr>`: la primitiva `Tabla` es duenia de la fila y de la celda (y por eso la tabla
+ * puede seguir dibujando el encabezado cuando esta cargando, vacia o en error). Lo que este
+ * archivo aporta es el CONTENIDO de cada celda, que es lo unico especifico de Flota.
+ * `TablaVehiculos` las ensambla en su descriptor de columnas.
+ *
+ * Regla que gobierna todas las celdas: los campos de identidad canonica (`patente`, `marca`,
+ * `modelo`, `anio`, `tipo`) llegan NULABLES — la proyeccion local del canonico puede no estar
+ * vigente — y los tecnicos (`estado`, `ultimaSenal`) llegan vacios cuando Telemetria no responde
+ * (partial-data, D-C1 a). En los dos casos la celda muestra su fallback y la fila se sigue viendo
+ * entera: nunca se inventa un dato ni se rompe la pantalla.
+ */
+
+/** Fallback unico de dato ausente. Se resuelve por i18n para no hardcodear el guion. */
+function useSinDato(): string {
+  const { t } = useTranslation('flota')
+  return t('vehiculosListado.celda.sinDato')
+}
+
+function formatearFecha(fechaIso: string, idioma: string): string | null {
+  const marca = Date.parse(fechaIso)
+  if (Number.isNaN(marca)) return null
+
+  return new Intl.DateTimeFormat(idioma, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(marca))
+}
+
+/**
+ * "hace 12 segundos" / "hace 2 horas". Se calcula contra el reloj del browser porque el contrato
+ * sirve la fecha en ISO 8601 UTC y la conversion a hora local es responsabilidad del frontend.
+ */
+function formatearRelativo(fechaIso: string, idioma: string): string | null {
+  const marca = Date.parse(fechaIso)
+  if (Number.isNaN(marca)) return null
+
+  const formateador = new Intl.RelativeTimeFormat(idioma, { numeric: 'auto' })
+  const segundos = Math.round((marca - Date.now()) / 1000)
+  if (Math.abs(segundos) < 60) return formateador.format(segundos, 'second')
+
+  const minutos = Math.round(segundos / 60)
+  if (Math.abs(minutos) < 60) return formateador.format(minutos, 'minute')
+
+  const horas = Math.round(minutos / 60)
+  if (Math.abs(horas) < 24) return formateador.format(horas, 'hour')
+
+  return formateador.format(Math.round(horas / 24), 'day')
+}
+
+export interface CeldaVehiculoProps {
+  vehiculo: VehiculoListItemDto
+}
+
+export function CeldaPatente({ vehiculo }: CeldaVehiculoProps) {
+  const sinDato = useSinDato()
+  return <span>{vehiculo.patente ?? sinDato}</span>
+}
+
+/** Dos lineas: `marca modelo` arriba, `anio · tipo` abajo. El tipo se traduce; el codigo no cambia. */
+export function CeldaVehiculo({ vehiculo }: CeldaVehiculoProps) {
+  const { t } = useTranslation('flota')
+  const sinDato = useSinDato()
+
+  const nombre = [vehiculo.marca, vehiculo.modelo].filter(Boolean).join(' ')
+  const tipo = vehiculo.tipo
+    ? t(`tipoVehiculo.${vehiculo.tipo}`, { defaultValue: vehiculo.tipo })
+    : null
+  const detalle = [vehiculo.anio === null ? null : String(vehiculo.anio), tipo]
+    .filter(Boolean)
+    .join(' · ')
+
+  return (
+    <div className="flex flex-col">
+      <span className="text-fg-primario">{nombre.length > 0 ? nombre : sinDato}</span>
+      {detalle.length > 0 ? (
+        <span className="text-xs text-fg-terciario">{detalle}</span>
+      ) : null}
+    </div>
+  )
+}
+
+/**
+ * El alias del dispositivo va en mono y como TEXTO, no como enlace: la pantalla de detalle de
+ * dispositivo llega en su propio slice y un enlace al 404 interno de Flota es peor que texto plano.
+ * Cuando exista `/app/flota/dispositivos/:id`, esta celda pasa a enlace (ficha §8).
+ */
+export function CeldaDispositivo({ vehiculo }: CeldaVehiculoProps) {
+  const { t } = useTranslation('flota')
+
+  if (vehiculo.dispositivo === null) {
+    return (
+      <span className="text-fg-terciario">{t('vehiculosListado.celda.sinDispositivo')}</span>
+    )
+  }
+
+  return <span title={vehiculo.dispositivo.imei}>{vehiculo.dispositivo.alias}</span>
+}
+
+export function CeldaConductores({ vehiculo }: CeldaVehiculoProps) {
+  const { t } = useTranslation('flota')
+
+  if (vehiculo.conductorPrincipal === null) {
+    return vehiculo.conductoresCount > 0 ? (
+      <span>
+        {t('vehiculosListado.celda.conductoresAsignados', { count: vehiculo.conductoresCount })}
+      </span>
+    ) : (
+      <span className="text-fg-terciario">{t('vehiculosListado.celda.sinConductor')}</span>
+    )
+  }
+
+  const extra = vehiculo.conductoresCount - 1
+
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="truncate">{vehiculo.conductorPrincipal.nombreCompleto}</span>
+      {extra > 0 ? (
+        <span className="text-xs text-fg-terciario">
+          {t('vehiculosListado.celda.conductoresExtra', { count: extra })}
+        </span>
+      ) : null}
+    </span>
+  )
+}
+
+export function CeldaEstado({ vehiculo }: CeldaVehiculoProps) {
+  return (
+    <VehiculoBadgeEstado
+      estado={vehiculo.estado}
+      velocidadKmH={vehiculo.ultimaSenal?.velocidadKmH ?? null}
+    />
+  )
+}
+
+export function CeldaUltimaSenal({ vehiculo }: CeldaVehiculoProps) {
+  const { t, i18n } = useTranslation('flota')
+  const sinDato = useSinDato()
+
+  // `null` = el vehiculo nunca emitio. Distinto de "Telemetria no responde", que se lee en el
+  // badge de estado (`sin_dato`): por eso son dos copys diferentes y no uno solo.
+  if (vehiculo.ultimaSenal === null) {
+    return <span className="text-fg-terciario">{t('vehiculosListado.celda.sinSenal')}</span>
+  }
+
+  const relativo = formatearRelativo(vehiculo.ultimaSenal.fechaUtc, i18n.language)
+  return <span className="text-fg-secundario">{relativo ?? sinDato}</span>
+}
+
+export function CeldaCreado({ vehiculo }: CeldaVehiculoProps) {
+  const { i18n } = useTranslation('flota')
+  const sinDato = useSinDato()
+
+  return <span>{formatearFecha(vehiculo.fechaCreacion, i18n.language) ?? sinDato}</span>
+}
+
+export interface CeldaAccionesProps extends CeldaVehiculoProps {
+  /** `flota.vehiculos.eliminar`. Sin el permiso el item NO se dibuja (permisos.md: verbo `eliminar` = oculto). */
+  puedeEliminar: boolean
+  onVerDetalle: (vehiculo: VehiculoListItemDto) => void
+  onEliminar: (vehiculo: VehiculoListItemDto) => void
+}
+
+export function CeldaAcciones({
+  vehiculo,
+  puedeEliminar,
+  onVerDetalle,
+  onEliminar,
+}: CeldaAccionesProps) {
+  const { t } = useTranslation('flota')
+
+  const items: ItemMenuAcciones[] = [
+    {
+      clave: 'ver-detalle',
+      etiqueta: t('vehiculosListado.acciones.verDetalle'),
+      icono: Eye,
+      onSelect: () => onVerDetalle(vehiculo),
+    },
+  ]
+
+  if (puedeEliminar) {
+    items.push({
+      clave: 'eliminar',
+      etiqueta: t('vehiculosListado.acciones.eliminar'),
+      icono: Trash2,
+      tono: 'peligro',
+      separadorAntes: true,
+      onSelect: () => onEliminar(vehiculo),
+    })
+  }
+
+  return (
+    <MenuAcciones
+      items={items}
+      disparador={
+        <BotonIcono
+          variante="fantasma"
+          tamano="sm"
+          icono={MoreVertical}
+          etiqueta={t('vehiculosListado.acciones.abrirMenu')}
+        />
+      }
+    />
+  )
+}

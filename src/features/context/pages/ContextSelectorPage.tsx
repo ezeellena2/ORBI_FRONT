@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { User, Building2, ChevronRight } from 'lucide-react'
 import { useContextSwitch } from '../hooks/useContextSwitch'
 import { useContextSelectorView } from '../hooks/useContextSelectorView'
-import { Alert } from '@/shared/ui/Alert'
+import { Alert } from '@/shared/ui/legacy/Alert'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
 import type { OrganizacionDisponible } from '@/services/contracts/auth'
 

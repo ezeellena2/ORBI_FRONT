@@ -1,0 +1,90 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# CI del frontend de ORBI
+#
+# POR QUÉ VIVE ACÁ Y NO EN EL REPO DEL BACKEND (opción A de `06-capa-0-frontend.md` §3.1):
+#
+# El repo del backend tiene un job `frontend` que NUNCA CORRE, por tres motivos
+# independientes y acumulativos:
+#   1. Está guardado por `if: hashFiles('../TracAutoFrontV2/package.json') != ''`
+#      y `hashFiles()` resuelve relativo a `GITHUB_WORKSPACE` y no sale de ahí:
+#      el `../` devuelve string vacío POR DISEÑO.
+#   2. El `if` de un job se evalúa ANTES de `actions/checkout`. Aunque el path
+#      fuera válido, en ese momento el disco está vacío.
+#   3. `actions/checkout` sin `repository:` clona SOLO el repo actual, y
+#      `TracAutoFrontV2` es un repo hermano: nunca aparece en el runner.
+#
+# Resultado: aparecía como *skipped*, en verde, y nadie lo notaba. Un falso
+# verde es peor que no tener job, porque comunica una garantía que no existe.
+#
+# Regla que sale de ahí y que NO se puede repetir: ningún `if` de este archivo
+# depende de un archivo fuera del workspace.
+#
+# ⚠️ Este workflow es inútil mientras el job `frontend` del backend siga ahí:
+# hay que BORRARLO de `TracAutoV2/.github/workflows/ci.yml`. Eso se toca en el
+# otro repo, así que queda como pendiente explícito.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificacion:
+    name: Tipos · lint · tokens · tests · build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` y no `npm install`: reproducible, y no mueve el lockfile.
+      - name: Instalar dependencias
+        run: npm ci
+
+      # Separado del build a propósito: falla en segundos y con el error de
+      # tipo, no ahogado en un log de bundling.
+      - name: Tipos
+        run: npm run typecheck
+
+      # Sin `--max-warnings=0` una regla `warn` no rompe nada y el lint es
+      # decorativo. El flag está dentro del script.
+      #
+      # Las violaciones preexistentes del scaffold legacy están CONGELADAS en
+      # `eslint-suppressions.json` (baseline, `06-capa-0-frontend.md` §3.3;
+      # mismo patrón que `check-links.mjs --baseline=47` del backend). El CI
+      # falla si el número CRECE. Para bajarlo: `npm run lint:baseline:podar`.
+      - name: Lint (ESLint + reglas ORBI)
+        run: npm run lint:eslint
+
+      # Es CSS: ESLint no lo ve. Acá viven F1 sobre `.css`, la dirección de las
+      # capas de token, F4 y —sobre todo— F17: el `@theme` sin `inline`, que es
+      # el único bug del sistema que invalida el multi-tema entero SIN dejar
+      # ningún rastro en consola.
+      - name: Capa 0 · tokens y tema
+        run: npm run lint:tokens
+
+      - name: Tests unitarios
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # Un Storybook que no compila es documentación rota que nadie ve hasta
+      # que la abre.
+      - name: Build de Storybook
+        run: npm run build-storybook
+
+# El e2e de Playwright NO entra en el CI de PR: necesita la app levantada y el
+# backend. Va en un workflow aparte, contra un entorno desplegado
+# (`06-capa-0-frontend.md` §3.2).

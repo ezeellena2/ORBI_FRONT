@@ -1,0 +1,66 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEMA `dark` — el default, y el ÚNICO expuesto hoy (decisión del PO)
+
+   Por qué existe este archivo si `semanticas.css` ya declara el default:
+   en el mockup el tema oscuro vivía en `:root` SIN `data-theme`, así que
+   `[data-theme="dark"]` no existía y cualquier selector de temas que escribiera
+   el atributo en los 4 casos dejaba la app sin estilos justo en el default
+   (01-sistema-de-diseno.md §5.1). Acá `dark` es un tema NOMBRADO como los otros
+   tres: mismos valores, misma forma, ningún caso especial.
+
+   Especificidad: se escribe `:root[data-theme="…"]` (0,2,0) y nunca
+   `[data-theme="…"]` a secas (0,1,0), que empata con `:root` y deja el desempate
+   en manos del orden que decide el bundler.
+
+   CERO HEX. Solo `var(--p-*)` y `color-mix()`.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root[data-theme='dark'] {
+  /* Superficies y bordes — rampa `frio` */
+  --s-fondo-base: var(--p-frio-950);
+  --s-superficie-1: var(--p-frio-900);
+  --s-superficie-2: var(--p-frio-850);
+  --s-superficie-3: var(--p-frio-800);
+  --s-borde: var(--p-frio-750);
+  --s-borde-hover: var(--p-frio-700);
+
+  /* Texto */
+  --s-fg-primario: var(--p-frio-50);
+  --s-fg-secundario: var(--p-frio-400);
+  --s-fg-terciario: var(--p-frio-500);
+  --s-fg-sobre-color: var(--p-blanco);
+
+  /* Alfas de marca y acción — el HUE es invariante, lo que se adapta es cuánto brilla */
+  --s-marca-tenue: color-mix(in srgb, var(--p-cyan-500) 8%, transparent);
+  --s-marca-suave: color-mix(in srgb, var(--p-cyan-500) 15%, transparent);
+  --s-marca-halo: color-mix(in srgb, var(--p-cyan-500) 25%, transparent);
+  --s-accion-tenue: color-mix(in srgb, var(--p-ambar-500) 8%, transparent);
+  --s-accion-suave: color-mix(in srgb, var(--p-ambar-500) 15%, transparent);
+  --s-accion-halo: color-mix(in srgb, var(--p-ambar-500) 25%, transparent);
+
+  /* Velo, vidrio y modal — base `frio-950` */
+  --s-velo: color-mix(in srgb, var(--p-frio-950) 80%, transparent);
+  --s-velo-fuerte: color-mix(in srgb, var(--p-frio-950) 90%, transparent);
+  --s-modal-fondo: color-mix(in srgb, var(--p-frio-950) 85%, transparent);
+  --s-vidrio: color-mix(in srgb, var(--p-frio-900) 85%, transparent);
+
+  /* Gradiente ambiente — cyan @ 5% */
+  --s-gradiente-ambiente: radial-gradient(
+    ellipse at 20% 50%,
+    color-mix(in srgb, var(--p-cyan-500) 5%, transparent) 0%,
+    transparent 60%
+  );
+
+  /* Sombras de elevación — negro puro, dura y contrastada */
+  --s-sombra-sm: 0 1px 2px color-mix(in srgb, var(--p-negro) 40%, transparent);
+  --s-sombra-md: 0 4px 12px color-mix(in srgb, var(--p-negro) 40%, transparent);
+  --s-sombra-lg: 0 8px 24px color-mix(in srgb, var(--p-negro) 50%, transparent);
+  --s-sombra-xl: 0 16px 48px color-mix(in srgb, var(--p-negro) 60%, transparent);
+
+  color-scheme: dark;
+
+  /* Un tema puede además re-declarar radios, familias tipográficas, escala de
+     texto y densidad (01 §5.2). Los 4 temas de hoy son cuatro modos de luz de
+     la MISMA marca, así que ninguno los toca. El día que llegue una marca con
+     otro radio, el cambio entra acá y no en los componentes. */
+}

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { TracAutoMark } from '@/shared/ui/TracAutoMark'
+import { TracAutoMark } from '@/shared/ui/legacy/TracAutoMark'
 
 export function LandingFooter() {
   const { t } = useTranslation()

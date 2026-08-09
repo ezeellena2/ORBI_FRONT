@@ -15,9 +15,9 @@ import {
   resolveApiErrorMessage,
   resolveApiFieldErrors,
 } from '@/shared/errors/parse-api-error'
-import { Input } from '@/shared/ui/Input'
-import { Button } from '@/shared/ui/Button'
-import { Alert } from '@/shared/ui/Alert'
+import { Input } from '@/shared/ui/legacy/Input'
+import { Button } from '@/shared/ui/legacy/Button'
+import { Alert } from '@/shared/ui/legacy/Alert'
 
 export function SolicitarRecuperacionPage() {
   const { t } = useTranslation()

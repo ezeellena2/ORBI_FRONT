@@ -23,6 +23,9 @@ import { RestablecerPasswordPage } from '@/features/access/pages/RestablecerPass
 import { DashboardPage } from '@/features/shell/pages/DashboardPage'
 import { ContextSelectorPage } from '@/features/context/pages/ContextSelectorPage'
 
+// Modulos de negocio
+import FlotaRoutes from '@/modules/flota/FlotaRoutes'
+
 function AppComingSoonPage() {
   const { t } = useTranslation()
   return (
@@ -76,9 +79,15 @@ export function AppRouter() {
           <Route index element={<DashboardPage />} />
           <Route path="selector" element={<ContextSelectorPage />} />
 
-          {/* Flota */}
+          {/*
+            Flota — el splat es obligatorio (frontend.md §3.2): FlotaRoutes renderiza su propio
+            <Routes> interno con rutas relativas. Cubre /app/flota (redirige a vehiculos), el
+            listado, el detalle y el wizard.
+            Las 4 rutas de abajo son de OTROS slices y siguen en el placeholder: al ser segmentos
+            estaticos, el router las rankea por encima del splat y no las captura FlotaRoutes.
+          */}
+          <Route path="flota/*" element={<FlotaRoutes />} />
           <Route path="flota/mapa" element={<AppComingSoonPage />} />
-          <Route path="flota/vehiculos" element={<AppComingSoonPage />} />
           <Route path="flota/dispositivos" element={<AppComingSoonPage />} />
           <Route path="flota/conductores" element={<AppComingSoonPage />} />
           <Route path="flota/geozonas" element={<AppComingSoonPage />} />

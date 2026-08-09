@@ -3,11 +3,64 @@
 > Este archivo es la fuente de verdad para cualquier agente IA que trabaje en este repositorio.
 > Su contenido se replica en AGENTS.md.
 
+---
+
+## 🔴 LEER PRIMERO — la fundación de UI cambió (2026-08-07)
+
+El sistema de diseño y la capa de primitivas de UI se rearquitecturaron. **Lo que
+este archivo dice más abajo sobre estilos, tokens y `shared/ui/` quedó viejo** y
+está marcado como tal en cada sección. Manda la arquitectura del repo hermano:
+
+```
+../TracAutoV2/docsv2/02-arquitectura/frontend/
+  README.md                       ← vocabulario, regla de oro, decisiones D1–D11
+  01-sistema-de-diseno.md         ← tokens, escalas, temas, puente Tailwind v4
+  02-primitivas.md                ← catálogo de primitivas de UI (los 32 P0)
+  03-estructura-y-convenciones.md ← dónde va cada archivo
+  04-patrones-de-pantalla.md · 05-datos-y-estado.md · 06-capa-0-frontend.md
+```
+
+### La regla de oro
+
+> **Un color se escribe UNA sola vez, en `src/styles/primitivas.css`.**
+> Es el ÚNICO archivo del frontend con permiso de contener un hex. Un hex en
+> cualquier otro archivo es un bug con el mismo peso que un test que falla — y
+> el lint lo hace fallar.
+
+### Lo mínimo que hay que saber antes de tocar una línea de UI
+
+| | |
+|---|---|
+| **Estilos** | `src/styles/{primitivas,semanticas,base}.css` + `temas/*.css`. `base.css` es el ÚNICO entrypoint y el único que Tailwind ve. **`src/index.css` ya no existe.** |
+| **Cómo se pinta** | Solo utilidades semánticas: `bg-superficie-1`, `text-fg-primario`, `border-borde`, `bg-accion`. **La paleta default de Tailwind está APAGADA**: `bg-red-500` no genera nada y falla el lint. |
+| **Primitivas de UI** | `src/shared/ui/`. Se **adoptan** de shadcn/ui + Base UI (`npx shadcn@latest add <x>`), aterrizan en `src/shared/ui/base/` y se envuelven con la API en español. **No se escriben a mano** (D5). |
+| **Vocabulario de shadcn** | `bg-primary`, `text-muted-foreground`, `border-input` solo pueden aparecer **dentro de `src/shared/ui/base/`**. Afuera, lint en rojo. |
+| **Tema** | Viaja por `data-theme` en `<html>`. Los 4 temas están declarados; solo `dark` está expuesto. Ningún componente pregunta cuál es el tema. |
+| **Verificación** | `npm run lint` (ESLint + reglas ORBI + script de tokens) · `npm run typecheck` · `npm test` · `npm run build` · `npm run build-storybook`. Corren en CI: `.github/workflows/ci.yml`. |
+| **Deuda congelada** | `eslint-suppressions.json` congela las violaciones preexistentes del scaffold legacy. El CI falla si el número **crece**. Para bajarlo: `npm run lint:baseline:podar`. |
+
+### Si necesitás un token que no existe
+
+**No lo inventes en el componente.** Pedilo: `01-sistema-de-diseno.md` §10 tiene
+el procedimiento. Un token inventado en una pantalla es el origen del drift.
+
+### Si algo no está definido
+
+Escribí `PENDIENTE (DA-FE-xx): <qué falta, quién decide>`. No lo rellenes con
+algo plausible.
+
+---
+
 ## Documentacion autoritativa
 
 ### Repositorio normativo
 
-- `C:\Users\ezequ\source\repos\TracAutoV2` es el repo autoritativo para arquitectura, contratos y mockups.
+- El repo hermano **`TracAutoV2`** (clonado al lado, misma carpeta padre) es el
+  autoritativo para arquitectura, contratos y mockups. Se referencia como
+  `../TracAutoV2/...`.
+  > ⚠️ Las rutas absolutas tipo `C:\Users\...\source\repos\TracAutoV2` que
+  > aparecen más abajo en este archivo están **derogadas**: el repo se clona en
+  > dos máquinas con paths distintos y ninguna ruta absoluta sobrevive a eso.
 - `TracAutoFrontV2` es solo la implementacion frontend React.
 
 ### Web vigente en TracAutoV2
@@ -139,9 +192,20 @@ src/
 
 ### Diseño y animacion
 
-- Seguir los mockups HTML como referencia visual exacta (dark-first, cyan + amber).
-- Animaciones con duracion 150-300ms. Usar CSS transitions o framer-motion.
-- No desviarse de la estetica definida en los mockups por "simplificar".
+> ⚠️ **CORREGIDO — ver el bloque "LEER PRIMERO" del principio.**
+
+- Los mockups de `../TracAutoV2/docs/mockupsv2/` son **referencia visual
+  ÚNICAMENTE**. Se toma el lenguaje (dark-first, cyan + ámbar, las escalas, la
+  firma visual); **NO se copia su CSS ni su JS**, nunca. Decisión del PO.
+  El porqué —los 5 defectos estructurales de ese CSS, incluido el `zoom: 0.75`
+  que rompe Leaflet y el hit-testing— está en `01-sistema-de-diseno.md` §11.
+- El look sale de los TOKENS, no del mockup: si un valor no existe como token,
+  se pide el token, no se copia el píxel.
+- Animaciones: duraciones tokenizadas (`--duration-fast` 150ms ·
+  `--duration-normal` 200ms · `--duration-slow` 300ms) y curvas `--ease-*`.
+  Toda animación respeta `prefers-reduced-motion` (ya está el reset global).
+- Si el mockup y la doc de arquitectura se contradicen: **manda la doc**, y se
+  reporta el drift.
 
 ## Patrones de implementacion
 
@@ -420,6 +484,35 @@ Convenciones:
 
 ### 8. Componentes de UI compartidos
 
+> ⚠️ **SECCIÓN DEROGADA — ver el bloque "LEER PRIMERO" del principio.**
+> Los cinco componentes de abajo son el scaffold del slice-01 y se movieron a
+> `src/shared/ui/legacy/`. Se conservan porque el plan de migración del scaffold
+> es una decisión abierta (`DA-FE-07` de `06-capa-0-frontend.md`), no porque
+> sean el patrón.
+
+La capa vigente:
+
+```
+src/shared/ui/
+  base/                   ← lo que copia `npx shadcn@latest add`. Es CÓDIGO NUESTRO.
+                            Idioma interno: el vocabulario de shadcn. Ver su README.
+  Boton.tsx  Input.tsx  Tabla.tsx  Modal.tsx  …   ← las primitivas de ORBI
+  *.stories.tsx           ← una story POR CADA ESTADO (R3 de `02-primitivas.md`)
+  legacy/                 ← el scaffold viejo. Se borra al cerrar DA-FE-07.
+```
+
+Reglas:
+- los componentes de `shared/ui/` no importan de `features/`, `modules/`, `app/`
+  ni `stores/` — hay una regla de lint que lo hace fallar
+- son puros: reciben props, renderizan UI. Sin `fetch`, sin router, sin permisos
+- **cero valores de pintura**: ni hex, ni `rgba()`, ni `rounded-[10px]`, ni
+  `var(--p-*)`. Solo utilidades semánticas
+- si falta un componente base, **no se escribe a mano**: se trae con el CLI de
+  shadcn y se envuelve
+
+<details>
+<summary>Lo que decía esta sección (histórico)</summary>
+
 ```
 shared/
   ui/
@@ -430,10 +523,7 @@ shared/
     FormField.tsx           ← wrapper input + label + error + React Hook Form
 ```
 
-Reglas:
-- los componentes de `shared/ui/` no importan de `features/` ni de `stores/`
-- son puros: reciben props, renderizan UI
-- usan los tokens de diseño del CSS (colores, tipografia, radius del mockup)
+</details>
 
 ### 9. Antipatrones
 
@@ -487,9 +577,13 @@ Antes de aprobar un cambio:
 - botones con solo icono tienen `aria-label`?
 
 #### Build
-- `npm run build` pasa?
-- `npm run lint` pasa?
-- la UI sigue los tokens del mockup?
+- `npm run typecheck` pasa?
+- `npm run lint` pasa? (incluye las reglas de color de ORBI + el script de tokens)
+- `npm test` pasa?
+- `npm run build` y `npm run build-storybook` pasan?
+- ¿hay una story por cada estado nuevo?
+- ¿la UI sale de los TOKENS del sistema (`bg-superficie-1`, `text-fg-primario`),
+  no de valores copiados del mockup?
 
 ## Antes de codear
 
@@ -502,12 +596,17 @@ Antes de aprobar un cambio:
 
 Verificar siempre:
 
-- `npm run build`
-- `npm run lint`
+- `npm run typecheck` · `npm run lint` · `npm test` · `npm run build` ·
+  `npm run build-storybook` (es lo mismo que corre el CI)
 - que no haya texto visible fuera de i18n
 - que no haya `fetch` o `axios` ad hoc en pantallas
 - que `esMicroOrg` sea la unica base para derivar contexto personal/empresa
-- que la UI siga los tokens de `docs/mockups/`
+- que **ningún** color venga de un literal, de la paleta default de Tailwind, de
+  una clase arbitraria ni del vocabulario de shadcn fuera de `shared/ui/base/`
+  — el lint lo verifica, pero si te lo bloqueó, la respuesta NO es agregar una
+  excepción: es usar el token, o pedirlo
+- que `eslint-suppressions.json` **no haya crecido**. Si crece, se metió una
+  violación nueva en un archivo que ya tenía deuda congelada
 
 ## Evidencia obligatoria de lectura
 

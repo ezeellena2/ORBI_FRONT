@@ -1,0 +1,82 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEMA `light` — DECLARADO COMPLETO, NO EXPUESTO
+
+   Por qué se declara si no hay selector de temas: porque agregar un tema
+   después tiene que ser *cambiar un atributo*, no *reescribir componentes*.
+   Con los 4 bloques poblados desde el día 1, la disciplina se sostiene sola:
+   si un componente se ve mal en light, es porque el componente hizo trampa
+   (01-sistema-de-diseno.md §5.3).
+
+   ⚠️ ESTE TEMA NO ESTÁ LISTO PARA EXPONERSE. Bloqueado por
+   PENDIENTE (DA-FE-03 de 01-sistema-de-diseno): los 4 colores de estado y el
+   cyan de marca, como TEXTO sobre blanco, quedan por debajo de 4.5:1
+   (verde ~2.5:1 · ámbar ~2.2:1 · rojo ~3.8:1 · violeta ~4.2:1 · cyan ~2.4:1).
+   La corrección es una variante más oscura del mismo hue EN ESTE ARCHIVO,
+   nunca en un componente. Decide: PO + implementación.
+
+   CERO HEX.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root[data-theme='light'] {
+  /* Superficies — rampa `claro` */
+  --s-fondo-base: var(--p-claro-50);
+  --s-superficie-1: var(--p-claro-0);
+  --s-superficie-2: var(--p-claro-100);
+  --s-superficie-3: var(--p-claro-200);
+
+  /* Bordes — el caso raro de light: NO son gris neutro, son cyan translúcido.
+     Eso es lo que le da al tema claro el aire del producto en vez de parecer
+     un formulario genérico (01 §5.2). Se conserva. */
+  --s-borde: color-mix(in srgb, var(--p-cyan-500) 18%, transparent);
+  --s-borde-hover: color-mix(in srgb, var(--p-cyan-500) 38%, transparent);
+
+  /* Texto — `claro` 950 / 500 / 400
+     PENDIENTE (DA-FE-08 de 01-sistema-de-diseno): `claro-500` y `claro-400`
+     están a 2 pasos; la jerarquía secundario/terciario en light queda muy poco
+     separada. Decide: implementación. */
+  --s-fg-primario: var(--p-claro-950);
+  --s-fg-secundario: var(--p-claro-500);
+  --s-fg-terciario: var(--p-claro-400);
+  --s-fg-sobre-color: var(--p-blanco);
+
+  /* Alfas de marca — más bajas: un halo al 25% sobre blanco es una mancha */
+  --s-marca-tenue: color-mix(in srgb, var(--p-cyan-500) 6%, transparent);
+  --s-marca-suave: color-mix(in srgb, var(--p-cyan-500) 10%, transparent);
+  --s-marca-halo: color-mix(in srgb, var(--p-cyan-500) 12%, transparent);
+  /* Normalizado a propósito (01 §2.4): el mockup tiene el ámbar en 0.12 y el
+     cyan en 0.10 sin justificación visible. La escala se unifica en 0.10. */
+  --s-accion-tenue: color-mix(in srgb, var(--p-ambar-500) 6%, transparent);
+  --s-accion-suave: color-mix(in srgb, var(--p-ambar-500) 10%, transparent);
+  --s-accion-halo: color-mix(in srgb, var(--p-ambar-500) 12%, transparent);
+
+  /* Velo, vidrio y modal — más transparentes, y el vidrio es blanco.
+     Normalización declarada: 01 §3.6 indica un velo base `rgba(15,23,42,α)`;
+     ese paso (900) NO existe en la rampa `claro`, que está incompleta a
+     propósito, y completar rampas está bloqueado por DA-FE-01 de 01. Se usa el
+     paso 950, que sí existe. No se inventa un hex. */
+  --s-velo: color-mix(in srgb, var(--p-claro-950) 50%, transparent);
+  --s-velo-fuerte: color-mix(in srgb, var(--p-claro-950) 60%, transparent);
+  --s-modal-fondo: color-mix(in srgb, var(--p-claro-950) 55%, transparent);
+  --s-vidrio: color-mix(in srgb, var(--p-claro-0) 85%, transparent);
+
+  /* Gradiente ambiente — cyan @ 5%, corta antes */
+  --s-gradiente-ambiente: radial-gradient(
+    ellipse at 20% 50%,
+    color-mix(in srgb, var(--p-cyan-500) 5%, transparent) 0%,
+    transparent 55%
+  );
+
+  /* Sombras — TEÑIDAS de cyan y en capas dobles.
+     Por qué: sobre un fondo blanco-azulado una sombra gris se ve sucia; teñirla
+     del hue de marca hace que la elevación se lea como parte del sistema. */
+  --s-sombra-sm: 0 1px 2px color-mix(in srgb, var(--p-cyan-500) 6%, transparent);
+  --s-sombra-md:
+    0 1px 2px color-mix(in srgb, var(--p-cyan-500) 5%, transparent),
+    0 4px 12px color-mix(in srgb, var(--p-cyan-500) 7%, transparent);
+  --s-sombra-lg:
+    0 2px 4px color-mix(in srgb, var(--p-cyan-500) 6%, transparent),
+    0 10px 20px color-mix(in srgb, var(--p-cyan-500) 8%, transparent);
+  --s-sombra-xl: 0 16px 48px color-mix(in srgb, var(--p-cyan-500) 12%, transparent);
+
+  color-scheme: light;
+}

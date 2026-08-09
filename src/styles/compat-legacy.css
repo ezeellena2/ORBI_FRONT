@@ -1,0 +1,187 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⚠️ DEUDA — CAPA DE COMPATIBILIDAD DEL SCAFFOLD LEGACY. NO ES PARTE DEL SISTEMA.
+
+   Qué es: el scaffold del slice-01 (`features/access`, `features/shell`,
+   `features/landing`, `features/context`) fue escrito contra los nombres de
+   token del `src/index.css` viejo — 420 usos de `var(--…)` y 260 clases
+   arbitrarias tipo `bg-[var(--color-brand-cyan)]` repartidos en 35 archivos.
+   Este archivo re-declara esos nombres como ALIAS de las semánticas nuevas para
+   que ese código siga renderizando —y además siga siendo tematizable— mientras
+   dure la transición.
+
+   Por qué existe en vez de borrar o migrar el scaffold:
+   - Borrarlo decidiría por su cuenta el PENDIENTE (DA-FE-07 de 06-capa-0-frontend):
+     "hasta que se defina si `features/` se migra, se congela o se borra…".
+     Decide arquitectura, no la implementación.
+   - Migrar 35 archivos de pantallas ya construidas es un trabajo de producto,
+     no de fundación, y no se puede verificar visualmente en esta pasada.
+
+   Reglas que este archivo SÍ cumple, porque no hay excepción para la deuda:
+   - CERO hex, cero `rgba()`. Todo es `var(--s-*)`.
+   - Ningún nombre de acá se usa en código nuevo. `src/shared/ui/` y
+     `src/modules/` escriben SOLO las utilidades de ORBI.
+
+   Condición de borrado: se elimina entero cuando se resuelva DA-FE-07 y el
+   scaffold legacy se migre o se descarte. Mientras tanto, cada línea que
+   desaparezca de acá es deuda pagada.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Nombres planos del mockup (`--cyan`, `--surface-1`, …) ───────────── */
+  --bg-base: var(--s-fondo-base);
+  --surface-1: var(--s-superficie-1);
+  --surface-2: var(--s-superficie-2);
+  --surface-3: var(--s-superficie-3);
+  --border-color: var(--s-borde);
+  --border-hover: var(--s-borde-hover);
+  --text-primary: var(--s-fg-primario);
+  --text-secondary: var(--s-fg-secundario);
+  --text-tertiary: var(--s-fg-terciario);
+
+  --cyan: var(--s-marca);
+  --cyan-hover: var(--s-marca-hover);
+  --cyan-muted: var(--s-marca-suave);
+  --cyan-glow: var(--s-marca-halo);
+  --cyan-subtle: var(--s-marca-tenue);
+
+  --amber: var(--s-accion);
+  --amber-hover: var(--s-accion-hover);
+  --amber-muted: var(--s-accion-suave);
+  --amber-text: var(--s-accion-fg);
+
+  --success: var(--s-exito);
+  --success-muted: var(--s-exito-fondo);
+  --danger: var(--s-peligro);
+
+  --glass-bg: var(--s-vidrio);
+  --overlay: var(--s-velo);
+  --gradient-hero: var(--s-gradiente-hero);
+  --shadow-cyan: var(--s-sombra-marca);
+  --shadow-cyan-sm: var(--s-sombra-marca-sm);
+
+  /* ── Nombres `--color-*` del `@theme` viejo, consumidos por `var()` ──────
+     Ojo: `@theme inline` NO emite variables en `:root` (por eso el tema cambia).
+     Así que las clases arbitrarias `bg-[var(--color-brand-cyan)]` del legacy
+     necesitan que el nombre exista como variable PLANA. Es esta lista.
+     Las utilidades equivalentes (`bg-brand-cyan`, `text-text-primario`…) se
+     generan aparte, en el bloque legacy del puente de `base.css`. */
+  --color-bg-canvas: var(--s-fondo-base);
+  --color-surface-primary: var(--s-superficie-1);
+  --color-surface-secondary: var(--s-superficie-2);
+  --color-surface-tertiary: var(--s-superficie-3);
+  --color-border-subtle: var(--s-borde);
+  --color-border-strong: var(--s-borde-hover);
+  --color-text-primary: var(--s-fg-primario);
+  --color-text-secondary: var(--s-fg-secundario);
+  --color-text-tertiary: var(--s-fg-terciario);
+  --color-brand-cyan: var(--s-marca);
+  --color-brand-amber: var(--s-accion);
+  --color-success: var(--s-exito);
+  --color-warning: var(--s-advertencia);
+  --color-danger: var(--s-peligro);
+  --color-info: var(--s-info);
+
+  /* `--color-surface-1/2/3` NUNCA existieron: el `index.css` viejo declaraba
+     `--color-surface-primary/secondary/tertiary` y 47 usos del scaffold piden
+     `-1/-2/-3`. O sea que hoy caen a `initial` y el color no se aplica — es el
+     modo de falla silencioso que la regla F2 existe para cazar. Se declaran acá
+     apuntando a lo que evidentemente querían decir. */
+  --color-surface-1: var(--s-superficie-1);
+  --color-surface-2: var(--s-superficie-2);
+  --color-surface-3: var(--s-superficie-3);
+
+  /* ── Gradientes y sombras compuestas del scaffold ─────────────────────── */
+  --gradient-brand:
+    radial-gradient(circle at top, var(--s-marca-halo), transparent 42%),
+    linear-gradient(135deg, var(--s-accion-suave), var(--s-marca-suave));
+  --gradient-panel: linear-gradient(180deg, var(--s-superficie-3), var(--s-superficie-1));
+  --shadow-panel: var(--s-sombra-xl);
+
+  /* ── Dimensiones del shell ────────────────────────────────────────────── */
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 60px;
+  --header-height: 56px;
+}
+
+/* ═══ Clases de componente del scaffold ═══════════════════════════════════
+   Portadas del `index.css` viejo con sus hex reemplazados por tokens. Se
+   borran junto con el resto de este archivo. */
+
+.page-shell {
+  position: relative;
+  min-height: var(--s-alto-viewport);
+  overflow: hidden;
+}
+
+.page-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 20%, var(--s-marca-suave), transparent 22%),
+    radial-gradient(circle at 85% 15%, var(--s-accion-suave), transparent 24%);
+  pointer-events: none;
+}
+
+.glass-panel {
+  background: var(--gradient-panel);
+  border: 1px solid var(--s-borde);
+  box-shadow: var(--s-sombra-xl);
+  backdrop-filter: blur(var(--s-vidrio-desenfoque));
+}
+
+.section-eyebrow {
+  font-size: var(--s-texto-xs);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--s-marca);
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--s-radio-full);
+  border: 1px solid var(--s-exito-fondo);
+  background: var(--s-exito-fondo);
+  padding: 0.45rem 0.75rem;
+  color: var(--s-exito);
+}
+
+.status-dot {
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: var(--s-radio-full);
+  background: var(--s-exito);
+  box-shadow: 0 0 12px var(--s-exito-fondo);
+}
+
+.text-gradient-hero {
+  background: var(--s-gradiente-hero);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tracking-point {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--s-marca);
+  border-radius: var(--s-radio-full);
+  z-index: var(--z-base);
+  animation: tracking-dot 2s ease-in-out infinite;
+  box-shadow: var(--s-sombra-marca-sm);
+}
+
+.tracking-point::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 2px solid var(--s-marca);
+  border-radius: var(--s-radio-full);
+  opacity: 0.3;
+  animation: tracking-dot 2s ease-in-out infinite 0.3s;
+}

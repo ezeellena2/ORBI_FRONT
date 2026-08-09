@@ -1,7 +1,7 @@
 import { Layers3, Languages, ShieldCheck, Waypoints } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { appConfig } from '@/config/env'
-import { TracAutoMark } from '@/shared/ui/TracAutoMark'
+import { TracAutoMark } from '@/shared/ui/legacy/TracAutoMark'
 
 const structureKeys = [
   'app',

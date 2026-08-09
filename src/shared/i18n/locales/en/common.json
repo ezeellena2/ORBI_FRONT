@@ -502,6 +502,14 @@
     "validation": {
       "failed": "Review the form data and try again."
     },
+    "flota": {
+      "vehiculo": {
+        "baja_con_asignaciones_activas": "The vehicle cannot be deleted because it has a GPS device or drivers assigned. Unassign those links first."
+      },
+      "modulo": {
+        "no_activo": "Your organization does not have the Fleet module active."
+      }
+    },
       "auth": {
         "credenciales_invalidas": "Incorrect email or password.",
         "cuenta_bloqueada": "Your account is temporarily locked. Try again later.",

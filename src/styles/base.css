@@ -1,0 +1,447 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   base.css — EL ÚNICO ARCHIVO QUE TAILWIND VE Y EL ÚNICO QUE LA APP IMPORTA.
+
+   Todo lo demás cuelga de acá por `@import`. Estructura, en este orden exacto:
+
+     1. `@import "tailwindcss"` + las capas de token (CSS plano, sin `@theme`)
+     2. La variante `dark:` custom  ← sin esto mira el SO, no `data-theme`
+     3. `@theme` PLANO que apaga la paleta default  ← antes del puente, siempre
+     4. `@theme inline` — EL PUENTE. Todo su contenido empieza con `var(`
+     5. `@theme` PLANO con lo que ningún tema va a tocar jamás
+     6. Keyframes y reset
+
+   Contrato: 01-sistema-de-diseno.md §7.3. Cada paso tiene su porqué abajo.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Familias tipográficas del sistema (01 §4.2). Va primero porque `@import` de
+   URL tiene que preceder a todo lo demás. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import 'tailwindcss';
+
+/* Utilidades de animación (`animate-in`, `fade-in-0`, `zoom-in-95`,
+   `slide-in-from-top-2`) que los componentes copiados de shadcn/ui usan de
+   fábrica en diálogos, menús, tooltips y selects. No trae ni un color: son
+   transformaciones y opacidades. Sin este import las clases no existen y los
+   overlays aparecen de golpe, sin ningún error que lo avise.
+   El bloque global de `prefers-reduced-motion` de más abajo las neutraliza. */
+@import 'tw-animate-css';
+
+/* ── CAPAS 1 y 2 · CSS plano, NUNCA `@theme` ─────────────────────────────
+   Si las primitivas de color entraran a `@theme`, Tailwind generaría
+   `bg-p-cyan-500` y la regla "los componentes solo consumen semánticas" pasaría
+   de ser arquitectura a ser un pedido por favor. La utilidad que no existe no la
+   puede usar nadie (D6 · 01 §7.3 bis a). */
+@import './primitivas.css'; /* A1 — el único archivo con hex */
+@import './semanticas.css'; /* A2 — `:root`, que es el default = dark */
+@import './temas/dark.css'; /* A2 — el default, además como tema NOMBRADO */
+@import './temas/light.css';
+@import './temas/dark-warm.css';
+@import './temas/midnight.css';
+
+/* ⚠️ DEUDA, no sistema. Se borra entero al resolver DA-FE-07 de 06-capa-0. */
+@import './compat-legacy.css';
+
+/* ── 2 · LA VARIANTE `dark:` (01 §7.2 bis) ───────────────────────────────
+   La `dark:` de fábrica de Tailwind v4 mira `prefers-color-scheme` — la
+   preferencia del SISTEMA OPERATIVO —, no `data-theme`. Sin esta línea,
+   `dark:bg-…` se activaría porque el usuario tiene Windows en oscuro, sin
+   ninguna relación con el tema que la app tiene puesto. Y sin error.
+
+   Los dos selectores son necesarios: `[data-theme=dark] *` matchea solo
+   DESCENDIENTES; sin `[data-theme=dark]` a secas, el propio `<html>` —que es
+   donde vive el atributo— queda afuera.
+   El `:where()` mantiene la especificidad en 0 para que la variante no le gane
+   a otras reglas por accidente.
+
+   Aun así, en ORBI `dark:` casi no se usa: lo normal es que cambie la SEMÁNTICA.
+   Si estás escribiendo `bg-white dark:bg-black`, falta un token. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ── 3 · APAGAR LA PALETA DEFAULT DE TAILWIND (D7 · 01 §7.3 bis b) ────────
+   Después de esta línea `bg-red-500`, `text-slate-700` y `border-gray-200` NO
+   EXISTEN: son clases desconocidas y no generan nada.
+
+   Por qué: sin esto conviven ~240 colores que no son de ORBI, no responden a
+   `data-theme` y están a un autocompletado de distancia. Un `bg-slate-800` se ve
+   *casi* como `bg-superficie-1`, pasa el code review y rompe el tema claro seis
+   meses después — y no lo detecta ningún grep de hex, porque no hay ningún `#`.
+
+   Dos cosas que NO se pueden cambiar de este bloque:
+   - Es `@theme` PLANO. `initial` es un literal y `@theme inline` solo admite
+     referencias `var()`.
+   - Va ANTES del puente. Un reset borra lo declarado antes; al revés se llevaría
+     puestas nuestras propias definiciones.
+   - Y el alcance es SOLO el color: `--*: initial` es nuclear (borra `--spacing`,
+     `--breakpoint-*`, `--radius-*`) y rompe shadcn/ui. No usarlo. */
+@theme {
+  --color-*: initial;
+}
+
+/* ═══ 4 · EL PUENTE — `@theme inline` ══════════════════════════════════════
+   ⚠️ LA PALABRA `inline` ES LA LÍNEA MÁS IMPORTANTE DEL SISTEMA.
+
+   Con `@theme` normal, Tailwind emite `:root { --color-superficie-1: var(--s-superficie-1) }`
+   y esa indirección se resuelve UNA vez, EN `:root`. Cuando `[data-theme="light"]`
+   re-declara `--s-superficie-1` más abajo del árbol, ya es tarde: el valor quedó
+   congelado. Los 4 bloques de tema se escriben, se aplican, y NO PASA NADA.
+   No hay error, no hay warning, no hay nada en consola.
+
+   Con `inline`, Tailwind sustituye textualmente el `var()` dentro de la utilidad:
+   `.bg-superficie-1 { background-color: var(--s-superficie-1) }`, que se resuelve
+   EN EL ELEMENTO y sí hereda del ancestro con `data-theme`.
+
+   Diagnóstico en 10 segundos (01 §7.2): en DevTools, sobre un elemento con
+   `bg-superficie-1` — si la regla dice `var(--color-superficie-1)` falta `inline`;
+   si dice `var(--s-superficie-1)`, está bien.
+
+   REGLA DERIVADA, para revisar de un vistazo:
+   si acá adentro hay algo que no empieza con `var(`, es un bug.
+   ══════════════════════════════════════════════════════════════════════════ */
+@theme inline {
+  /* ── Color ─────────────────────────────────────────────────────────────
+     TODO el color entra por `--color-*`, el color de texto incluido:
+     `text-fg-primario` existe porque existe `--color-fg-primario`. `--text-*` es
+     TAMAÑO DE FUENTE (01 §1). Un color declarado ahí no da error: da una utilidad
+     muerta y el texto queda del color heredado. */
+  --color-fondo-base: var(--s-fondo-base);
+  --color-superficie-1: var(--s-superficie-1);
+  --color-superficie-2: var(--s-superficie-2);
+  --color-superficie-3: var(--s-superficie-3);
+  --color-borde: var(--s-borde);
+  --color-borde-hover: var(--s-borde-hover);
+
+  --color-fg-primario: var(--s-fg-primario);
+  --color-fg-secundario: var(--s-fg-secundario);
+  --color-fg-terciario: var(--s-fg-terciario);
+  --color-fg-sobre-color: var(--s-fg-sobre-color);
+
+  --color-marca: var(--s-marca);
+  --color-marca-hover: var(--s-marca-hover);
+  --color-marca-tenue: var(--s-marca-tenue);
+  --color-marca-suave: var(--s-marca-suave);
+  --color-marca-halo: var(--s-marca-halo);
+
+  --color-accion: var(--s-accion);
+  --color-accion-hover: var(--s-accion-hover);
+  --color-accion-fg: var(--s-accion-fg);
+  --color-accion-tenue: var(--s-accion-tenue);
+  --color-accion-suave: var(--s-accion-suave);
+  --color-accion-halo: var(--s-accion-halo);
+
+  --color-exito: var(--s-exito);
+  --color-exito-fondo: var(--s-exito-fondo);
+  --color-advertencia: var(--s-advertencia);
+  --color-advertencia-fondo: var(--s-advertencia-fondo);
+  --color-peligro: var(--s-peligro);
+  --color-peligro-fondo: var(--s-peligro-fondo);
+  --color-info: var(--s-info);
+  --color-info-fondo: var(--s-info-fondo);
+
+  /* Anillo de foco. El doc 02 §1.4 anotaba que `--color-foco` no estaba expuesto
+     y que por eso el anillo había que escribirlo a mano con `var(--s-foco-anillo)`.
+     Se expone: `ring-foco` / `focus-visible:ring-foco` ya existen. */
+  --color-foco: var(--s-foco);
+
+  --color-mapa: var(--s-mapa);
+  --color-velo: var(--s-velo);
+  --color-velo-fuerte: var(--s-velo-fuerte);
+  --color-modal-fondo: var(--s-modal-fondo);
+  --color-vidrio: var(--s-vidrio);
+
+  /* ── Sombras → `shadow-*` (la semántica se llama `--s-sombra-*`) ───────── */
+  --shadow-sm: var(--s-sombra-sm);
+  --shadow-md: var(--s-sombra-md);
+  --shadow-lg: var(--s-sombra-lg);
+  --shadow-xl: var(--s-sombra-xl);
+  --shadow-marca: var(--s-sombra-marca);
+  --shadow-marca-sm: var(--s-sombra-marca-sm);
+  --shadow-accion: var(--s-sombra-accion);
+  --shadow-accion-sm: var(--s-sombra-accion-sm);
+  /* PENDIENTE (DA-FE-IMPL-01): shadcn/ui escribe `shadow-xs` y el sistema de
+     diseño no declara una sombra `xs` (01 §4.6 tiene sm/md/lg/xl). Se apunta a
+     `sm` para que ningún componente copiado caiga en la sombra default de
+     Tailwind, que es un negro fuera del sistema de tokens. Decide: diseño —
+     ¿se agrega `--s-sombra-xs` o shadcn usa `shadow-sm`? */
+  --shadow-xs: var(--s-sombra-sm);
+
+  /* ── Desenfoque → `backdrop-blur-vidrio` ──────────────────────────────── */
+  --blur-vidrio: var(--s-vidrio-desenfoque);
+
+  /* ── Anchos de layout → `max-w-app`, `max-w-pagina` ───────────────────── */
+  --container-pagina: var(--s-ancho-pagina);
+  --container-pagina-xl: var(--s-ancho-pagina-xl);
+  --container-hero: var(--s-ancho-hero);
+  --container-app: var(--s-ancho-app);
+
+  /* ── No solo color: esto TAMBIÉN es tematizable (01 §5.2) ──────────────
+     Si el único eje tematizable fuera el color, la primera marca que llegue con
+     otro radio, otra tipografía o más densidad no sería expresable con un
+     `data-theme`: habría que abrir componentes. */
+
+  /* Densidad — toda la escala de spacing se deriva de este único token */
+  --spacing: var(--s-unidad-espaciado);
+
+  /* Familias → `font-sans`, `font-mono` */
+  --font-sans: var(--s-fuente-ui);
+  --font-mono: var(--s-fuente-mono);
+
+  /* Tamaño de fuente (NO color) → `text-xs` … `text-6xl` */
+  --text-xs: var(--s-texto-xs);
+  --text-sm: var(--s-texto-sm);
+  --text-base: var(--s-texto-base);
+  --text-md: var(--s-texto-md);
+  --text-lg: var(--s-texto-lg);
+  --text-xl: var(--s-texto-xl);
+  --text-2xl: var(--s-texto-2xl);
+  --text-3xl: var(--s-texto-3xl);
+  --text-4xl: var(--s-texto-4xl);
+  --text-5xl: var(--s-texto-5xl);
+  --text-6xl: var(--s-texto-6xl);
+
+  /* Radios → `rounded-sm` … `rounded-full` */
+  --radius-sm: var(--s-radio-sm);
+  --radius-md: var(--s-radio-md);
+  --radius-lg: var(--s-radio-lg);
+  --radius-xl: var(--s-radio-xl);
+  --radius-2xl: var(--s-radio-2xl);
+  --radius-full: var(--s-radio-full);
+
+  /* ── Compatibilidad shadcn/ui (01 §7.6 · 02 §1.4) ──────────────────────
+     Los nombres con los que el CLI escribe sus componentes. Cada uno apunta al
+     alias plano declarado en `semanticas.css`, que a su vez apunta a un `--s-*`.
+     Esto es lo que deja los componentes copiados tematizados por `data-theme`
+     SIN editarles una línea — que es lo que hace que `shadcn add --overwrite`
+     siga siendo un comando y no un merge de estilos.
+
+     Estos nombres son el idioma INTERNO de `src/shared/ui/`. Fuera de esa
+     carpeta se escribe `bg-fondo-base`, no `bg-background` (R10 del doc 02), y
+     hay una regla de lint que lo hace cumplir. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* ── ⚠️ DEUDA · utilidades del scaffold legacy ─────────────────────────
+     Las 17 utilidades del `@theme` viejo que el scaffold del slice-01 usa 177
+     veces (`text-text-primary`, `bg-surface-tertiary`, `border-border-subtle`…).
+     Están acá para que ese código siga tematizado mientras dure la transición.
+     Se borran con `compat-legacy.css` al resolver DA-FE-07 de 06-capa-0.
+     Código nuevo NO las usa: escribe las utilidades de ORBI de arriba. */
+  --color-bg-canvas: var(--s-fondo-base);
+  --color-surface-primary: var(--s-superficie-1);
+  --color-surface-secondary: var(--s-superficie-2);
+  --color-surface-tertiary: var(--s-superficie-3);
+  --color-border-subtle: var(--s-borde);
+  --color-border-strong: var(--s-borde-hover);
+  --color-text-primary: var(--s-fg-primario);
+  --color-text-secondary: var(--s-fg-secundario);
+  --color-text-tertiary: var(--s-fg-terciario);
+  --color-brand-cyan: var(--s-marca);
+  --color-brand-amber: var(--s-accion);
+  --color-success: var(--s-exito);
+  --color-warning: var(--s-advertencia);
+  --color-danger: var(--s-peligro);
+  /* `--color-info` del legacy NO se repite acá: coincide en nombre y en
+     significado con el `--color-info` de ORBI, ya declarado arriba. */
+}
+
+/* ═══ 5 · SOLO LO QUE NINGÚN TEMA VA A TOCAR JAMÁS ════════════════════════
+   `@theme` PLANO, con literales. Si algo de acá tuviera que cambiar por tema,
+   estaría en el bloque de arriba.
+   Los breakpoints describen el hardware, no la marca; las curvas de easing y
+   los pesos tipográficos son de la familia, no del modo de luz.
+   ══════════════════════════════════════════════════════════════════════════ */
+@theme {
+  /* Pesos (01 §4.4). No hay extrabold ni black: la marca no grita.
+     Ojo al rename: el mockup los llamaba `--weight-*`; con ese nombre Tailwind
+     no genera NINGUNA utilidad. `--font-weight-*` es el namespace correcto. */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  /* El sesgo negativo del tracking es la firma tipográfica de ORBI: de
+     `text-2xl` para arriba, tracking negativo. `wider` es para versalitas. */
+  --tracking-tighter: -0.03em;
+  --tracking-tight: -0.02em;
+  --tracking-snug: -0.01em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.05em;
+
+  /* `--ease-spring` SOBREPASA (el 1.56 lleva el valor por encima de 1 antes de
+     volver). Sirve para cosas que "aparecen". NO se usa en transiciones de color
+     ni de opacidad: ahí el overshoot se ve como un parpadeo. */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Duraciones (01 §4.7) */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  /* Breakpoints (01 §6.1). `1919`, `2048` y el `max-height: 1100px` del mockup
+     desaparecen: existían solo para el hack de `zoom`, que no se porta. */
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-2xl: 90rem;
+  --breakpoint-3xl: 120rem;
+  --breakpoint-4xl: 160rem;
+
+  /* Animaciones nombradas → `animate-*`. `tracking-dot` es NOMBRE DE DOMINIO:
+     el punto de GPS latiendo en el mapa, la señal de "este vehículo está
+     transmitiendo ahora". No es "animación de latido" ni "pulse del mapa". */
+  --animate-tracking-dot: tracking-dot 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  --animate-shimmer: shimmer 1.5s linear infinite;
+}
+
+/* ═══ 6 · KEYFRAMES ═══════════════════════════════════════════════════════
+   Declarados en el nivel superior (y no dentro de `@theme`) porque el scaffold
+   legacy los invoca por nombre desde `style={{ animation: 'fadeInUp …' }}`, y
+   ahí Tailwind no puede saber que hacen falta. Los `--animate-*` de arriba los
+   referencian igual. */
+@keyframes tracking-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ═══ 7 · RESET Y GLOBALES ════════════════════════════════════════════════ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: var(--s-fuente-ui);
+    color: var(--s-fg-primario);
+    background-color: var(--s-fondo-base);
+    /* La única luz de fondo de la app: lo que evita que el fondo oscuro se vea
+       plano. Se re-declara por tema, así que esta regla no cambia nunca. */
+    background-image: var(--s-gradiente-ambiente);
+    background-attachment: fixed;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: var(--s-alto-viewport);
+    background: transparent;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    min-height: var(--s-alto-viewport);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  ::selection {
+    background-color: var(--s-marca-suave);
+    color: var(--s-fg-primario);
+  }
+
+  /* La barra de scroll sigue al tema sin declarar nada extra (01 §3.8) */
+  * {
+    scrollbar-color: var(--s-scrollbar-pulgar) var(--s-scrollbar-riel);
+  }
+
+  /* Accesibilidad, no negociable (01 §4.7). Sin esto el producto puede provocar
+     malestar vestibular real a una parte de los usuarios. */
+  @media (prefers-reduced-motion: reduce) {
+    html:focus-within {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

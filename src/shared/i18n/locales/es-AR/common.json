@@ -524,6 +524,14 @@
     "validation": {
       "failed": "Revisa los datos del formulario e intenta nuevamente."
     },
+    "flota": {
+      "vehiculo": {
+        "baja_con_asignaciones_activas": "No se puede eliminar el vehículo porque tiene un dispositivo GPS o conductores asignados. Primero desasigná esos vínculos."
+      },
+      "modulo": {
+        "no_activo": "Tu organización no tiene el módulo Flota activo."
+      }
+    },
       "auth": {
         "credenciales_invalidas": "Email o contraseña incorrectos.",
         "cuenta_bloqueada": "Tu cuenta esta bloqueada temporalmente. Intenta mas tarde.",

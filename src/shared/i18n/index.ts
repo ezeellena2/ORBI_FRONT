@@ -4,16 +4,22 @@ import { initReactI18next } from 'react-i18next'
 import { appConfig } from '@/config/env'
 import enCommon from './locales/en/common.json'
 import esArCommon from './locales/es-AR/common.json'
+import enFlota from './locales/en/flota.json'
+import esArFlota from './locales/es-AR/flota.json'
 
+// Un namespace por area funcional: cada modulo de negocio trae el suyo y no engorda `common`.
 const resources = {
   en: {
     common: enCommon,
+    flota: enFlota,
   },
   'es-AR': {
     common: esArCommon,
+    flota: esArFlota,
   },
   es: {
     common: esArCommon,
+    flota: esArFlota,
   },
 } as const
 
@@ -31,7 +37,7 @@ void i18n
     supportedLngs: ['es-AR', 'es', 'en'],
     nonExplicitSupportedLngs: true,
     defaultNS: 'common',
-    ns: ['common'],
+    ns: ['common', 'flota'],
     interpolation: {
       escapeValue: false,
     },

@@ -1,0 +1,52 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEMA `midnight` — DECLARADO COMPLETO, NO EXPUESTO
+   Mismo motivo que `light.css` (01-sistema-de-diseno.md §5.3).
+
+   CERO HEX.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root[data-theme='midnight'] {
+  /* Superficies y bordes — rampa `noche` */
+  --s-fondo-base: var(--p-noche-950);
+  --s-superficie-1: var(--p-noche-900);
+  --s-superficie-2: var(--p-noche-850);
+  --s-superficie-3: var(--p-noche-800);
+  --s-borde: var(--p-noche-750);
+  --s-borde-hover: var(--p-noche-700);
+
+  /* Texto */
+  --s-fg-primario: var(--p-noche-50);
+  --s-fg-secundario: var(--p-noche-400);
+  --s-fg-terciario: var(--p-noche-500);
+  --s-fg-sobre-color: var(--p-blanco);
+
+  /* Alfas — el halo SUBE (01 §2.4): cyan 0.20 · ámbar 0.18.
+     Es coherente: cuanto más oscuro el fondo, más fuerte el halo. */
+  --s-marca-tenue: color-mix(in srgb, var(--p-cyan-500) 8%, transparent);
+  --s-marca-suave: color-mix(in srgb, var(--p-cyan-500) 15%, transparent);
+  --s-marca-halo: color-mix(in srgb, var(--p-cyan-500) 20%, transparent);
+  --s-accion-tenue: color-mix(in srgb, var(--p-ambar-500) 8%, transparent);
+  --s-accion-suave: color-mix(in srgb, var(--p-ambar-500) 15%, transparent);
+  --s-accion-halo: color-mix(in srgb, var(--p-ambar-500) 18%, transparent);
+
+  /* Velo, vidrio y modal — base `noche-950`, alfas MÁS ALTAS */
+  --s-velo: color-mix(in srgb, var(--p-noche-950) 85%, transparent);
+  --s-velo-fuerte: color-mix(in srgb, var(--p-noche-950) 95%, transparent);
+  --s-modal-fondo: color-mix(in srgb, var(--p-noche-950) 90%, transparent);
+  --s-vidrio: color-mix(in srgb, var(--p-noche-900) 85%, transparent);
+
+  /* Gradiente ambiente — cyan @ 8% */
+  --s-gradiente-ambiente: radial-gradient(
+    ellipse at 20% 50%,
+    color-mix(in srgb, var(--p-cyan-500) 8%, transparent) 0%,
+    transparent 60%
+  );
+
+  /* Sombras — cyan muy tenue: casi solo un halo */
+  --s-sombra-sm: 0 1px 3px color-mix(in srgb, var(--p-cyan-500) 5%, transparent);
+  --s-sombra-md: 0 4px 8px color-mix(in srgb, var(--p-cyan-500) 6%, transparent);
+  --s-sombra-lg: 0 10px 20px color-mix(in srgb, var(--p-cyan-500) 8%, transparent);
+  --s-sombra-xl: 0 16px 48px color-mix(in srgb, var(--p-cyan-500) 10%, transparent);
+
+  color-scheme: dark;
+}

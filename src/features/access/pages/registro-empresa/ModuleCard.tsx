@@ -28,7 +28,7 @@ export function ModuleCard({ icon, name, description, selected, onToggle }: Modu
     >
       {selected ? (
         <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-brand-cyan)]">
-          <Check className="h-3 w-3 text-white" />
+          <Check className="h-3 w-3 text-fg-sobre-color" />
         </div>
       ) : null}
       <span className="text-lg">{icon}</span>

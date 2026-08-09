@@ -1,0 +1,308 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CAPA A2 — SEMÁNTICAS (`--s-*`) · bloque `:root` = el tema DARK, que es el default
+
+   "Para qué sirve" un color, no "qué color es". Acá NO entra ni un literal:
+   todo es `var(--p-…)` o `color-mix()` sobre una primitiva de color.
+
+   CSS PLANO. Ningún `@theme` en este archivo: el puente vive una sola vez, en
+   `base.css` (01-sistema-de-diseno.md §7.3).
+
+   Este archivo declara además, y a propósito, tres familias que no son `--s-*`:
+   - `--z-*`   → z-index. Tailwind v4 NO tiene namespace de tema para z-index
+                 (01 §4.9 · §7.1); se consume con `z-(--z-modal)`.
+   - los alias de **shadcn/ui** (`--background`, `--primary`, …) → §shadcn abajo.
+   Las dos son plano `:root` y ninguna genera utilidad por sí sola.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Superficies y bordes (01 §3.1) ─────────────────────────────────────
+     4 profundidades y no 2: el producto es denso (tablas, mapas, paneles
+     anidados) y en fondo oscuro la profundidad se comunica con SUPERFICIE,
+     no con sombra. */
+  --s-fondo-base: var(--p-frio-950);
+  --s-superficie-1: var(--p-frio-900);
+  --s-superficie-2: var(--p-frio-850);
+  --s-superficie-3: var(--p-frio-800);
+  --s-borde: var(--p-frio-750);
+  --s-borde-hover: var(--p-frio-700);
+
+  /* ── Texto (01 §3.2) ───────────────────────────────────────────────────
+     PENDIENTE (DA-FE-12 de 01-sistema-de-diseno): `--s-fg-terciario` mide
+     ~2.6:1 en dark. Pasa como *deshabilitado* (exento por WCAG) y FALLA como
+     `placeholder`, que es otro de sus usos declarados. Decide PO + implementación:
+     subirlo, o partirlo en `--s-fg-terciario` / `--s-fg-placeholder`. */
+  --s-fg-primario: var(--p-frio-50);
+  --s-fg-secundario: var(--p-frio-400);
+  --s-fg-terciario: var(--p-frio-500);
+  --s-fg-sobre-color: var(--p-blanco);
+
+  /* ── Marca y acción (01 §3.3) ───────────────────────────────────────────
+     NO son intercambiables. El cyan está en todos lados (bordes, links, datos);
+     el ámbar aparece poco y por eso se ve. Regla: una sola cosa ámbar por pantalla. */
+  --s-marca: var(--p-cyan-500);
+  --s-marca-hover: var(--p-cyan-600);
+  --s-marca-tenue: color-mix(in srgb, var(--p-cyan-500) 8%, transparent);
+  --s-marca-suave: color-mix(in srgb, var(--p-cyan-500) 15%, transparent);
+  --s-marca-halo: color-mix(in srgb, var(--p-cyan-500) 25%, transparent);
+
+  --s-accion: var(--p-ambar-500);
+  --s-accion-hover: var(--p-ambar-600);
+  --s-accion-fg: var(--p-ambar-tinta);
+  --s-accion-tenue: color-mix(in srgb, var(--p-ambar-500) 8%, transparent);
+  --s-accion-suave: color-mix(in srgb, var(--p-ambar-500) 15%, transparent);
+  --s-accion-halo: color-mix(in srgb, var(--p-ambar-500) 25%, transparent);
+
+  /* ── Estado (01 §3.4) ───────────────────────────────────────────────────
+     PENDIENTE (DA-FE-02 de 01-sistema-de-diseno): `--s-advertencia` apunta al
+     MISMO ámbar que `--s-accion`. Un solo naranja hace dos trabajos opuestos
+     ("hacé click acá" y "cuidado") y con la regla de una sola cosa ámbar por
+     pantalla eso es inviable. Queda PROVISORIO hasta que el PO elija hue.
+     El token existe separado a propósito: el día que se separen, se separan
+     solas; si compartieran token habría que auditar 40 componentes. */
+  --s-exito: var(--p-verde-500);
+  --s-exito-fondo: color-mix(in srgb, var(--p-verde-500) 15%, transparent);
+  --s-advertencia: var(--p-ambar-500);
+  --s-advertencia-fondo: color-mix(in srgb, var(--p-ambar-500) 15%, transparent);
+  --s-peligro: var(--p-rojo-500);
+  --s-peligro-fondo: color-mix(in srgb, var(--p-rojo-500) 15%, transparent);
+  --s-info: var(--p-violeta-500);
+  --s-info-fondo: color-mix(in srgb, var(--p-violeta-500) 15%, transparent);
+
+  /* ── Foco (01 §3.5) ─────────────────────────────────────────────────────
+     No existía en el mockup: el único anillo era exclusivo del tema claro y
+     valía 1px al 8% — invisible como indicador de foco. Es un hueco de
+     accesibilidad y se cubre acá.
+     PENDIENTE (DA-FE-04 de 01-sistema-de-diseno): validar grosor (3px) y alfa
+     (0.35) con un medidor de contraste real en los 4 temas. Decide implementación. */
+  --s-foco: var(--s-marca);
+  --s-foco-anillo: 0 0 0 3px color-mix(in srgb, var(--p-cyan-500) 35%, transparent);
+
+  /* ── Velo, vidrio y modal (01 §3.6) ─────────────────────────────────────
+     El glassmorphism es first-class en ORBI: el header y el sidebar dejan ver
+     el mapa que corre por debajo. Ese es el look, no un adorno. */
+  --s-velo: color-mix(in srgb, var(--p-frio-950) 80%, transparent);
+  --s-velo-fuerte: color-mix(in srgb, var(--p-frio-950) 90%, transparent);
+  --s-modal-fondo: color-mix(in srgb, var(--p-frio-950) 85%, transparent);
+  --s-vidrio: color-mix(in srgb, var(--p-frio-900) 85%, transparent);
+  --s-vidrio-desenfoque: 20px;
+
+  /* ── Gradientes (01 §3.7) ───────────────────────────────────────────────
+     `--s-gradiente-ambiente` es la única luz de fondo de la app: lo que evita
+     que el fondo oscuro se vea plano. Se re-declara por tema. */
+  --s-gradiente-hero: linear-gradient(
+    135deg,
+    var(--p-cyan-500) 0%,
+    var(--p-cyan-600) 50%,
+    var(--p-cyan-800) 100%
+  );
+  --s-gradiente-cta: linear-gradient(135deg, var(--p-ambar-500) 0%, var(--p-ambar-600) 100%);
+  --s-gradiente-ambiente: radial-gradient(
+    ellipse at 20% 50%,
+    color-mix(in srgb, var(--p-cyan-500) 5%, transparent) 0%,
+    transparent 60%
+  );
+
+  /* ── Scrollbar (01 §3.8) — referenciales: siguen al tema sin declarar nada ── */
+  --s-scrollbar-pulgar: var(--s-borde);
+  --s-scrollbar-riel: var(--s-superficie-1);
+
+  /* ── Mapa (01 §2.3) — invariante en los 4 temas, a propósito ───────────── */
+  --s-mapa: var(--p-mapa);
+
+  /* ── Sombras de elevación (01 §4.6) ─────────────────────────────────────
+     La geometría es literal (es geometría, 01 §0); el COLOR sale de una
+     primitiva vía color-mix. Nunca un `rgba()` escrito acá. */
+  --s-sombra-sm: 0 1px 2px color-mix(in srgb, var(--p-negro) 40%, transparent);
+  --s-sombra-md: 0 4px 12px color-mix(in srgb, var(--p-negro) 40%, transparent);
+  --s-sombra-lg: 0 8px 24px color-mix(in srgb, var(--p-negro) 50%, transparent);
+  --s-sombra-xl: 0 16px 48px color-mix(in srgb, var(--p-negro) 60%, transparent);
+
+  /* ── Sombras de halo (01 §4.6) — referenciales, nunca se re-declaran ─────
+     Sin offset: no es elevación, es RESPLANDOR. El sistema piensa en luz. */
+  --s-sombra-marca: 0 0 20px var(--s-marca-halo);
+  --s-sombra-marca-sm: 0 0 10px var(--s-marca-suave);
+  --s-sombra-accion: 0 0 20px var(--s-accion-halo);
+  --s-sombra-accion-sm: 0 0 10px var(--s-accion-suave);
+
+  /* ── Radios (01 §4.5) — TEMATIZABLES ────────────────────────────────────
+     "ORBI nunca es cuadrado" es una decisión de la marca ORBI, no una ley de
+     la física: una segunda marca con esquinas rectas cambia este bloque, no
+     los componentes. Por eso pasan por semántica y no van clavados al puente. */
+  --s-radio-sm: 0.5rem;
+  --s-radio-md: 0.625rem;
+  --s-radio-lg: 0.875rem;
+  --s-radio-xl: 1.125rem;
+  --s-radio-2xl: 1.5rem;
+  --s-radio-full: 9999px;
+
+  /* ── Tipografía · familias (01 §4.2) — TEMATIZABLES ─────────────────────
+     `--s-fuente-mono` no es decorativa: patentes, VIN, IMEI, coordenadas, ids
+     y códigos de error van en mono, porque ahí el usuario compara carácter por
+     carácter y la proporcional confunde 0/O y 1/l. */
+  --s-fuente-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --s-fuente-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  /* ── Tipografía · escala (01 §4.3) — TEMATIZABLE ────────────────────────
+     No es una escala modular: los 11 pasos están afinados a mano. En `rem`, no
+     en `px`, para que agrandar el texto por accesibilidad no rompa el layout.
+     PENDIENTE (DA-FE-05 de 01-sistema-de-diseno): `--s-texto-sm` queda en 13px
+     o pasa a 14px. Afecta todas las tablas del producto. Decide el PO. */
+  --s-texto-xs: 0.75rem;
+  --s-texto-sm: 0.8125rem;
+  --s-texto-base: 1rem;
+  --s-texto-md: 1.0625rem;
+  --s-texto-lg: 1.1875rem;
+  --s-texto-xl: 1.375rem;
+  --s-texto-2xl: 1.625rem;
+  --s-texto-3xl: 2rem;
+  --s-texto-4xl: 2.625rem;
+  --s-texto-5xl: 3.25rem;
+  --s-texto-6xl: 4.25rem;
+
+  /* ── Densidad (01 §4.1) — TEMATIZABLE ───────────────────────────────────
+     Toda la escala de espaciado de Tailwind se deriva de esta única unidad:
+     token N = 4·N px, sin excepción. Un modo denso cambia este token y nada más. */
+  --s-unidad-espaciado: 0.25rem;
+
+  /* ── Layout (01 §6.2 y §6.3) ────────────────────────────────────────────
+     `dvh` y no `vh`: en móvil la barra del navegador aparece y desaparece, y
+     con `100vh` un panel a pantalla completa queda cortado por debajo del fold. */
+  --s-ancho-pagina: 1200px;
+  --s-ancho-pagina-xl: 1400px;
+  --s-ancho-hero: var(--s-ancho-pagina);
+  --s-ancho-app: 1320px;
+  --s-padding-pagina: 24px;
+  --s-padding-panel-x: 32px;
+  --s-padding-panel-y: 24px;
+  --s-alto-viewport: 100vh;
+  --s-alto-viewport: 100dvh;
+
+  /* ── Z-index (01 §4.9) ──────────────────────────────────────────────────
+     Banda 1010–1050 y no 10–50 para dejar libre todo lo de abajo de 1000 a los
+     componentes de terceros (Leaflet apila sus panes en 200–700).
+     NO es un namespace de `@theme`: si alguien lo "arregla" metiéndolo ahí, no
+     genera ninguna utilidad y el z-index deja de aplicarse. Se usa `z-(--z-modal)`. */
+  --z-base: 0;
+  --z-dropdown: 1010;
+  --z-popover: 1015;
+  --z-sticky: 1020;
+  --z-velo: 1030;
+  --z-modal: 1040;
+  --z-toast: 1050;
+
+  /* ── Controles nativos (01 §5.4) ────────────────────────────────────────
+     Sin esto, el scrollbar por defecto, el `<select>` desplegado, el date picker
+     y el autocompletado de contraseñas se dibujan en claro sobre una app oscura.
+     Es el detalle que delata que el dark mode "es pintura". */
+  color-scheme: dark;
+
+  /* ═════════════════════════════════════════════════════════════════════════
+     ALIAS DE shadcn/ui (02-primitivas.md §1.4 · 01 §7.6)
+
+     Este es el ÚNICO lugar del frontend que conoce los nombres de shadcn.
+     Cada línea es un ALIAS a una semántica de ORBI: cero hex, cero valores.
+
+     Por qué el mapeo va acá y no reescribiendo las clases del componente
+     copiado: `shadcn add --overwrite` es la única vía por la que llega un
+     arreglo de accesibilidad upstream. Un componente con las clases reescritas
+     pierde esos cambios en cada actualización. Mapeando desde afuera,
+     actualizar es un comando.
+
+     NO se re-declara por tema: los alias apuntan a `--s-*`, y `--s-*` es lo que
+     cada `[data-theme]` re-apunta. Si se repitiera por tema habría 4 copias que
+     mantener sincronizadas y la segunda se desincroniza el primer día.
+
+     Cierra DA-FE-13 de 01-sistema-de-diseno ("¿`semanticas.css` o un
+     `compat-shadcn.css` aparte?") por la vía que el doc 02 §1.4 ya prescribe:
+     "va junto a las semánticas de ORBI, no en un archivo aparte".
+     ═════════════════════════════════════════════════════════════════════════ */
+  --background: var(--s-fondo-base);
+  --foreground: var(--s-fg-primario);
+  --card: var(--s-superficie-1);
+  --card-foreground: var(--s-fg-primario);
+  --popover: var(--s-superficie-3);
+  --popover-foreground: var(--s-fg-primario);
+  --primary: var(--s-accion);
+  --primary-foreground: var(--s-accion-fg);
+  --secondary: var(--s-superficie-2);
+  --secondary-foreground: var(--s-fg-secundario);
+  --muted: var(--s-superficie-2);
+  --muted-foreground: var(--s-fg-terciario);
+  --accent: var(--s-marca-suave);
+  --accent-foreground: var(--s-fg-primario);
+  --destructive: var(--s-peligro);
+  --destructive-foreground: var(--s-fg-sobre-color);
+  --border: var(--s-borde);
+  --input: var(--s-borde);
+  --ring: var(--s-foco);
+
+  /* De shadcn se toma el alias `--radius` y NUNCA su bloque derivado con
+     `calc()`: ese bloque pisaría la escala de radios de ORBI entera, y falla
+     en silencio porque `rounded-md` sigue existiendo, solo que con otro valor
+     (02-primitivas.md §1.4, recuadro "trampa concreta"). */
+  --radius: var(--s-radio-lg);
+
+  /* Los componentes de shadcn leen la escala de radios DENTRO de una clase
+     arbitraria: `rounded-[min(var(--radius-md),10px)]`. Y `@theme inline` no
+     emite ninguna variable en `:root` (es exactamente lo que hace que el tema
+     cambie), así que `var(--radius-md)` quedaría SIN DEFINIR y el redondeo se
+     perdería en silencio. Se declaran acá como variables planas — con LOS
+     VALORES DE ORBI, no con el bloque `calc()` de shadcn, que es lo que la
+     trampa de arriba prohíbe. */
+  --radius-sm: var(--s-radio-sm);
+  --radius-md: var(--s-radio-md);
+  --radius-lg: var(--s-radio-lg);
+  --radius-xl: var(--s-radio-xl);
+  --radius-2xl: var(--s-radio-2xl);
+}
+
+/* ── Layout responsivo (01 §6.2) ─────────────────────────────────────────
+   Densidad real por breakpoint. Es lo que reemplaza al `zoom: 0.75` del
+   mockup, que NO se porta: rompe `position: fixed`, desalinea las medidas de
+   Leaflet (los mapas de telemetría) y corre el hit-testing de los clics. */
+@media (max-width: 767px) {
+  :root {
+    --s-padding-pagina: 16px;
+    --s-padding-panel-x: 16px;
+    --s-padding-panel-y: 16px;
+  }
+}
+
+@media (min-width: 90rem) {
+  :root {
+    --s-ancho-pagina: 1320px;
+    --s-ancho-pagina-xl: 1520px;
+    --s-ancho-hero: 1320px;
+    --s-ancho-app: 1440px;
+    --s-padding-pagina: 32px;
+    --s-padding-panel-x: 40px;
+    --s-padding-panel-y: 28px;
+  }
+}
+
+@media (min-width: 120rem) {
+  :root {
+    --s-ancho-pagina: 1440px;
+    --s-ancho-pagina-xl: 1680px;
+    --s-ancho-hero: 1480px;
+    --s-ancho-app: 1600px;
+    --s-padding-pagina: 48px;
+    --s-padding-panel-x: 48px;
+    --s-padding-panel-y: 32px;
+  }
+}
+
+@media (min-width: 160rem) {
+  :root {
+    --s-ancho-pagina: 1680px;
+    --s-ancho-pagina-xl: 1840px;
+    --s-ancho-hero: 1760px;
+    --s-ancho-app: 1840px;
+    --s-padding-pagina: 64px;
+    --s-padding-panel-x: 64px;
+    /* Declarado explícito: el mockup sobreescribía el padding X en 2560px y se
+       olvidaba del Y, que quedaba heredado del bloque de 1920. La asimetría no
+       parecía intencional (01 §6.2). */
+    --s-padding-panel-y: 32px;
+  }
+}

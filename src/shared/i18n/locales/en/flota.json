@@ -1,0 +1,336 @@
+{
+  "paginas": {
+    "vehiculosListado": "Vehicles",
+    "vehiculoDetalle": "Vehicle",
+    "vehiculosOnboarding": "New vehicle"
+  },
+  "estadoConexion": {
+    "en_linea": "Online",
+    "desconectado": "Disconnected",
+    "incompleto": "Incomplete",
+    "sin_dato": "No data"
+  },
+  "tipoVehiculo": {
+    "auto": "Car",
+    "camioneta": "Pickup",
+    "suv": "SUV",
+    "furgon": "Van",
+    "camion_chico": "Light truck",
+    "camion_grande": "Heavy truck",
+    "moto": "Motorcycle",
+    "colectivo": "Bus",
+    "maquinaria": "Machinery",
+    "acoplado": "Trailer"
+  },
+  "vehiculosListado": {
+    "titulo": "Vehicles",
+    "subtitulo": "The vehicles of your organization.",
+    "nuevoVehiculo": "New vehicle",
+    "sinPermisoCrear": "You need the flota.vehiculos.crear permission",
+    "buscar": {
+      "etiqueta": "Search by plate",
+      "placeholder": "Search by plate"
+    },
+    "soloActivos": "Active only",
+    "limpiar": "Clear filters",
+    "columnas": {
+      "patente": "Plate",
+      "vehiculo": "Vehicle",
+      "dispositivo": "Device",
+      "conductores": "Driver(s)",
+      "estado": "Status",
+      "ultimaSenal": "Last signal",
+      "creado": "Created",
+      "acciones": "Actions"
+    },
+    "celda": {
+      "sinDato": "—",
+      "sinDispositivo": "No device",
+      "sinConductor": "No driver",
+      "conductoresAsignados_one": "{{count}} assigned",
+      "conductoresAsignados_other": "{{count}} assigned",
+      "conductoresExtra": "+{{count}}",
+      "sinSenal": "No signal yet",
+      "velocidad": "{{velocidad}} km/h"
+    },
+    "acciones": {
+      "abrirMenu": "Vehicle actions",
+      "verDetalle": "View detail",
+      "eliminar": "Delete"
+    },
+    "paginacion": {
+      "rango": "Showing {{desde}}–{{hasta}} of {{total}} vehicles",
+      "porPagina": "Per page",
+      "anterior": "Previous page",
+      "siguiente": "Next page"
+    },
+    "vacioSinDatos": {
+      "titulo": "You have not added any vehicles yet",
+      "descripcion": "Start by adding your first vehicle. You can do it manually or import a CSV with your current fleet.",
+      "cta": "Add first vehicle"
+    },
+    "vacioSinResultados": {
+      "titulo": "No vehicle matches your filters",
+      "descripcion": "Try adjusting the search or clearing the active filters.",
+      "cta": "Clear filters"
+    },
+    "error": {
+      "titulo": "The vehicles could not be loaded",
+      "reintentar": "Retry"
+    },
+    "sinAcceso": {
+      "titulo": "No access",
+      "descripcion": "You need the {{permiso}} permission to see this screen",
+      "volver": "Back to dashboard"
+    },
+    "eliminar": {
+      "titulo": "Delete vehicle",
+      "descripcion": "The vehicle stops appearing in lists and on the map. It is a logical deletion: you can reactivate it later.",
+      "etiquetaTipeo": "To confirm, type the plate",
+      "confirmar": "Delete vehicle",
+      "cancelar": "Cancel"
+    }
+  },
+  "rutaNoEncontrada": {
+    "titulo": "This Fleet section does not exist",
+    "descripcion": "Check the link or go back to the vehicle list.",
+    "volver": "Back to vehicles"
+  },
+  "comun": {
+    "reintentar": "Retry",
+    "cancelar": "Cancel",
+    "volverAVehiculos": "Back to vehicles"
+  },
+  "forbidden": {
+    "titulo": "No access",
+    "descripcion": "You need this permission to see this screen.",
+    "volver": "Back to dashboard"
+  },
+  "estadoOperativo": {
+    "operativo": "Operational",
+    "fuera_de_servicio": "Out of service",
+    "baja_operativa": "Decommissioned"
+  },
+  "estadoActivo": {
+    "activo": "Active",
+    "deBaja": "Deleted"
+  },
+  "rolConductor": {
+    "principal": "Primary",
+    "secundario": "Secondary"
+  },
+  "detalle": {
+    "cargando": "Loading vehicle…",
+    "identidadNoDisponible": "Vehicle identity not available",
+    "ultimaSenal": "Last signal: {{valor}}",
+    "sinConductor": "No driver assigned",
+    "noEncontrado": {
+      "titulo": "Vehicle not found",
+      "descripcion": "It may have been deleted, or the link may no longer be valid."
+    },
+    "error": {
+      "titulo": "The vehicle could not be loaded",
+      "descripcion": "Try again in a few seconds."
+    },
+    "acciones": {
+      "verEnMapa": "View on map",
+      "editar": "Edit",
+      "masAcciones": "More actions",
+      "cambiarDispositivo": "Change device",
+      "gestionarConductores": "Manage drivers",
+      "darDeBaja": "Delete vehicle",
+      "sinPermiso": "You need the {{permiso}} permission",
+      "llegaEnOtroSlice": "Device and driver assignments are not available yet."
+    },
+    "miniStats": {
+      "titulo": "Vehicle status",
+      "kmTotales": "Total km",
+      "pistaKmTotales": "Mileage recorded in Fleet",
+      "kmHoy": "Km driven today",
+      "consumo30d": "Fuel use last 30 d",
+      "alertas30d": "Alerts last 30 d",
+      "sinFuente": "No data source yet"
+    },
+    "tabs": {
+      "info": "Overview",
+      "conductor": "Driver",
+      "dispositivo": "GPS device",
+      "historial": "History"
+    },
+    "info": {
+      "titulo": "Vehicle data",
+      "patente": "Plate",
+      "tipo": "Type",
+      "marca": "Make",
+      "modelo": "Model",
+      "anio": "Year",
+      "color": "Color",
+      "vin": "VIN / chassis no.",
+      "alias": "Alias",
+      "kilometraje": "Current km",
+      "kilometros": "{{valor}} km",
+      "estadoOperativo": "Operational status",
+      "estado": "Status",
+      "notas": "Operational notes",
+      "creado": "Created",
+      "modificado": "Last updated",
+      "porUsuario": "{{cuando}} · by {{nombre}}"
+    },
+    "ubicacion": {
+      "titulo": "Current location",
+      "sinSenal": "No signal",
+      "sinSenalDescripcion": "There is no telemetry data for this vehicle yet.",
+      "enFlotaDesde": "In the fleet since {{fecha}}",
+      "abrirMapa": "Open in full map"
+    },
+    "conductor": {
+      "titulo": "Assigned drivers",
+      "vacioTitulo": "No driver assigned",
+      "vacioDescripcion": "You will be able to assign a driver to this vehicle from here once driver management is available.",
+      "dni": "ID number",
+      "licencia": "License",
+      "telefono": "Phone",
+      "asignadoDesde": "Assigned since"
+    },
+    "dispositivo": {
+      "titulo": "Linked GPS device",
+      "vacioTitulo": "No device linked",
+      "vacioDescripcion": "You will be able to link a GPS device to this vehicle from here once device management is available.",
+      "alias": "Alias",
+      "imei": "IMEI",
+      "snapshotPendiente": "Live technical status (connection, battery, last position) has no available source yet."
+    },
+    "historial": {
+      "periodo": {
+        "etiqueta": "Period",
+        "ultimos7": "Last 7 days",
+        "ultimos30": "Last 30 days",
+        "esteMes": "This month"
+      },
+      "columnas": {
+        "inicio": "Start",
+        "fin": "End",
+        "duracion": "Duration",
+        "distancia": "Km",
+        "velocidadMax": "Max speed",
+        "paradas": "Stops"
+      },
+      "minutos": "{{valor}} min",
+      "degradadoTitulo": "Telemetry not available",
+      "degradadoDescripcion": "Trip history has no data source yet: historical vehicle positions are not stored. This does not mean the vehicle has not been driven.",
+      "errorTitulo": "The history could not be loaded",
+      "errorDescripcion": "Try again in a few seconds.",
+      "vacioTitulo": "No trips in this period",
+      "vacioDescripcion": "Try widening the selected period."
+    },
+    "editar": {
+      "titulo": "Edit vehicle",
+      "guardar": "Save changes",
+      "alias": "Alias",
+      "aliasAyuda": "Operational nickname for the vehicle inside your organization.",
+      "kilometraje": "Current km",
+      "notas": "Operational notes",
+      "leyendaCanonicos": "Plate, make, model, year and type are edited in the vehicle's canonical record, not here."
+    },
+    "baja": {
+      "titulo": "Delete vehicle",
+      "descripcion": "The vehicle stops appearing in lists and on the map.",
+      "bloqueadaPorAsignaciones": "The vehicle cannot be deleted: it still has a driver or a device assigned. Unassign them first.",
+      "etiquetaTipeo": "To confirm, type the plate",
+      "confirmar": "Delete vehicle"
+    }
+  },
+  "onboarding": {
+    "bienvenida": "Welcome to {{organizacion}}",
+    "titulo": "Add your first vehicle",
+    "subtitulo": "Start tracking your fleet in minutes. Once you add the first one you will see the live map and alerts in your dashboard.",
+    "crearYContinuar": "Create vehicle and continue",
+    "creando": "Creating vehicle…",
+    "vehiculoCreado": "Done: vehicle {{patente}} is already created and you can look it up even if you leave this wizard.",
+    "verFicha": "View its record",
+    "saltarAlDashboard": "Skip this step — go to the dashboard",
+    "campos": {
+      "patente": "Plate",
+      "patentePlaceholder": "AB 123 CD",
+      "marca": "Make",
+      "marcaPlaceholder": "Pick a make",
+      "modelo": "Model",
+      "anio": "Year",
+      "anioAyuda": "Between {{min}} and {{max}}.",
+      "tipo": "Type",
+      "tipoPlaceholder": "Pick a type",
+      "vin": "VIN / chassis no.",
+      "color": "Color",
+      "kilometrajeInicial": "Initial mileage",
+      "notasOperativas": "Operational notes"
+    },
+    "opcionales": {
+      "titulo": "Optional data"
+    },
+    "catalogo": {
+      "cargando": "Loading catalog…",
+      "vacio": "Catalog has no options",
+      "fallo": "The catalog could not be loaded. Try again in a few seconds.",
+      "marcasVacias": "The make catalog is still empty: no makes have been loaded into the platform.",
+      "tiposVacios": "The vehicle type catalog is still empty."
+    },
+    "errores": {
+      "sinFilaFantasma": "No vehicle was created: you can retry without risk of duplicating it."
+    },
+    "pasos": {
+      "accionNoDisponible": "Not available yet",
+      "saltarAlSiguiente": "Skip this step",
+      "finalizar": "Finish and go to vehicles",
+      "vehiculo": {
+        "etiqueta": "First vehicle"
+      },
+      "dispositivo": {
+        "etiqueta": "GPS device",
+        "titulo": "Link a GPS device",
+        "descripcion": "Optional. You can skip it and do it later.",
+        "hint": "You will be able to link a device from the vehicle record once device management is available."
+      },
+      "conductor": {
+        "etiqueta": "Driver",
+        "titulo": "Assign a driver",
+        "descripcion": "Optional. You can skip it and do it later.",
+        "hint": "You will be able to assign a driver from the vehicle record once driver management is available."
+      }
+    },
+    "importar": {
+      "titulo": "Do you have many vehicles?",
+      "descripcion": "You will be able to import a CSV with your whole fleet at once.",
+      "cta": "Import CSV",
+      "motivoSlice": "CSV import is not available yet."
+    }
+  },
+  "validation": {
+    "patente": {
+      "required": "The plate is required.",
+      "max_length": "The plate cannot exceed 20 characters."
+    },
+    "marca": {
+      "required": "The make is required.",
+      "max_length": "The make cannot exceed 50 characters."
+    },
+    "modelo": {
+      "required": "The model is required.",
+      "max_length": "The model cannot exceed 50 characters."
+    },
+    "anio": {
+      "range_invalid": "The year must be between 1950 and 2030."
+    },
+    "tipo": {
+      "required": "The vehicle type is required."
+    },
+    "vin": {
+      "max_length": "The VIN cannot exceed 17 characters."
+    },
+    "kilometraje_inicial": {
+      "negative": "Mileage cannot be negative."
+    },
+    "kilometraje_actual": {
+      "negative": "Mileage cannot be negative."
+    }
+  }
+}

@@ -17,11 +17,11 @@ import {
   resolveApiErrorMessage,
   resolveApiFieldErrors,
 } from '@/shared/errors/parse-api-error'
-import { Input } from '@/shared/ui/Input'
-import { Select } from '@/shared/ui/Select'
-import { Button } from '@/shared/ui/Button'
-import { Alert } from '@/shared/ui/Alert'
-import { PasswordStrength } from '@/shared/ui/PasswordStrength'
+import { Input } from '@/shared/ui/legacy/Input'
+import { Select } from '@/shared/ui/legacy/Select'
+import { Button } from '@/shared/ui/legacy/Button'
+import { Alert } from '@/shared/ui/legacy/Alert'
+import { PasswordStrength } from '@/shared/ui/legacy/PasswordStrength'
 import { resolveDocumentInputMode } from '@/shared/utils/document-input'
 
 type InviteTab = 'login' | 'register'
