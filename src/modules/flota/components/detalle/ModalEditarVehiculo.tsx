@@ -1,4 +1,4 @@
-import { useForm, type FieldError } from 'react-hook-form'
+import { useForm, useWatch, type FieldError } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { Lock } from 'lucide-react'
@@ -15,11 +15,13 @@ import {
   resolveApiFieldErrors,
 } from '@/shared/errors/parse-api-error'
 import type { VehiculoDetalleDto } from '@/services/contracts/flota'
+import { AvisoCamposNoBorrables } from '../AvisoCamposNoBorrables'
 import { AvisoOperacion } from '../AvisoOperacion'
 import { useEditarVehiculo } from '../../hooks/useEditarVehiculo'
 import { claveDeTipoVehiculo } from './vocabulario'
 import {
   aActualizarVehiculoRequest,
+  camposQueNoSePuedenBorrar,
   editarVehiculoSchema,
   valoresInicialesEditarVehiculo,
   type EditarVehiculoFormulario,
@@ -77,6 +79,13 @@ export function ModalEditarVehiculo({
     if (hasApiFieldErrors(apiError)) return null
     return resolveApiErrorMessage(apiError, t)
   })()
+
+  /*
+    `useWatch`, no `form.watch()`: la regla `react-hooks/incompatible-library` marca `watch()` como
+    no memoizable y hace que el React Compiler saltee el componente entero. `useWatch` es la API
+    suscribible que el compilador sí entiende, y devuelve los valores como parciales.
+  */
+  const valoresActuales = useWatch({ control: form.control })
 
   const enviar = form.handleSubmit((valores) => {
     mutacion.mutate(aActualizarVehiculoRequest(valores), {
@@ -155,6 +164,18 @@ export function ModalEditarVehiculo({
         >
           {(control) => <AreaTexto {...control} {...form.register('notasOperativas')} filas={3} />}
         </Campo>
+
+        {/*
+          `camposQueNoSePuedenBorrar` estaba escrito, exportado y documentado como "se le avisa que
+          ese cambio no se va a guardar" — y no lo importaba NADIE. El aviso que prometia el
+          comentario nunca llegaba a la pantalla: el usuario vaciaba las notas, guardaba, el modal
+          cerraba en verde y las notas seguian ahi.
+        */}
+        <AvisoCamposNoBorrables
+          campos={camposQueNoSePuedenBorrar(valoresActuales, vehiculo).map((campo) =>
+            t(`flota:detalle.editar.campos.${campo}`),
+          )}
+        />
       </form>
     </Modal>
   )

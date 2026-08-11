@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, CarFront } from 'lucide-react'
 import { Badge } from '@/shared/ui/Badge'
 import { Boton } from '@/shared/ui/Boton'
@@ -9,8 +9,13 @@ import { EstadoVacio } from '@/shared/ui/EstadoVacio'
 import { SinAccesoOverlay } from '@/shared/ui/SinAccesoOverlay'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/base/tabs'
 import { parseApiError } from '@/shared/errors/parse-api-error'
-import type { VehiculoDetalleDto } from '@/services/contracts/flota'
+import type {
+  AsignacionVehiculoDispositivoDto,
+  VehiculoDetalleDto,
+} from '@/services/contracts/flota'
 import { useVehiculo } from '../hooks/useVehiculo'
+import { ModalAsociarDispositivo } from '../components/dispositivos/ModalAsociarDispositivo'
+import { ModalDesasociarDispositivo } from '../components/dispositivos/ModalDesasociarDispositivo'
 import { DetalleCargando } from '../components/detalle/DetalleCargando'
 import { HeroVehiculo } from '../components/detalle/HeroVehiculo'
 import { MiniStatsVehiculo } from '../components/detalle/MiniStatsVehiculo'
@@ -105,9 +110,70 @@ export default function VehiculoDetallePage() {
   return <FichaVehiculo vehiculo={consulta.data} />
 }
 
+/**
+ * Lee la asignación que el wizard de alta deja en el `state` de la navegación.
+ *
+ * Se VALIDA la forma en vez de castear: `location.state` lo puede escribir cualquier navegación (o
+ * un `history.pushState` de otra pestaña de la misma app), así que no es un dato de confianza. Si no
+ * tiene la forma esperada se ignora y la ficha se comporta como si no hubiera asignación de sesión
+ * — que es el estado honesto, no un error.
+ */
+function asignacionDeState(state: unknown): AsignacionVehiculoDispositivoDto | null {
+  if (typeof state !== 'object' || state === null) return null
+  const candidata = (state as { asignacionDispositivo?: unknown }).asignacionDispositivo
+  if (typeof candidata !== 'object' || candidata === null) return null
+
+  const { asignacionId, dispositivoFlotaId } = candidata as Record<string, unknown>
+  if (typeof asignacionId !== 'string' || typeof dispositivoFlotaId !== 'string') return null
+
+  return candidata as AsignacionVehiculoDispositivoDto
+}
+
 function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
   const { t } = useTranslation(['flota', 'common'])
-  const [modal, setModal] = useState<'ninguno' | 'editar' | 'baja'>('ninguno')
+  const location = useLocation()
+  const [modal, setModal] = useState<'ninguno' | 'editar' | 'baja' | 'asociar' | 'desasociar'>(
+    'ninguno',
+  )
+
+  /**
+   * LA ASIGNACION DE ESTA SESION — y por qué vive acá y no en el DTO.
+   *
+   * `DELETE .../asignaciones/dispositivo/{asignacionId}` pide el id en la URL, y su ÚNICA fuente en
+   * todo el contrato es la respuesta del `POST` (**D-S3-16**): `GET /vehiculos/{id}/asignaciones` no
+   * está implementado, `VehiculoDetalleDto.dispositivo` no lo trae y los ítems de
+   * `historialAsignaciones` del dispositivo tampoco. Así que se recuerda la de esta sesión.
+   *
+   * NO se persiste en un store ni en `localStorage`: sería un id que sobrevive a cambios hechos
+   * desde otra pestaña o por otro usuario, y el `DELETE` con un id cerrado responde 404
+   * `flota.asignacion.no_existe`. Recordarlo de más es peor que no tenerlo: convierte un botón
+   * honestamente apagado en uno que falla.
+   *
+   * ── SE GUARDA EL DTO ENTERO, NO SOLO EL `asignacionId` ────────────────────────────────────────
+   * Antes se guardaba el id suelto Y ADEMÁS se lo anulaba con
+   * `vehiculo.dispositivo === null ? null : asignacionId`. Como el backend hardcodea
+   * `Dispositivo = null` hasta slice-05 (ver `TabDispositivo`), esa guarda daba `null` SIEMPRE: el
+   * `ModalDesasociarDispositivo` era código muerto —no había ninguna forma de llegar a renderizarlo,
+   * o sea que el `DELETE` no tenía un solo camino en la UI— y el aviso "vas a desinstalar el equipo
+   * actual" (`reasigna`) nunca se mostraba, ni siquiera reasignando.
+   *
+   * Ahora la asignación de sesión vale por sí misma: es la prueba de que el vehículo quedó con GPS
+   * cuando el DTO todavía no lo dice. El `dispositivoFlotaId` que trae el DTO es lo que permite
+   * enlazar a la ficha del equipo sin inventar su alias.
+   */
+  const [asignacionDeSesion, setAsignacionDeSesion] = useState<AsignacionVehiculoDispositivoDto | null>(
+    // Semilla: el wizard de alta asigna el GPS en su paso 2 y llega acá por su enlace, pasando la
+    // asignación en el `state` de la navegación. Sin esto, terminar el wizard y entrar a la ficha
+    // perdía el `asignacionId` en el camino — el mismo agujero, un salto de pantalla más tarde.
+    // Lazy initializer: se lee UNA vez al montar. `location.state` es dato de entrada, así que se
+    // valida su forma en vez de castearlo y confiar.
+    () => asignacionDeState(location.state),
+  )
+
+  // El vehículo tiene GPS si el DTO lo dice (slice-05 en adelante) o si lo asociamos recién.
+  const tieneDispositivo = vehiculo.dispositivo !== null || asignacionDeSesion !== null
+
+  const identificacionVehiculo = vehiculo.patente ?? vehiculo.alias ?? vehiculo.id
 
   return (
     <div className="flex flex-col gap-6">
@@ -117,6 +183,7 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
         vehiculo={vehiculo}
         onEditar={() => setModal('editar')}
         onDarDeBaja={() => setModal('baja')}
+        onCambiarDispositivo={() => setModal('asociar')}
       />
 
       <MiniStatsVehiculo vehiculo={vehiculo} />
@@ -139,7 +206,12 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
           <TabConductor vehiculo={vehiculo} />
         </TabsContent>
         <TabsContent value="dispositivo" className="pt-4">
-          <TabDispositivo vehiculo={vehiculo} />
+          <TabDispositivo
+            vehiculo={vehiculo}
+            asignacionDeSesion={asignacionDeSesion}
+            onAsociar={() => setModal('asociar')}
+            onDesasociar={() => setModal('desasociar')}
+          />
         </TabsContent>
         {/*
           El panel del Historial se monta solo cuando el tab está activo: su request es la superficie
@@ -161,6 +233,51 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
       ) : null}
       {modal === 'baja' ? (
         <ModalBajaVehiculo vehiculo={vehiculo} abierto onCerrar={() => setModal('ninguno')} />
+      ) : null}
+
+      {/*
+        Un solo modal para asociar y para cambiar: el `POST` cierra la asignación anterior por su
+        cuenta (`motivo_cierre = reasignacion`) y devuelve el GPS saliente a `en_stock` — D-S3-14.
+        `reasigna` solo cambia el aviso que se muestra ANTES de confirmar.
+      */}
+      {modal === 'asociar' ? (
+        <ModalAsociarDispositivo
+          vehiculoFlotaId={vehiculo.id}
+          identificacionVehiculo={identificacionVehiculo}
+          reasigna={tieneDispositivo}
+          abierto
+          onCerrar={() => setModal('ninguno')}
+          onAsignado={setAsignacionDeSesion}
+        />
+      ) : null}
+
+      {/*
+        La condición ya NO exige `vehiculo.dispositivo !== null`: ese campo viene `null` siempre en
+        slice-03, así que exigirlo hacía este modal inalcanzable. Lo que de verdad hace falta para el
+        `DELETE` es el `asignacionId`, y eso es exactamente lo que `asignacionDeSesion` contiene.
+      */}
+      {modal === 'desasociar' && asignacionDeSesion !== null ? (
+        <ModalDesasociarDispositivo
+          vehiculoFlotaId={vehiculo.id}
+          asignacionId={asignacionDeSesion.asignacionId}
+          /*
+            `alias` es NULLABLE (D-S3-12: `alias text NULL`), asi que el fallback es `??` y no
+            `.length`. Con `.length` sobre un `null` esto tiraba un TypeError ANTES de poder caer al
+            IMEI: el comentario describia un fallback que el codigo no podia alcanzar. El IMEI es la
+            identidad real y siempre esta.
+            Tercer escalon: con el DTO sin componer no hay alias NI imei, y la respuesta del `POST`
+            solo trae ids — se nombra al equipo por lo unico cierto en vez de dejar el subtitulo en
+            blanco o pintar un uuid.
+          */
+          identificacionDispositivo={
+            vehiculo.dispositivo === null
+              ? t('flota:detalle.dispositivo.identificacionRecienAsociado')
+              : (vehiculo.dispositivo.alias ?? vehiculo.dispositivo.imei)
+          }
+          abierto
+          onCerrar={() => setModal('ninguno')}
+          onDesasignado={() => setAsignacionDeSesion(null)}
+        />
       ) : null}
     </div>
   )

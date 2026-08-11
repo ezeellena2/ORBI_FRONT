@@ -90,6 +90,16 @@ export function Boton({
     <BotonBase
       variant="link"
       disabled={inhabilitado}
+      /*
+       * `nativeButton` de Base UI vale `true` por default y significa "el elemento renderizado ES un
+       * <button> nativo". Con `render={<Link/>}` el elemento real es un <a>, y la contradiccion la
+       * cantaba la consola en CADA render de las fichas ("A component that acts as a button expected
+       * a native <button>…"): ademas de ensuciar la consola, el elemento se quedaba sin la
+       * semantica de boton que Base UI le agrega a mano cuando sabe que no hay <button>.
+       * Se deriva de `render` en vez de exponer una prop nueva: quien pasa `render` no tiene por que
+       * conocer el detalle interno de la primitiva.
+       */
+      nativeButton={resto.render === undefined}
       aria-busy={cargando || undefined}
       className={cn(
         'border font-semibold no-underline transition-colors duration-150 ease-out',

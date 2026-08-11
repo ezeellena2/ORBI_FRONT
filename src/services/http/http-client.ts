@@ -47,7 +47,14 @@ function attachHeaders(
   // Accept-Language coherente con la UI: el backend localiza el fallback title/detail de ProblemDetails
   // por este header (backend I18N-03). Sin el, ese fallback saldria en el idioma default del backend.
   headers.set('Accept-Language', i18n.resolvedLanguage ?? appConfig.defaultLocale)
-  headers.set('X-TracAuto-Client', 'web')
+  // `X-Client-Type`, NO `X-TracAuto-Client`. El header viejo no lo leia NADIE en el backend y no
+  // estaba en la whitelist de CORS (`Platform.Web/OrbiAuthExtensions.cs`: Content-Type,
+  // Authorization, X-Client-Type, X-orbi-Client), asi que el PREFLIGHT lo rechazaba y **todos** los
+  // requests morian con `net::ERR_FAILED` — la app entera mostraba "No se pudo conectar con el
+  // servidor" contra un backend sano. `X-Client-Type` esta whitelisteado y ademas TIENE lector
+  // (`AuthController` compara contra `mobile` para el flujo de refresh); mandar `web` deja ese
+  // branch igual que con el header ausente.
+  headers.set('X-Client-Type', 'web')
 
   if (accessToken) {
     headers.set('Authorization', `Bearer ${accessToken}`)

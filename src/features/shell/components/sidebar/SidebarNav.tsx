@@ -9,7 +9,14 @@ interface Props {
 }
 
 export function SidebarNav({ collapsed }: Props) {
-  const modulos = useSessionStore(s => s.organizacionActiva?.modulos ?? [])
+  // El `?? []` va AFUERA del selector, igual que en `RequierePermiso`, `RequiereModulo` y
+  // `usePermisos`. Zustand 5 corre el selector dentro de `useSyncExternalStore`: con el default
+  // ADENTRO, cada lectura construye un array NUEVO, React ve un snapshot distinto por render y la
+  // app entera cae en "Maximum update depth exceeded" (precedido de "The result of getSnapshot
+  // should be cached"). Reproducido: con `organizacionActiva.modulos` ausente, el ErrorBoundary
+  // tapaba TODA la aplicacion con "Algo salio mal" — el sidebar se monta en cada pantalla de /app.
+  const modulosDeLaOrg = useSessionStore(s => s.organizacionActiva?.modulos)
+  const modulos = modulosDeLaOrg ?? []
 
   function isVisible(item: NavItem): boolean {
     if (item.type === 'label') return true

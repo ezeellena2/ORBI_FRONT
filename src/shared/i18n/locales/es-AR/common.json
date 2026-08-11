@@ -85,20 +85,48 @@
     },
     "logos": {
       "label": "Confian en nosotros",
-      "items": ["FleetCorp", "AutoSur", "TallerPro", "SeguroTotal", "TransLogic", "MobiDrive"]
+      "items": [
+        "FleetCorp",
+        "AutoSur",
+        "TallerPro",
+        "SeguroTotal",
+        "TransLogic",
+        "MobiDrive"
+      ]
     },
     "modules": {
       "title": "Todo lo que tu empresa necesita",
       "subtitle": "Modulos especializados para cada vertical del ecosistema vehicular. Activa solo los que necesitas.",
       "cta": "Registrar mi empresa",
       "items": {
-        "flota": { "title": "Gestion de Flota", "desc": "Gestion completa de vehiculos, conductores, rutas y mantenimiento preventivo." },
-        "concesionaria": { "title": "Concesionaria", "desc": "Stock, ventas, CRM y postventa integrados en una sola plataforma." },
-        "taller": { "title": "Taller", "desc": "Ordenes de trabajo, repuestos, turnos online y facturacion automatizada." },
-        "seguros": { "title": "Seguros", "desc": "Polizas, siniestros, inspecciones y seguimiento integral de cobertura." },
-        "alquileres": { "title": "Alquileres", "desc": "Disponibilidad, contratos, devoluciones y control en tiempo real." },
-        "movilidad": { "title": "Movilidad", "desc": "Viajes, conductores, pasajeros — gestion tipo Uber para tu operacion." },
-        "delivery": { "title": "Delivery", "desc": "Entregas, rutas optimizadas y tracking en vivo para ultima milla." }
+        "flota": {
+          "title": "Gestion de Flota",
+          "desc": "Gestion completa de vehiculos, conductores, rutas y mantenimiento preventivo."
+        },
+        "concesionaria": {
+          "title": "Concesionaria",
+          "desc": "Stock, ventas, CRM y postventa integrados en una sola plataforma."
+        },
+        "taller": {
+          "title": "Taller",
+          "desc": "Ordenes de trabajo, repuestos, turnos online y facturacion automatizada."
+        },
+        "seguros": {
+          "title": "Seguros",
+          "desc": "Polizas, siniestros, inspecciones y seguimiento integral de cobertura."
+        },
+        "alquileres": {
+          "title": "Alquileres",
+          "desc": "Disponibilidad, contratos, devoluciones y control en tiempo real."
+        },
+        "movilidad": {
+          "title": "Movilidad",
+          "desc": "Viajes, conductores, pasajeros — gestion tipo Uber para tu operacion."
+        },
+        "delivery": {
+          "title": "Delivery",
+          "desc": "Entregas, rutas optimizadas y tracking en vivo para ultima milla."
+        }
       }
     },
     "b2c": {
@@ -114,19 +142,40 @@
         "batteryLabel": "Estado del GPS"
       },
       "features": {
-        "gps": { "title": "Rastreo GPS en tiempo real", "desc": "Ubicacion exacta de tu vehiculo, actualizada cada 10 segundos." },
-        "alerts": { "title": "Alertas inteligentes", "desc": "Movimiento, velocidad, geocercas — notificaciones push instantaneas." },
-        "history": { "title": "Historial de recorridos", "desc": "Revisa todos los viajes y rutas con detalle de paradas y velocidad." },
-        "status": { "title": "Estado del vehiculo", "desc": "Kilometros, motor, bateria y diagnosticos desde la app." }
+        "gps": {
+          "title": "Rastreo GPS en tiempo real",
+          "desc": "Ubicacion exacta de tu vehiculo, actualizada cada 10 segundos."
+        },
+        "alerts": {
+          "title": "Alertas inteligentes",
+          "desc": "Movimiento, velocidad, geocercas — notificaciones push instantaneas."
+        },
+        "history": {
+          "title": "Historial de recorridos",
+          "desc": "Revisa todos los viajes y rutas con detalle de paradas y velocidad."
+        },
+        "status": {
+          "title": "Estado del vehiculo",
+          "desc": "Kilometros, motor, bateria y diagnosticos desde la app."
+        }
       }
     },
     "steps": {
       "title": "Empeza en 3 pasos",
       "subtitle": "De cero a tracking en vivo en menos de 5 minutos.",
       "items": [
-        { "title": "Registrate", "desc": "Crea tu cuenta en menos de 2 minutos. Sin tarjeta de credito." },
-        { "title": "Conecta", "desc": "Suma tus vehiculos y dispositivos GPS a la plataforma." },
-        { "title": "Controla", "desc": "Monitorea todo desde una sola plataforma, en tiempo real." }
+        {
+          "title": "Registrate",
+          "desc": "Crea tu cuenta en menos de 2 minutos. Sin tarjeta de credito."
+        },
+        {
+          "title": "Conecta",
+          "desc": "Suma tus vehiculos y dispositivos GPS a la plataforma."
+        },
+        {
+          "title": "Controla",
+          "desc": "Monitorea todo desde una sola plataforma, en tiempo real."
+        }
       ]
     },
     "pricing": {
@@ -139,21 +188,38 @@
           "name": "Personal",
           "price": "Gratis",
           "desc": "Ideal para rastrear tu vehiculo personal.",
-          "features": ["1 vehiculo", "Rastreo GPS en tiempo real", "Alertas basicas", "Historial 30 dias"],
+          "features": [
+            "1 vehiculo",
+            "Rastreo GPS en tiempo real",
+            "Alertas basicas",
+            "Historial 30 dias"
+          ],
           "cta": "Empezar"
         },
         "profesional": {
           "name": "Profesional",
           "price": "$29.990",
           "desc": "Para pequeñas flotas y negocios en crecimiento.",
-          "features": ["Hasta 10 vehiculos", "2 modulos incluidos", "Reportes avanzados", "Historial ilimitado", "5 usuarios"],
+          "features": [
+            "Hasta 10 vehiculos",
+            "2 modulos incluidos",
+            "Reportes avanzados",
+            "Historial ilimitado",
+            "5 usuarios"
+          ],
           "cta": "Empezar"
         },
         "enterprise": {
           "name": "Enterprise",
           "price": "A medida",
           "desc": "Para operaciones grandes con necesidades especificas.",
-          "features": ["Vehiculos ilimitados", "Todos los modulos", "API e integraciones", "Soporte dedicado", "SLA garantizado"],
+          "features": [
+            "Vehiculos ilimitados",
+            "Todos los modulos",
+            "API e integraciones",
+            "Soporte dedicado",
+            "SLA garantizado"
+          ],
           "cta": "Contactar ventas"
         }
       }
@@ -161,9 +227,21 @@
     "testimonials": {
       "title": "Lo que dicen nuestros usuarios",
       "items": [
-        { "quote": "Desde que implementamos ORBI, redujimos un 30% los costos de combustible. La visibilidad en tiempo real cambio nuestra operacion.", "name": "Carlos Mendez", "role": "Dir. de Operaciones, TransLogic" },
-        { "quote": "La gestion de siniestros mejoro drasticamente. Tenemos toda la informacion del vehiculo al instante, sin llamar al asegurado.", "name": "Laura Peralta", "role": "Gte. de Seguros, AsegurAR" },
-        { "quote": "Controlo mi auto desde el celular. Me notifica si alguien lo mueve. Simple, rapido y me da tranquilidad todos los dias.", "name": "Martin Garcia", "role": "Usuario particular" }
+        {
+          "quote": "Desde que implementamos ORBI, redujimos un 30% los costos de combustible. La visibilidad en tiempo real cambio nuestra operacion.",
+          "name": "Carlos Mendez",
+          "role": "Dir. de Operaciones, TransLogic"
+        },
+        {
+          "quote": "La gestion de siniestros mejoro drasticamente. Tenemos toda la informacion del vehiculo al instante, sin llamar al asegurado.",
+          "name": "Laura Peralta",
+          "role": "Gte. de Seguros, AsegurAR"
+        },
+        {
+          "quote": "Controlo mi auto desde el celular. Me notifica si alguien lo mueve. Simple, rapido y me da tranquilidad todos los dias.",
+          "name": "Martin Garcia",
+          "role": "Usuario particular"
+        }
       ]
     },
     "cta": {
@@ -175,9 +253,26 @@
     "footer": {
       "brandDesc": "Plataforma integral de gestion vehicular, telemetria y rastreo GPS para empresas y personas.",
       "copyright": "© 2026 ORBI. Todos los derechos reservados.",
-      "product": { "title": "Producto", "features": "Funcionalidades", "plans": "Planes", "integrations": "Integraciones", "api": "API" },
-      "company": { "title": "Empresa", "about": "Nosotros", "blog": "Blog", "contact": "Contacto", "careers": "Trabaja con nosotros" },
-      "legal": { "title": "Legal", "terms": "Terminos de servicio", "privacy": "Privacidad", "cookies": "Cookies" }
+      "product": {
+        "title": "Producto",
+        "features": "Funcionalidades",
+        "plans": "Planes",
+        "integrations": "Integraciones",
+        "api": "API"
+      },
+      "company": {
+        "title": "Empresa",
+        "about": "Nosotros",
+        "blog": "Blog",
+        "contact": "Contacto",
+        "careers": "Trabaja con nosotros"
+      },
+      "legal": {
+        "title": "Legal",
+        "terms": "Terminos de servicio",
+        "privacy": "Privacidad",
+        "cookies": "Cookies"
+      }
     }
   },
   "auth": {
@@ -195,7 +290,8 @@
       "googleLoading": "Conectando con Google...",
       "noAccount": "¿No tenes cuenta?",
       "createAccount": "Crear cuenta",
-      "registerCompany": "Registrar una empresa"
+      "registerCompany": "Registrar una empresa",
+      "googleUnavailable": "Google sign-in is not enabled in this slice yet."
     },
     "passwordRecovery": {
       "eyebrow": "Recuperacion",
@@ -526,19 +622,55 @@
     },
     "flota": {
       "vehiculo": {
-        "baja_con_asignaciones_activas": "No se puede eliminar el vehículo porque tiene un dispositivo GPS o conductores asignados. Primero desasigná esos vínculos."
+        "baja_con_asignaciones_activas": "No se puede eliminar el vehículo porque tiene un dispositivo GPS o conductores asignados. Primero desasigná esos vínculos.",
+        "no_existe": "El vehículo no existe o no pertenece a tu organización.",
+        "patente_duplicada": "Ya hay un vehículo con la patente {{patente}} en tu organización.",
+        "canonico_no_creable": "No se pudo registrar el vehículo en la plataforma. Volvé a intentar en unos minutos.",
+        "datos_canonicos_invalidos": "Alguno de los datos del vehículo no es válido. Revisalos y probá de nuevo.",
+        "conflicto_canonico": "Los datos del vehículo chocan con un registro ya existente en la plataforma.",
+        "transicion_invalida": "No se puede pasar de {{estadoActual}} a {{estadoDestino}}.",
+        "ya_tiene_dispositivo": "Este vehículo ya tiene un dispositivo GPS asociado. Desasocialo antes de instalar otro."
       },
       "modulo": {
         "no_activo": "Tu organización no tiene el módulo Flota activo."
+      },
+      "dispositivo": {
+        "no_existe": "El dispositivo no existe o no pertenece a tu organización.",
+        "imei_duplicado": "Ya hay un dispositivo activo con el IMEI {{imei}} en tu organización.",
+        "alias_duplicado": "Ya hay un dispositivo con el alias {{alias}} en tu organización.",
+        "canonico_no_existe": "No se encontró el dispositivo en el catálogo de la plataforma.",
+        "transicion_stock_invalida": "No se puede pasar de {{estadoActual}} a {{estadoDestino}}.",
+        "no_disponible": "El dispositivo no está disponible para asignar: está en estado {{estadoActual}}.",
+        "baja_con_asignacion_activa": "No se puede dar de baja el dispositivo porque está instalado en un vehículo. Primero desasocialo.",
+        "alta_modo_b_no_soportado": "Ese IMEI todavía no está dado de alta en la plataforma, y por ahora no se pueden crear equipos nuevos desde Flota.",
+        "modelo_no_existe": "El modelo elegido ya no está disponible. Actualizá la lista y elegí otro.",
+        "proveedor_sim_no_existe": "El proveedor de SIM elegido ya no está disponible. Actualizá la lista y elegí otro.",
+        "reparacion_con_asignacion_activa": "El dispositivo está instalado en un vehículo. Desasocialo antes de mandarlo a reparación.",
+        "canonico_no_coordinable": "No se pudo coordinar con la plataforma. No se guardó ningún cambio: volvé a intentar."
+      },
+      "telemetria": {
+        "no_disponible": "Esta información todavía no tiene una fuente de datos disponible."
+      },
+      "recurso": {
+        "sin_permiso": "No tenés el permiso {{permiso}} para esta acción.",
+        "organizacion_invalida": "Ese elemento no pertenece al recurso que estás viendo.",
+        "tiene_dependencias": "No se puede eliminar: hay {{recurso}} que dependen de este registro. Primero desvinculalos."
+      },
+      "asignacion": {
+        "no_existe": "Esa asociación no existe o ya está cerrada.",
+        "canonico_inactivo": "El vehículo o el dispositivo están dados de baja en la plataforma. Reintentar no lo va a resolver."
+      },
+      "catalogo": {
+        "nombre_duplicado": "Tu organización ya tiene una opción con el nombre {{nombre}}."
       }
     },
-      "auth": {
-        "credenciales_invalidas": "Email o contraseña incorrectos.",
-        "cuenta_bloqueada": "Tu cuenta esta bloqueada temporalmente. Intenta mas tarde.",
-        "cuenta_deshabilitada": "Tu cuenta fue deshabilitada. Contacta al administrador de la organizacion.",
-        "rate_limit_exceeded": "Demasiados intentos. Espera {{retry_after_seconds}} segundos antes de reintentar.",
-        "email_no_verificado": "Debes verificar tu email antes de iniciar sesion.",
-        "token_expirado": "Tu sesion expiro. Inicia sesion nuevamente.",
+    "auth": {
+      "credenciales_invalidas": "Email o contraseña incorrectos.",
+      "cuenta_bloqueada": "Tu cuenta esta bloqueada temporalmente. Intenta mas tarde.",
+      "cuenta_deshabilitada": "Tu cuenta fue deshabilitada. Contacta al administrador de la organizacion.",
+      "rate_limit_exceeded": "Demasiados intentos. Espera {{retry_after_seconds}} segundos antes de reintentar.",
+      "email_no_verificado": "Debes verificar tu email antes de iniciar sesion.",
+      "token_expirado": "Tu sesion expiro. Inicia sesion nuevamente.",
       "token_invalido": "Tu sesion no es valida.",
       "token_requerido": "Se requiere refresh token para continuar.",
       "token_reutilizado": "La sesion fue invalidada por seguridad.",
@@ -672,45 +804,11 @@
         "step1Label": "Primer vehículo",
         "step2Label": "Dispositivo GPS",
         "step3Label": "Conductor",
-        "optional": "opcional",
-        "step1Title": "1. Primer vehículo",
         "step1Desc": "Datos básicos de tu primer vehículo. Una vez creado podés asociar dispositivo y conductor.",
-        "step2Title": "2. Dispositivo GPS",
         "step2Desc": "Asociá un dispositivo GPS al vehículo para empezar a rastrearlo. Si todavía no tenés uno, saltá este paso.",
-        "step3Title": "3. Conductor",
         "step3Desc": "Asigná un conductor al vehículo. Podés cargar sus datos o invitarlo por email.",
-        "cancel": "Cancelar",
-        "skip": "Saltar este paso",
-        "skipFinish": "Saltar y finalizar",
-        "createVehicle": "Crear vehículo y continuar →",
-        "assignDevice": "Asociar dispositivo y continuar →",
-        "finish": "Finalizar configuración →",
-        "selectBrand": "Elegir marca",
-        "selectType": "Elegir tipo",
-        "selectGpsModel": "Elegir modelo",
-        "selectLicense": "Elegir categoría",
-        "patenteLabel": "Patente",
-        "patentePlaceholder": "AB 123 CD",
-        "marcaLabel": "Marca",
-        "modeloLabel": "Modelo",
-        "modeloPlaceholder": "Transit, Hilux, Kangoo...",
-        "anioLabel": "Año",
-        "anioPlaceholder": "2024",
-        "tipoLabel": "Tipo",
-        "imeiLabel": "IMEI del dispositivo",
-        "imeiPlaceholder": "353456789012345",
-        "dispModeloLabel": "Modelo GPS",
-        "simLabel": "Número de SIM",
-        "simPlaceholder": "+54 11 ...",
-        "condNombreLabel": "Nombre",
-        "condNombrePlaceholder": "Carlos",
-        "condApellidoLabel": "Apellido",
-        "condApellidoPlaceholder": "Méndez",
-        "condDniLabel": "DNI",
-        "condDniPlaceholder": "32.456.789",
-        "condEmailLabel": "Email (para invitar)",
-        "condEmailPlaceholder": "carlos@empresa.com",
-        "condLicenciaLabel": "Categoría de licencia"
+        "later": "Ahora no",
+        "start": "Empezar la configuración →"
       }
     },
     "placeholder": {

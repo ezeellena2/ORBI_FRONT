@@ -2,7 +2,9 @@
   "paginas": {
     "vehiculosListado": "Vehicles",
     "vehiculoDetalle": "Vehicle",
-    "vehiculosOnboarding": "New vehicle"
+    "vehiculosOnboarding": "New vehicle",
+    "dispositivosListado": "Devices",
+    "dispositivoDetalle": "Device"
   },
   "estadoConexion": {
     "en_linea": "Online",
@@ -99,7 +101,10 @@
   "comun": {
     "reintentar": "Retry",
     "cancelar": "Cancel",
-    "volverAVehiculos": "Back to vehicles"
+    "volverAVehiculos": "Back to vehicles",
+    "volverADispositivos": "Back to devices",
+    "noSePuedeBorrar": "Clearing a field does not delete it yet: {{campos}} will stay as they were. The rest of your changes are saved.",
+    "separadorLista": ", "
   },
   "forbidden": {
     "titulo": "No access",
@@ -194,11 +199,19 @@
     },
     "dispositivo": {
       "titulo": "Linked GPS device",
-      "vacioTitulo": "No device linked",
-      "vacioDescripcion": "You will be able to link a GPS device to this vehicle from here once device management is available.",
       "alias": "Alias",
       "imei": "IMEI",
-      "snapshotPendiente": "Live technical status (connection, battery, last position) has no available source yet."
+      "snapshotPendiente": "Live technical status (connection, battery, last position) has no available source yet.",
+      "asociar": "Link device",
+      "desasociar": "Unlink",
+      "desasociarSinId": "Unlinking needs the link identifier, and today it only arrives in the response of linking: it is available if you linked it in this session. In the meantime, use Change device.",
+      "verEnDispositivos": "View in devices",
+      "sinComponerTitulo": "This page does not show the vehicle GPS yet",
+      "sinComponerDescripcion": "Fleet does not compose the installed device here yet, so this screen cannot confirm whether the vehicle has one. The device inventory does show it, in its Vehicle column. You can link one anyway: if it already had one, the previous unit goes back to stock.",
+      "verInventario": "View device inventory",
+      "recienAsociadoTitulo": "GPS linked in this session",
+      "recienAsociadoDescripcion": "The link was saved. The unit details are not shown on this page yet because the vehicle does not compose them; the device page has them in full.",
+      "identificacionRecienAsociado": "The device you linked in this session"
     },
     "historial": {
       "periodo": {
@@ -230,7 +243,12 @@
       "aliasAyuda": "Operational nickname for the vehicle inside your organization.",
       "kilometraje": "Current km",
       "notas": "Operational notes",
-      "leyendaCanonicos": "Plate, make, model, year and type are edited in the vehicle's canonical record, not here."
+      "leyendaCanonicos": "Plate, make, model, year and type are edited in the vehicle's canonical record, not here.",
+      "campos": {
+        "alias": "the alias",
+        "kilometrajeActual": "the mileage",
+        "notasOperativas": "the notes"
+      }
     },
     "baja": {
       "titulo": "Delete vehicle",
@@ -288,7 +306,10 @@
         "etiqueta": "GPS device",
         "titulo": "Link a GPS device",
         "descripcion": "Optional. You can skip it and do it later.",
-        "hint": "You will be able to link a device from the vehicle record once device management is available."
+        "continuar": "Link and continue",
+        "asignando": "Linking…",
+        "vacio": "You have no GPS devices in stock. You can skip this step and link one later from the vehicle detail.",
+        "vacioCta": "Go to the device inventory"
       },
       "conductor": {
         "etiqueta": "Driver",
@@ -331,6 +352,325 @@
     },
     "kilometraje_actual": {
       "negative": "Mileage cannot be negative."
+    },
+    "imei": {
+      "required": "The IMEI is required.",
+      "length_invalid": "The IMEI must be between 14 and 20 digits.",
+      "format_invalid": "The IMEI only accepts digits."
+    },
+    "alias": {
+      "required": "The alias is required.",
+      "max_length": "The alias cannot exceed 100 characters."
+    },
+    "numero_sim": {
+      "max_length": "The SIM number cannot exceed 30 characters."
+    },
+    "numero_serie": {
+      "max_length": "The serial number cannot exceed 100 characters."
+    },
+    "nombre": {
+      "required": "The name is required.",
+      "max_length": "The name cannot exceed 100 characters."
+    },
+    "fabricante": {
+      "max_length": "The manufacturer cannot exceed 100 characters."
+    },
+    "motivo": {
+      "max_length": "The reason cannot exceed 500 characters.",
+      "invalid": "That closing reason is not valid."
+    },
+    "dispositivo_flota_id": {
+      "required": "Pick a device from the list."
     }
+  },
+  "estadoStockDispositivo": {
+    "en_stock": "Available",
+    "instalado": "Installed",
+    "en_reparacion": "Under repair",
+    "dado_de_baja": "Decommissioned"
+  },
+  "dispositivosListado": {
+    "titulo": "GPS devices",
+    "subtitulo": "Your organization's GPS device inventory.",
+    "registrar": "Register device",
+    "filtros": {
+      "stock": "Stock status",
+      "stockTodos": "All",
+      "soloActivos": "Active only",
+      "limpiar": "Clear filters",
+      "modelo": "Model",
+      "modeloTodos": "All models",
+      "asignacion": "Assignment",
+      "asignacionTodos": "Assigned and unassigned"
+    },
+    "columnas": {
+      "aliasImei": "Alias / IMEI",
+      "modelo": "Model",
+      "vehiculo": "Vehicle",
+      "stock": "Stock",
+      "ultimaSenal": "Last signal",
+      "acciones": "Actions"
+    },
+    "celda": {
+      "sinDato": "—",
+      "imei": "IMEI {{imei}}",
+      "sinAsignar": "Unassigned",
+      "sinPatente": "No plate"
+    },
+    "acciones": {
+      "abrirMenu": "Device actions",
+      "verDetalle": "View detail",
+      "asignarVehiculo": "Assign to vehicle",
+      "asignarNoDisponible": "Linking to a vehicle is done from the vehicle detail, in its GPS device tab.",
+      "editar": "Edit",
+      "cambiarEstadoStock": "Change stock status",
+      "eliminar": "Delete",
+      "sinPermiso": "You need the {{permiso}} permission"
+    },
+    "paginacion": {
+      "rango": "Showing {{desde}}–{{hasta}} of {{total}} devices",
+      "porPagina": "Per page",
+      "anterior": "Previous page",
+      "siguiente": "Next page"
+    },
+    "vacioSinDatos": {
+      "titulo": "You haven't added any devices yet",
+      "descripcion": "Register your first GPS device so you can assign it to the vehicles in your fleet."
+    },
+    "vacioSinResultados": {
+      "titulo": "No device matches your filters",
+      "descripcion": "Try changing the stock status or clearing the active filters.",
+      "cta": "Clear filters"
+    },
+    "error": {
+      "titulo": "Devices could not be loaded",
+      "reintentar": "Retry",
+      "tituloRefresco": "The list could not be refreshed. You are seeing the last result that loaded correctly."
+    },
+    "sinAcceso": {
+      "titulo": "No access",
+      "descripcion": "You need the {{permiso}} permission to view this screen",
+      "volver": "Back to dashboard"
+    },
+    "editar": {
+      "titulo": "Edit device",
+      "guardar": "Save changes",
+      "errorCarga": "The device could not be loaded",
+      "imeiBloqueado": "The IMEI cannot be changed: it identifies the hardware and is managed outside Fleet.",
+      "alias": "Alias",
+      "aliasAyuda": "Operational nickname for the device within your organization.",
+      "numeroSim": "SIM number",
+      "notas": "Operational notes",
+      "activo": "Device active",
+      "activoAyuda": "Turning it off moves it to \"Decommissioned\". You can reactivate it later.",
+      "catalogoNoDesvincula": "Leaving it empty keeps whatever was already saved: it cannot be unlinked from here yet.",
+      "campos": {
+        "alias": "the alias",
+        "modeloId": "the model",
+        "numeroSim": "the SIM number",
+        "proveedorSimId": "the SIM provider",
+        "notasOperativas": "the notes"
+      }
+    },
+    "estadoStock": {
+      "titulo": "Change stock status",
+      "estadoActual": "Current status:",
+      "nuevoEstado": "New status",
+      "instaladoNota": "Reached by assigning the device to a vehicle.",
+      "sinDestinos": "There are no available transitions from this status.",
+      "motivo": "Note",
+      "motivoAyuda": "Reason for the change, work order number, etc.",
+      "confirmar": "Confirm change"
+    },
+    "eliminar": {
+      "titulo": "Delete device",
+      "descripcion": "The device is removed from the inventory. This cannot be undone.",
+      "etiquetaTipeo": "To confirm, type the alias",
+      "confirmar": "Delete device",
+      "cancelar": "Cancel"
+    }
+  },
+  "dispositivoDetalle": {
+    "cargando": "Loading device…",
+    "noEncontrado": {
+      "titulo": "Device not found",
+      "descripcion": "It may have been decommissioned, or the link is no longer valid."
+    },
+    "error": {
+      "titulo": "The device could not be loaded",
+      "descripcion": "Try again in a few seconds."
+    },
+    "sinAcceso": {
+      "descripcion": "You need the {{permiso}} permission to view this screen"
+    },
+    "hero": {
+      "imei": "IMEI {{valor}}",
+      "sim": "SIM {{valor}}",
+      "firmware": "Firmware {{valor}}",
+      "asociadoA": "Installed on",
+      "sinVehiculo": "No vehicle assigned"
+    },
+    "acciones": {
+      "editar": "Edit",
+      "masAcciones": "More actions",
+      "cambiarEstadoStock": "Change stock status",
+      "stockTerminal": "The device is decommissioned: no stock transitions are available from that state.",
+      "desasociar": "Detach from vehicle",
+      "desasociarNoDisponible": "Unlinking is done from the vehicle detail, in its GPS device tab.",
+      "reactivar": "Reactivate",
+      "darDeBaja": "Decommission",
+      "sinPermiso": "You need the {{permiso}} permission"
+    },
+    "tabs": {
+      "info": "Overview",
+      "telemetria": "Telemetry",
+      "stock": "Stock history",
+      "eventos": "Events"
+    },
+    "info": {
+      "titulo": "Device data",
+      "alias": "Alias",
+      "imei": "IMEI",
+      "modelo": "Model",
+      "fabricante": "Manufacturer",
+      "numeroSerie": "Serial number",
+      "firmware": "Firmware",
+      "sim": "SIM",
+      "proveedorSim": "SIM provider",
+      "estadoStock": "Stock status",
+      "estado": "Status",
+      "ingresoAlStock": "Added to stock",
+      "modificado": "Last modified",
+      "notas": "Operational notes",
+      "porUsuario": "{{cuando}} · by {{nombre}}"
+    },
+    "vehiculo": {
+      "titulo": "Assigned vehicle",
+      "patente": "Plate",
+      "instaladoDesde": "Installed since",
+      "verFicha": "View vehicle record",
+      "vacioTitulo": "No vehicle assigned",
+      "vacioDescripcion": "This device is not installed on any vehicle yet. Assignment is done from the vehicle record.",
+      "asociar": "Choose a vehicle"
+    },
+    "telemetria": {
+      "sinFuenteTitulo": "Live telemetry not available yet",
+      "sinFuenteDescripcion": "Position, speed, ignition and battery levels are composed from Telemetry, and that integration is not connected yet. It does not mean this device is not transmitting."
+    },
+    "eventos": {
+      "sinFuenteTitulo": "Event history not available",
+      "sinFuenteDescripcion": "Technical device events have no source: event history is not stored. It does not mean this device has not produced any."
+    },
+    "estadoStock": {
+      "avisoReparacionInstalado": "The device is installed in a vehicle. To send it for repair you have to unassign it first."
+    },
+    "baja": {
+      "titulo": "Decommission the device",
+      "descripcion": "The device stops appearing in listings and moves to \"Decommissioned\". You can reactivate it later.",
+      "etiquetaTipeo": "To confirm, type the alias",
+      "confirmar": "Decommission"
+    },
+    "reactivar": {
+      "titulo": "Reactivate the device",
+      "descripcion": "The device returns to inventory as available. It is not reinstalled on its previous vehicle: it has to be assigned again.",
+      "confirmar": "Reactivate"
+    },
+    "historialStock": {
+      "fecha": "Date",
+      "motivo": "Reason",
+      "usuario": "User",
+      "altaInicial": "Added to inventory",
+      "sinMotivo": "—",
+      "sinUsuario": "—",
+      "vacioTitulo": "No movements recorded",
+      "vacioDescripcion": "There are no stock status transitions for this device yet.",
+      "errorTitulo": "The history could not be loaded",
+      "transicion": "State change",
+      "rango": "Showing {{desde}}–{{hasta}} of {{total}} movements"
+    }
+  },
+  "filtroAsignacion": {
+    "asignado": "Assigned",
+    "sin_asignar": "Unassigned"
+  },
+  "dispositivoAlta": {
+    "titulo": "Register GPS device",
+    "subtitulo": "Add a unit to your organization inventory.",
+    "imei": "IMEI",
+    "imeiAyuda": "It is printed on the device. It must already exist in the platform.",
+    "alias": "Alias",
+    "aliasAyuda": "Operational nickname to recognize it in the lists.",
+    "numeroSerie": "Serial number",
+    "numeroSerieAyuda": "Optional. It cannot be changed after registration.",
+    "numeroSim": "SIM number",
+    "notas": "Operational notes",
+    "guardar": "Register device"
+  },
+  "catalogoDispositivo": {
+    "modelo": "Model",
+    "modeloPlaceholder": "Choose a model",
+    "modeloSinOpciones": "There are no models loaded yet.",
+    "modeloAgregar": "Add model",
+    "proveedorSim": "SIM provider",
+    "proveedorSimPlaceholder": "Choose a provider",
+    "proveedorSimSinOpciones": "There are no providers loaded yet.",
+    "proveedorSimAgregar": "Add provider",
+    "opcional": "Optional",
+    "cargando": "Loading options…",
+    "error": "The options could not be loaded.",
+    "reintentar": "Retry",
+    "nuevoModeloTitulo": "New device model",
+    "nuevoModeloDescripcion": "It becomes available only for your organization.",
+    "nuevoProveedorTitulo": "New SIM provider",
+    "nuevoProveedorDescripcion": "It becomes available only for your organization.",
+    "nombre": "Name",
+    "nombreRequerido": "The name is required.",
+    "fabricante": "Manufacturer",
+    "fabricanteAyuda": "Optional.",
+    "guardar": "Add",
+    "guardando": "Adding…",
+    "cancelar": "Cancel",
+    "sinPermisoCrear": "You need the {{permiso}} permission to add catalog options.",
+    "noSeEdita": "Catalog options cannot be edited or deleted yet. Check the name before adding it.",
+    "etiquetaPropia": "{{nombre}} · your organization"
+  },
+  "asignacionDispositivo": {
+    "titulo": "Link GPS device",
+    "descripcion": "Choose a device in stock to install in this vehicle.",
+    "dispositivo": "Device",
+    "dispositivoPlaceholder": "Choose a device",
+    "sinDisponibles": "There are no devices in stock to link.",
+    "sinDisponiblesCta": "Go to inventory",
+    "reasignaAviso": "This vehicle already has a GPS installed. On confirm, the current one is unlinked and returns to stock.",
+    "asignar": "Link device",
+    "asignando": "Linking…",
+    "exitoAsignar": "Device linked to the vehicle.",
+    "desasignarTitulo": "Unlink device",
+    "desasignarDescripcion": "The unit returns to stock and stops reporting positions for this vehicle.",
+    "desasignar": "Unlink",
+    "desasignando": "Unlinking…",
+    "exitoDesasignar": "Device unlinked.",
+    "motivo": "Reason",
+    "motivoAyuda": "It is recorded in the link history.",
+    "cancelar": "Cancel",
+    "sinPermiso": "You need the {{permiso}} permission to link devices.",
+    "buscar": "Search device",
+    "buscarPlaceholder": "Search by alias, IMEI or model",
+    "limpiarBusqueda": "Clear the search",
+    "sinResultados": "No device in stock matches your search.",
+    "cargando": "Loading devices in stock…",
+    "sinPermisoLectura": "You need the {{permiso}} permission to see the device inventory.",
+    "soloPrimeros": "Showing the first {{cantidad}} of {{total}} devices in stock. If the one you need is missing, look it up from the device inventory.",
+    "actualizar": "Refresh the list",
+    "errorCoordinacion": "Nothing was saved: the device was NOT installed and the vehicle will not report positions. You can retry with the same data.",
+    "errorConflicto": "The state changed while you were completing the operation. Refresh and pick again: retrying the same thing will fail as well.",
+    "errorNoEncontrado": "The vehicle, the device or the link may no longer exist. Refresh to see the real state.",
+    "errorGenerico": "The operation could not be completed. Refresh to see how it ended up before trying again."
+  },
+  "motivoCierreAsignacion": {
+    "reasignacion": "Reassignment",
+    "reparacion": "Repair",
+    "baja": "Decommission",
+    "otro": "Other"
   }
 }

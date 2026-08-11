@@ -18,14 +18,22 @@ import { Spinner } from '@/shared/ui/Spinner'
  * DUENIO DEL ARCHIVO: el paso que construye el cimiento del slice. Las pantallas se llenan en sus
  * propios archivos; este no se toca para agregar UI.
  *
- * Rutas de otros slices (mapa, dispositivos, conductores, geozonas, problemas, integraciones)
- * todavia NO estan aca: siguen resueltas por el `AppRouter` con su placeholder. Se mudan a este
- * archivo cuando su slice las construya.
+ * ⚠️ MONTAR UNA RUTA ACA TIENE UN SEGUNDO PASO OBLIGATORIO: borrar su placeholder de `AppRouter`.
+ * `<Route path="flota/dispositivos" element={<AppComingSoonPage />} />` es un segmento ESTATICO y el
+ * ranking de `react-router` lo pone POR ENCIMA del splat `flota/*`, asi que gana siempre y la
+ * pantalla montada aca queda inalcanzable — sin error, sin warning, sin nada que lo delate salvo
+ * abrir la URL. Es lo que paso con dispositivos: las 2 paginas existian y no las montaba nadie.
+ *
+ * Rutas de otros slices (mapa, conductores, geozonas, problemas, integraciones) todavia NO estan
+ * aca: siguen resueltas por el `AppRouter` con su placeholder. Se mudan a este archivo cuando su
+ * slice las construya, con el mismo par de pasos.
  */
 
 const VehiculosListPage = lazy(() => import('./pages/VehiculosListPage'))
 const VehiculoDetallePage = lazy(() => import('./pages/VehiculoDetallePage'))
 const OnboardingFlotaPage = lazy(() => import('./pages/OnboardingFlotaPage'))
+const DispositivosListPage = lazy(() => import('./pages/DispositivosListPage'))
+const DispositivoDetallePage = lazy(() => import('./pages/DispositivoDetallePage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 function FlotaCargando() {
@@ -71,6 +79,30 @@ export default function FlotaRoutes() {
             element={
               <RequierePermiso permiso="flota.vehiculos.leer">
                 <VehiculoDetallePage />
+              </RequierePermiso>
+            }
+          />
+
+          {/*
+            Dispositivos GPS (slice-03). Mismo par listado/detalle que vehiculos y el MISMO gate:
+            `RequierePermiso` bloquea con overlay y muestra el permiso literal, nunca redirige (B-3).
+            El backend valida igual y responde 403; esto solo evita pintar una pantalla que va a
+            fallar entera.
+          */}
+          <Route
+            path="dispositivos"
+            element={
+              <RequierePermiso permiso="flota.dispositivos.leer">
+                <DispositivosListPage />
+              </RequierePermiso>
+            }
+          />
+
+          <Route
+            path="dispositivos/:dispositivoId"
+            element={
+              <RequierePermiso permiso="flota.dispositivos.leer">
+                <DispositivoDetallePage />
               </RequierePermiso>
             }
           />

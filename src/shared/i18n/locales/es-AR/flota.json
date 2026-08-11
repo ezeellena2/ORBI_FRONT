@@ -2,7 +2,9 @@
   "paginas": {
     "vehiculosListado": "Vehículos",
     "vehiculoDetalle": "Vehículo",
-    "vehiculosOnboarding": "Nuevo vehículo"
+    "vehiculosOnboarding": "Nuevo vehículo",
+    "dispositivosListado": "Dispositivos",
+    "dispositivoDetalle": "Dispositivo"
   },
   "estadoConexion": {
     "en_linea": "En línea",
@@ -99,7 +101,10 @@
   "comun": {
     "reintentar": "Reintentar",
     "cancelar": "Cancelar",
-    "volverAVehiculos": "Volver a vehículos"
+    "volverAVehiculos": "Volver a vehículos",
+    "volverADispositivos": "Volver a dispositivos",
+    "noSePuedeBorrar": "Vaciar un campo todavía no lo borra: {{campos}} van a quedar como estaban. El resto de los cambios sí se guarda.",
+    "separadorLista": ", "
   },
   "forbidden": {
     "titulo": "Sin acceso",
@@ -194,11 +199,19 @@
     },
     "dispositivo": {
       "titulo": "Dispositivo GPS asociado",
-      "vacioTitulo": "Sin dispositivo asociado",
-      "vacioDescripcion": "Vas a poder asociar un dispositivo GPS a este vehículo desde acá cuando esté disponible la gestión de dispositivos.",
       "alias": "Alias",
       "imei": "IMEI",
-      "snapshotPendiente": "El estado técnico en vivo (conexión, batería, última posición) todavía no tiene fuente disponible."
+      "snapshotPendiente": "El estado técnico en vivo (conexión, batería, última posición) todavía no tiene fuente disponible.",
+      "asociar": "Asociar dispositivo",
+      "desasociar": "Desasociar",
+      "desasociarSinId": "Para desasociar hace falta el identificador de la asociación, y hoy solo llega en la respuesta de asociar: se puede usar si la asociaste en esta sesión. Mientras tanto, usá Cambiar dispositivo.",
+      "verEnDispositivos": "Ver en dispositivos",
+      "sinComponerTitulo": "Esta ficha todavía no muestra el GPS del vehículo",
+      "sinComponerDescripcion": "Flota todavía no compone acá el dispositivo instalado, así que esta pantalla no puede confirmar si el vehículo tiene uno o no. El inventario de dispositivos sí lo indica, en su columna Vehículo. Podés asociar uno igual: si ya tenía, el equipo anterior vuelve al stock.",
+      "verInventario": "Ver inventario de dispositivos",
+      "recienAsociadoTitulo": "GPS asociado en esta sesión",
+      "recienAsociadoDescripcion": "La asociación quedó guardada. Los datos del equipo todavía no se muestran en esta ficha porque el vehículo no los compone; en la ficha del dispositivo están completos.",
+      "identificacionRecienAsociado": "El dispositivo que asociaste en esta sesión"
     },
     "historial": {
       "periodo": {
@@ -230,7 +243,12 @@
       "aliasAyuda": "Apodo operativo del vehículo dentro de tu organización.",
       "kilometraje": "Km actuales",
       "notas": "Notas operativas",
-      "leyendaCanonicos": "La patente, la marca, el modelo, el año y el tipo se editan en la ficha canónica del vehículo, no acá."
+      "leyendaCanonicos": "La patente, la marca, el modelo, el año y el tipo se editan en la ficha canónica del vehículo, no acá.",
+      "campos": {
+        "alias": "el alias",
+        "kilometrajeActual": "el kilometraje",
+        "notasOperativas": "las notas"
+      }
     },
     "baja": {
       "titulo": "Dar de baja el vehículo",
@@ -288,7 +306,10 @@
         "etiqueta": "Dispositivo GPS",
         "titulo": "Asociar un dispositivo GPS",
         "descripcion": "Opcional. Podés saltarlo y hacerlo más adelante.",
-        "hint": "Vas a poder asociar un dispositivo desde el detalle del vehículo cuando esté disponible la gestión de dispositivos."
+        "continuar": "Asociar y continuar",
+        "asignando": "Asociando…",
+        "vacio": "No tenés dispositivos GPS en stock. Podés saltar este paso y asociar uno después desde el detalle del vehículo.",
+        "vacioCta": "Ir al inventario de dispositivos"
       },
       "conductor": {
         "etiqueta": "Conductor",
@@ -331,6 +352,325 @@
     },
     "kilometraje_actual": {
       "negative": "El kilometraje no puede ser negativo."
+    },
+    "imei": {
+      "required": "El IMEI es obligatorio.",
+      "length_invalid": "El IMEI debe tener entre 14 y 20 dígitos.",
+      "format_invalid": "El IMEI solo admite dígitos."
+    },
+    "alias": {
+      "required": "El alias es obligatorio.",
+      "max_length": "El alias no puede superar los 100 caracteres."
+    },
+    "numero_sim": {
+      "max_length": "El número de SIM no puede superar los 30 caracteres."
+    },
+    "numero_serie": {
+      "max_length": "El número de serie no puede superar los 100 caracteres."
+    },
+    "nombre": {
+      "required": "El nombre es obligatorio.",
+      "max_length": "El nombre no puede superar los 100 caracteres."
+    },
+    "fabricante": {
+      "max_length": "El fabricante no puede superar los 100 caracteres."
+    },
+    "motivo": {
+      "max_length": "El motivo no puede superar los 500 caracteres.",
+      "invalid": "Ese motivo de cierre no es válido."
+    },
+    "dispositivo_flota_id": {
+      "required": "Elegí un dispositivo de la lista."
     }
+  },
+  "estadoStockDispositivo": {
+    "en_stock": "Disponible",
+    "instalado": "Instalado",
+    "en_reparacion": "En reparación",
+    "dado_de_baja": "Dado de baja"
+  },
+  "dispositivosListado": {
+    "titulo": "Dispositivos GPS",
+    "subtitulo": "El inventario de dispositivos GPS de tu organización.",
+    "registrar": "Registrar dispositivo",
+    "filtros": {
+      "stock": "Estado de stock",
+      "stockTodos": "Todos",
+      "soloActivos": "Solo activos",
+      "limpiar": "Limpiar filtros",
+      "modelo": "Modelo",
+      "modeloTodos": "Todos los modelos",
+      "asignacion": "Asignación",
+      "asignacionTodos": "Asignados y sin asignar"
+    },
+    "columnas": {
+      "aliasImei": "Alias / IMEI",
+      "modelo": "Modelo",
+      "vehiculo": "Vehículo",
+      "stock": "Stock",
+      "ultimaSenal": "Última señal",
+      "acciones": "Acciones"
+    },
+    "celda": {
+      "sinDato": "—",
+      "imei": "IMEI {{imei}}",
+      "sinAsignar": "Sin asignar",
+      "sinPatente": "Sin patente"
+    },
+    "acciones": {
+      "abrirMenu": "Acciones del dispositivo",
+      "verDetalle": "Ver detalle",
+      "asignarVehiculo": "Asignar a vehículo",
+      "asignarNoDisponible": "La asociación a un vehículo se hace desde la ficha del vehículo, en su pestaña Dispositivo GPS.",
+      "editar": "Editar",
+      "cambiarEstadoStock": "Cambiar estado de stock",
+      "eliminar": "Eliminar",
+      "sinPermiso": "Necesitás el permiso {{permiso}}"
+    },
+    "paginacion": {
+      "rango": "Mostrando {{desde}}–{{hasta}} de {{total}} dispositivos",
+      "porPagina": "Por página",
+      "anterior": "Página anterior",
+      "siguiente": "Página siguiente"
+    },
+    "vacioSinDatos": {
+      "titulo": "Todavía no cargaste dispositivos",
+      "descripcion": "Registrá tu primer dispositivo GPS para poder asociarlo a los vehículos de tu flota."
+    },
+    "vacioSinResultados": {
+      "titulo": "Ningún dispositivo coincide con tus filtros",
+      "descripcion": "Probá cambiar el estado de stock o limpiar los filtros activos.",
+      "cta": "Limpiar filtros"
+    },
+    "error": {
+      "titulo": "No se pudieron cargar los dispositivos",
+      "reintentar": "Reintentar",
+      "tituloRefresco": "No se pudo actualizar la lista. Estás viendo el último resultado que cargó bien."
+    },
+    "sinAcceso": {
+      "titulo": "Sin acceso",
+      "descripcion": "Necesitás el permiso {{permiso}} para ver esta pantalla",
+      "volver": "Volver al dashboard"
+    },
+    "editar": {
+      "titulo": "Editar dispositivo",
+      "guardar": "Guardar cambios",
+      "errorCarga": "No se pudo cargar el dispositivo",
+      "imeiBloqueado": "El IMEI no se puede modificar: identifica al hardware y se administra fuera de Flota.",
+      "alias": "Alias",
+      "aliasAyuda": "Apodo operativo del dispositivo dentro de tu organización.",
+      "numeroSim": "N.º de SIM",
+      "notas": "Notas operativas",
+      "activo": "Dispositivo activo",
+      "activoAyuda": "Al desactivarlo pasa a «Dado de baja». Podés reactivarlo más adelante.",
+      "catalogoNoDesvincula": "Si lo dejás vacío, se conserva lo que ya estaba guardado: hoy no se puede desvincular desde acá.",
+      "campos": {
+        "alias": "el alias",
+        "modeloId": "el modelo",
+        "numeroSim": "el número de SIM",
+        "proveedorSimId": "el proveedor de SIM",
+        "notasOperativas": "las notas"
+      }
+    },
+    "estadoStock": {
+      "titulo": "Cambiar estado de stock",
+      "estadoActual": "Estado actual:",
+      "nuevoEstado": "Nuevo estado",
+      "instaladoNota": "Se logra asociando el dispositivo a un vehículo.",
+      "sinDestinos": "Desde este estado no hay transiciones disponibles.",
+      "motivo": "Nota",
+      "motivoAyuda": "Motivo del cambio, número de OT, etc.",
+      "confirmar": "Confirmar cambio"
+    },
+    "eliminar": {
+      "titulo": "Eliminar dispositivo",
+      "descripcion": "El dispositivo se borra del inventario. No se puede deshacer.",
+      "etiquetaTipeo": "Para confirmar, escribí el alias",
+      "confirmar": "Eliminar dispositivo",
+      "cancelar": "Cancelar"
+    }
+  },
+  "dispositivoDetalle": {
+    "cargando": "Cargando el dispositivo…",
+    "noEncontrado": {
+      "titulo": "Dispositivo no encontrado",
+      "descripcion": "Puede que se haya dado de baja o que el enlace ya no sea válido."
+    },
+    "error": {
+      "titulo": "No se pudo cargar el dispositivo",
+      "descripcion": "Volvé a intentarlo en unos segundos."
+    },
+    "sinAcceso": {
+      "descripcion": "Necesitás el permiso {{permiso}} para ver esta pantalla"
+    },
+    "hero": {
+      "imei": "IMEI {{valor}}",
+      "sim": "SIM {{valor}}",
+      "firmware": "Firmware {{valor}}",
+      "asociadoA": "Asociado a",
+      "sinVehiculo": "Sin vehículo asociado"
+    },
+    "acciones": {
+      "editar": "Editar",
+      "masAcciones": "Más acciones",
+      "cambiarEstadoStock": "Cambiar estado de stock",
+      "stockTerminal": "El dispositivo está dado de baja: desde ese estado no hay transiciones de stock disponibles.",
+      "desasociar": "Desasociar del vehículo",
+      "desasociarNoDisponible": "La desasociación se hace desde la ficha del vehículo, en su pestaña Dispositivo GPS.",
+      "reactivar": "Reactivar",
+      "darDeBaja": "Dar de baja",
+      "sinPermiso": "Necesitás el permiso {{permiso}}"
+    },
+    "tabs": {
+      "info": "Info general",
+      "telemetria": "Telemetría",
+      "stock": "Historial de stock",
+      "eventos": "Eventos"
+    },
+    "info": {
+      "titulo": "Datos del dispositivo",
+      "alias": "Alias",
+      "imei": "IMEI",
+      "modelo": "Modelo",
+      "fabricante": "Fabricante",
+      "numeroSerie": "Nº de serie",
+      "firmware": "Firmware",
+      "sim": "SIM",
+      "proveedorSim": "Proveedor de SIM",
+      "estadoStock": "Estado de stock",
+      "estado": "Estado",
+      "ingresoAlStock": "Ingresó al stock",
+      "modificado": "Última modificación",
+      "notas": "Notas operativas",
+      "porUsuario": "{{cuando}} · por {{nombre}}"
+    },
+    "vehiculo": {
+      "titulo": "Vehículo asociado",
+      "patente": "Patente",
+      "instaladoDesde": "Instalado desde",
+      "verFicha": "Ver ficha del vehículo",
+      "vacioTitulo": "Sin vehículo asociado",
+      "vacioDescripcion": "Este dispositivo todavía no está instalado en ningún vehículo. La asociación se hace desde la ficha del vehículo.",
+      "asociar": "Elegir vehículo"
+    },
+    "telemetria": {
+      "sinFuenteTitulo": "Telemetría en vivo no disponible todavía",
+      "sinFuenteDescripcion": "La posición, la velocidad, la ignición y las baterías se componen desde Telemetría, y esa integración todavía no está conectada. No es que este dispositivo no esté transmitiendo."
+    },
+    "eventos": {
+      "sinFuenteTitulo": "Historial de eventos no disponible",
+      "sinFuenteDescripcion": "Los eventos técnicos del dispositivo no tienen fuente: no se guarda el histórico de eventos. No es que este dispositivo no haya generado ninguno."
+    },
+    "estadoStock": {
+      "avisoReparacionInstalado": "El dispositivo está instalado en un vehículo. Para mandarlo a reparación primero hay que desasociarlo."
+    },
+    "baja": {
+      "titulo": "Dar de baja el dispositivo",
+      "descripcion": "El dispositivo deja de aparecer en los listados y pasa a estado \"Dado de baja\". Podés reactivarlo más adelante.",
+      "etiquetaTipeo": "Para confirmar, escribí el alias",
+      "confirmar": "Dar de baja"
+    },
+    "reactivar": {
+      "titulo": "Reactivar el dispositivo",
+      "descripcion": "El dispositivo vuelve al inventario como disponible. No se reinstala en su vehículo anterior: para eso hay que asociarlo de nuevo.",
+      "confirmar": "Reactivar"
+    },
+    "historialStock": {
+      "fecha": "Fecha",
+      "motivo": "Motivo",
+      "usuario": "Usuario",
+      "altaInicial": "Alta en el inventario",
+      "sinMotivo": "—",
+      "sinUsuario": "—",
+      "vacioTitulo": "Sin movimientos registrados",
+      "vacioDescripcion": "Todavía no hay transiciones de estado de stock para este dispositivo.",
+      "errorTitulo": "No se pudo cargar el historial",
+      "transicion": "Cambio de estado",
+      "rango": "Mostrando {{desde}}–{{hasta}} de {{total}} movimientos"
+    }
+  },
+  "filtroAsignacion": {
+    "asignado": "Asignado",
+    "sin_asignar": "Sin asignar"
+  },
+  "dispositivoAlta": {
+    "titulo": "Registrar dispositivo GPS",
+    "subtitulo": "Sumá un equipo al inventario de tu organización.",
+    "imei": "IMEI",
+    "imeiAyuda": "Está impreso en el equipo. Tiene que estar dado de alta en la plataforma.",
+    "alias": "Alias",
+    "aliasAyuda": "Apodo operativo para reconocerlo en los listados.",
+    "numeroSerie": "N.º de serie",
+    "numeroSerieAyuda": "Opcional. No se puede modificar después del alta.",
+    "numeroSim": "N.º de SIM",
+    "notas": "Notas operativas",
+    "guardar": "Registrar dispositivo"
+  },
+  "catalogoDispositivo": {
+    "modelo": "Modelo",
+    "modeloPlaceholder": "Elegí un modelo",
+    "modeloSinOpciones": "Todavía no hay modelos cargados.",
+    "modeloAgregar": "Agregar modelo",
+    "proveedorSim": "Proveedor de SIM",
+    "proveedorSimPlaceholder": "Elegí un proveedor",
+    "proveedorSimSinOpciones": "Todavía no hay proveedores cargados.",
+    "proveedorSimAgregar": "Agregar proveedor",
+    "opcional": "Opcional",
+    "cargando": "Cargando opciones…",
+    "error": "No se pudieron cargar las opciones.",
+    "reintentar": "Reintentar",
+    "nuevoModeloTitulo": "Nuevo modelo de dispositivo",
+    "nuevoModeloDescripcion": "Queda disponible solo para tu organización.",
+    "nuevoProveedorTitulo": "Nuevo proveedor de SIM",
+    "nuevoProveedorDescripcion": "Queda disponible solo para tu organización.",
+    "nombre": "Nombre",
+    "nombreRequerido": "El nombre es obligatorio.",
+    "fabricante": "Fabricante",
+    "fabricanteAyuda": "Opcional.",
+    "guardar": "Agregar",
+    "guardando": "Agregando…",
+    "cancelar": "Cancelar",
+    "sinPermisoCrear": "Necesitás el permiso {{permiso}} para agregar opciones al catálogo.",
+    "noSeEdita": "Las opciones del catálogo no se pueden editar ni eliminar todavía. Revisá el nombre antes de agregarla.",
+    "etiquetaPropia": "{{nombre}} · de tu organización"
+  },
+  "asignacionDispositivo": {
+    "titulo": "Asociar dispositivo GPS",
+    "descripcion": "Elegí un equipo en stock para instalar en este vehículo.",
+    "dispositivo": "Dispositivo",
+    "dispositivoPlaceholder": "Elegí un dispositivo",
+    "sinDisponibles": "No hay dispositivos en stock para asociar.",
+    "sinDisponiblesCta": "Ir al inventario",
+    "reasignaAviso": "Este vehículo ya tiene un GPS instalado. Al confirmar, el actual se desasocia y vuelve al stock.",
+    "asignar": "Asociar dispositivo",
+    "asignando": "Asociando…",
+    "exitoAsignar": "Dispositivo asociado al vehículo.",
+    "desasignarTitulo": "Desasociar dispositivo",
+    "desasignarDescripcion": "El equipo vuelve al stock y deja de reportar posiciones para este vehículo.",
+    "desasignar": "Desasociar",
+    "desasignando": "Desasociando…",
+    "exitoDesasignar": "Dispositivo desasociado.",
+    "motivo": "Motivo",
+    "motivoAyuda": "Queda registrado en el historial de la asociación.",
+    "cancelar": "Cancelar",
+    "sinPermiso": "Necesitás el permiso {{permiso}} para asociar dispositivos.",
+    "buscar": "Buscar dispositivo",
+    "buscarPlaceholder": "Buscar por alias, IMEI o modelo",
+    "limpiarBusqueda": "Limpiar la búsqueda",
+    "sinResultados": "Ningún equipo en stock coincide con lo que buscaste.",
+    "cargando": "Cargando equipos en stock…",
+    "sinPermisoLectura": "Necesitás el permiso {{permiso}} para ver el inventario de dispositivos.",
+    "soloPrimeros": "Se listan los primeros {{cantidad}} de {{total}} equipos en stock. Si el que buscás no aparece, buscalo desde el inventario de dispositivos.",
+    "actualizar": "Actualizar la lista",
+    "errorCoordinacion": "No se guardó nada: el dispositivo NO quedó instalado y el vehículo no va a reportar posiciones. Podés reintentar con los mismos datos.",
+    "errorConflicto": "El estado cambió mientras completabas la operación. Actualizá y volvé a elegir: reintentar lo mismo va a fallar igual.",
+    "errorNoEncontrado": "Puede que el vehículo, el equipo o la asociación ya no existan. Actualizá para ver el estado real.",
+    "errorGenerico": "No se pudo completar la operación. Actualizá para ver cómo quedó antes de volver a intentar."
+  },
+  "motivoCierreAsignacion": {
+    "reasignacion": "Reasignación",
+    "reparacion": "Reparación",
+    "baja": "Baja",
+    "otro": "Otro"
   }
 }

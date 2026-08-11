@@ -85,20 +85,48 @@
     },
     "logos": {
       "label": "They trust us",
-      "items": ["FleetCorp", "AutoSur", "TallerPro", "SeguroTotal", "TransLogic", "MobiDrive"]
+      "items": [
+        "FleetCorp",
+        "AutoSur",
+        "TallerPro",
+        "SeguroTotal",
+        "TransLogic",
+        "MobiDrive"
+      ]
     },
     "modules": {
       "title": "Everything your company needs",
       "subtitle": "Specialized modules for every vertical in the vehicle ecosystem. Activate only the ones you need.",
       "cta": "Register my company",
       "items": {
-        "flota": { "title": "Fleet Management", "desc": "Complete vehicle, driver, route and preventive maintenance management." },
-        "concesionaria": { "title": "Dealership", "desc": "Stock, sales, CRM and after-sales integrated in one platform." },
-        "taller": { "title": "Workshop", "desc": "Work orders, parts, online appointments and automated invoicing." },
-        "seguros": { "title": "Insurance", "desc": "Policies, claims, inspections and comprehensive coverage tracking." },
-        "alquileres": { "title": "Rentals", "desc": "Availability, contracts, returns and real-time control." },
-        "movilidad": { "title": "Mobility", "desc": "Trips, drivers, passengers — Uber-like management for your operation." },
-        "delivery": { "title": "Delivery", "desc": "Deliveries, optimized routes and live tracking for last mile." }
+        "flota": {
+          "title": "Fleet Management",
+          "desc": "Complete vehicle, driver, route and preventive maintenance management."
+        },
+        "concesionaria": {
+          "title": "Dealership",
+          "desc": "Stock, sales, CRM and after-sales integrated in one platform."
+        },
+        "taller": {
+          "title": "Workshop",
+          "desc": "Work orders, parts, online appointments and automated invoicing."
+        },
+        "seguros": {
+          "title": "Insurance",
+          "desc": "Policies, claims, inspections and comprehensive coverage tracking."
+        },
+        "alquileres": {
+          "title": "Rentals",
+          "desc": "Availability, contracts, returns and real-time control."
+        },
+        "movilidad": {
+          "title": "Mobility",
+          "desc": "Trips, drivers, passengers — Uber-like management for your operation."
+        },
+        "delivery": {
+          "title": "Delivery",
+          "desc": "Deliveries, optimized routes and live tracking for last mile."
+        }
       }
     },
     "b2c": {
@@ -114,19 +142,40 @@
         "batteryLabel": "GPS status"
       },
       "features": {
-        "gps": { "title": "Real-time GPS tracking", "desc": "Exact location of your vehicle, updated every 10 seconds." },
-        "alerts": { "title": "Smart alerts", "desc": "Movement, speed, geofences — instant push notifications." },
-        "history": { "title": "Trip history", "desc": "Review all trips and routes with stop and speed details." },
-        "status": { "title": "Vehicle status", "desc": "Mileage, engine, battery and diagnostics from the app." }
+        "gps": {
+          "title": "Real-time GPS tracking",
+          "desc": "Exact location of your vehicle, updated every 10 seconds."
+        },
+        "alerts": {
+          "title": "Smart alerts",
+          "desc": "Movement, speed, geofences — instant push notifications."
+        },
+        "history": {
+          "title": "Trip history",
+          "desc": "Review all trips and routes with stop and speed details."
+        },
+        "status": {
+          "title": "Vehicle status",
+          "desc": "Mileage, engine, battery and diagnostics from the app."
+        }
       }
     },
     "steps": {
       "title": "Get started in 3 steps",
       "subtitle": "From zero to live tracking in less than 5 minutes.",
       "items": [
-        { "title": "Sign up", "desc": "Create your account in less than 2 minutes. No credit card required." },
-        { "title": "Connect", "desc": "Add your vehicles and GPS devices to the platform." },
-        { "title": "Monitor", "desc": "Monitor everything from a single platform, in real time." }
+        {
+          "title": "Sign up",
+          "desc": "Create your account in less than 2 minutes. No credit card required."
+        },
+        {
+          "title": "Connect",
+          "desc": "Add your vehicles and GPS devices to the platform."
+        },
+        {
+          "title": "Monitor",
+          "desc": "Monitor everything from a single platform, in real time."
+        }
       ]
     },
     "pricing": {
@@ -139,21 +188,38 @@
           "name": "Personal",
           "price": "Free",
           "desc": "Ideal for tracking your personal vehicle.",
-          "features": ["1 vehicle", "Real-time GPS tracking", "Basic alerts", "30-day history"],
+          "features": [
+            "1 vehicle",
+            "Real-time GPS tracking",
+            "Basic alerts",
+            "30-day history"
+          ],
           "cta": "Get started"
         },
         "profesional": {
           "name": "Professional",
           "price": "$29.990",
           "desc": "For small fleets and growing businesses.",
-          "features": ["Up to 10 vehicles", "2 modules included", "Advanced reports", "Unlimited history", "5 users"],
+          "features": [
+            "Up to 10 vehicles",
+            "2 modules included",
+            "Advanced reports",
+            "Unlimited history",
+            "5 users"
+          ],
           "cta": "Get started"
         },
         "enterprise": {
           "name": "Enterprise",
           "price": "Custom",
           "desc": "For large operations with specific needs.",
-          "features": ["Unlimited vehicles", "All modules", "API & integrations", "Dedicated support", "Guaranteed SLA"],
+          "features": [
+            "Unlimited vehicles",
+            "All modules",
+            "API & integrations",
+            "Dedicated support",
+            "Guaranteed SLA"
+          ],
           "cta": "Contact sales"
         }
       }
@@ -161,9 +227,21 @@
     "testimonials": {
       "title": "What our users say",
       "items": [
-        { "quote": "Since we implemented ORBI, we reduced fuel costs by 30%. Real-time visibility changed our operation.", "name": "Carlos Mendez", "role": "Dir. of Operations, TransLogic" },
-        { "quote": "Claims management improved drastically. We have all vehicle information instantly, without calling the insured.", "name": "Laura Peralta", "role": "Insurance Manager, AsegurAR" },
-        { "quote": "I control my car from my phone. It notifies me if someone moves it. Simple, fast and gives me peace of mind every day.", "name": "Martin Garcia", "role": "Individual user" }
+        {
+          "quote": "Since we implemented ORBI, we reduced fuel costs by 30%. Real-time visibility changed our operation.",
+          "name": "Carlos Mendez",
+          "role": "Dir. of Operations, TransLogic"
+        },
+        {
+          "quote": "Claims management improved drastically. We have all vehicle information instantly, without calling the insured.",
+          "name": "Laura Peralta",
+          "role": "Insurance Manager, AsegurAR"
+        },
+        {
+          "quote": "I control my car from my phone. It notifies me if someone moves it. Simple, fast and gives me peace of mind every day.",
+          "name": "Martin Garcia",
+          "role": "Individual user"
+        }
       ]
     },
     "cta": {
@@ -175,9 +253,26 @@
     "footer": {
       "brandDesc": "Comprehensive vehicle management, telemetry and GPS tracking platform for businesses and individuals.",
       "copyright": "© 2026 ORBI. All rights reserved.",
-      "product": { "title": "Product", "features": "Features", "plans": "Plans", "integrations": "Integrations", "api": "API" },
-      "company": { "title": "Company", "about": "About us", "blog": "Blog", "contact": "Contact", "careers": "Careers" },
-      "legal": { "title": "Legal", "terms": "Terms of service", "privacy": "Privacy", "cookies": "Cookies" }
+      "product": {
+        "title": "Product",
+        "features": "Features",
+        "plans": "Plans",
+        "integrations": "Integrations",
+        "api": "API"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About us",
+        "blog": "Blog",
+        "contact": "Contact",
+        "careers": "Careers"
+      },
+      "legal": {
+        "title": "Legal",
+        "terms": "Terms of service",
+        "privacy": "Privacy",
+        "cookies": "Cookies"
+      }
     }
   },
   "auth": {
@@ -195,7 +290,8 @@
       "googleUnavailable": "Google sign-in is not enabled in this slice yet.",
       "noAccount": "Don't have an account?",
       "createAccount": "Create account",
-      "registerCompany": "Register a company"
+      "registerCompany": "Register a company",
+      "googleLoading": "Connecting to Google..."
     },
     "passwordRecovery": {
       "eyebrow": "Recovery",
@@ -425,6 +521,22 @@
         "title": "You've joined the organization!",
         "subtitle": "You can now access it from the organization selector."
       }
+    },
+    "googleCompletion": {
+      "title": "Complete your registration",
+      "subtitle": "We just need a few more details to create your account.",
+      "prefillInfo": "This data comes from your Google account:",
+      "docStep": {
+        "title": "Your ID document",
+        "subtitle": "We need to verify your identity to protect your account."
+      },
+      "passwordStep": {
+        "title": "Create your password",
+        "subtitle": "Choose a strong password. You will need it if you want to sign in without Google."
+      },
+      "submit": "Create my account",
+      "back": "Back",
+      "continue": "Continue"
     }
   },
   "validation": {
@@ -487,7 +599,13 @@
     },
     "organizacion_id": {
       "required": "Organization is required."
-    }
+    },
+    "credential": {
+      "required": "The Google credential is required."
+    },
+    "required": "This field is required",
+    "yearMin": "The year must be later than 1990",
+    "yearMax": "The year cannot be later than 2030"
   },
   "errors": {
     "unexpected": "An unexpected error occurred.",
@@ -504,19 +622,55 @@
     },
     "flota": {
       "vehiculo": {
-        "baja_con_asignaciones_activas": "The vehicle cannot be deleted because it has a GPS device or drivers assigned. Unassign those links first."
+        "baja_con_asignaciones_activas": "The vehicle cannot be deleted because it has a GPS device or drivers assigned. Unassign those links first.",
+        "no_existe": "The vehicle does not exist or does not belong to your organization.",
+        "patente_duplicada": "There is already a vehicle with plate {{patente}} in your organization.",
+        "canonico_no_creable": "The vehicle could not be registered in the platform. Try again in a few minutes.",
+        "datos_canonicos_invalidos": "Some of the vehicle data is not valid. Review it and try again.",
+        "conflicto_canonico": "The vehicle data conflicts with a record that already exists in the platform.",
+        "transicion_invalida": "It is not possible to go from {{estadoActual}} to {{estadoDestino}}.",
+        "ya_tiene_dispositivo": "This vehicle already has a GPS device linked. Unlink it before installing another one."
       },
       "modulo": {
         "no_activo": "Your organization does not have the Fleet module active."
+      },
+      "dispositivo": {
+        "no_existe": "The device does not exist or does not belong to your organization.",
+        "imei_duplicado": "There is already an active device with IMEI {{imei}} in your organization.",
+        "alias_duplicado": "There is already a device with alias {{alias}} in your organization.",
+        "canonico_no_existe": "The device was not found in the platform catalog.",
+        "transicion_stock_invalida": "It is not possible to go from {{estadoActual}} to {{estadoDestino}}.",
+        "no_disponible": "The device is not available to assign: its status is {{estadoActual}}.",
+        "baja_con_asignacion_activa": "The device cannot be decommissioned because it is installed in a vehicle. Unassign it first.",
+        "alta_modo_b_no_soportado": "That IMEI is not registered in the platform yet, and new units cannot be created from Fleet for now.",
+        "modelo_no_existe": "The selected model is no longer available. Refresh the list and pick another one.",
+        "proveedor_sim_no_existe": "The selected SIM provider is no longer available. Refresh the list and pick another one.",
+        "reparacion_con_asignacion_activa": "The device is installed in a vehicle. Unlink it before sending it for repair.",
+        "canonico_no_coordinable": "The platform could not be coordinated with. Nothing was saved: please try again."
+      },
+      "telemetria": {
+        "no_disponible": "This information does not have an available data source yet."
+      },
+      "recurso": {
+        "sin_permiso": "You do not have the {{permiso}} permission for this action.",
+        "organizacion_invalida": "That item does not belong to the resource you are viewing.",
+        "tiene_dependencias": "It cannot be deleted: there are {{recurso}} depending on this record. Unlink them first."
+      },
+      "asignacion": {
+        "no_existe": "That link does not exist or is already closed.",
+        "canonico_inactivo": "The vehicle or the device is inactive in the platform. Retrying will not fix it."
+      },
+      "catalogo": {
+        "nombre_duplicado": "Your organization already has an option named {{nombre}}."
       }
     },
-      "auth": {
-        "credenciales_invalidas": "Incorrect email or password.",
-        "cuenta_bloqueada": "Your account is temporarily locked. Try again later.",
-        "cuenta_deshabilitada": "Your account has been disabled. Contact your organization administrator.",
-        "rate_limit_exceeded": "Too many attempts. Wait {{retry_after_seconds}} seconds before retrying.",
-        "email_no_verificado": "You must verify your email before signing in.",
-        "token_expirado": "Your session has expired. Sign in again.",
+    "auth": {
+      "credenciales_invalidas": "Incorrect email or password.",
+      "cuenta_bloqueada": "Your account is temporarily locked. Try again later.",
+      "cuenta_deshabilitada": "Your account has been disabled. Contact your organization administrator.",
+      "rate_limit_exceeded": "Too many attempts. Wait {{retry_after_seconds}} seconds before retrying.",
+      "email_no_verificado": "You must verify your email before signing in.",
+      "token_expirado": "Your session has expired. Sign in again.",
       "token_invalido": "Your session is no longer valid.",
       "token_requerido": "A refresh token is required to continue.",
       "token_reutilizado": "The session was invalidated for security reasons.",
@@ -585,6 +739,81 @@
       "title": "Dashboard",
       "contextPersonal": "Personal context",
       "contextEmpresa": "Company context: {{org}}"
+    }
+  },
+  "shell": {
+    "nav": {
+      "modulos": "Modules",
+      "sistema": "System",
+      "dashboard": "Dashboard",
+      "flota": "Telemetry and fleet",
+      "flotaMapa": "Live map",
+      "flotaVehiculos": "Vehicles",
+      "flotaDispositivos": "Devices",
+      "flotaConductores": "Drivers",
+      "flotaGeozonas": "Geofences",
+      "configuracion": "Settings",
+      "confEmpresa": "Company",
+      "confModulos": "Modules",
+      "confFacturacion": "Billing",
+      "confNotificaciones": "Notifications",
+      "confIntegraciones": "Integrations",
+      "confSeguridad": "Security",
+      "confApariencia": "Appearance",
+      "confRoles": "Roles and permissions",
+      "usuarios": "Users"
+    },
+    "sidebar": {
+      "collapse": "Collapse menu",
+      "expand": "Expand menu"
+    },
+    "orgSwitcher": {
+      "changeLabel": "Switch workspace",
+      "changeOrg": "Switch organization",
+      "personal": "Personal account",
+      "empresa": "Company"
+    },
+    "header": {
+      "notifications": "Notifications",
+      "changeContext": "Switch context",
+      "logout": "Log out"
+    },
+    "dashboard": {
+      "title": "Telemetry and fleet",
+      "addVehicle": "Add vehicle",
+      "mapPlaceholder": "Fleet in real time",
+      "mapEmpty": "No positions available",
+      "alertsTitle": "Recent alerts",
+      "emptyAlerts": "No active alerts",
+      "vehiclesTitle": "Vehicles",
+      "emptyVehicles": "No vehicles loaded",
+      "kpi": {
+        "totalVehiculos": "Total vehicles",
+        "enLinea": "Online",
+        "alertasAbiertas": "Open alerts",
+        "conDispositivo": "With GPS device",
+        "conductoresActivos": "Active drivers",
+        "licenciasPorVencer": "Licenses expiring soon",
+        "geozonas": "Active geofences",
+        "mantenimientos": "Pending maintenance"
+      },
+      "onboarding": {
+        "kicker": "Initial setup",
+        "title": "Set up your fleet in 3 steps",
+        "subtitle": "Create your first vehicle, link a GPS device and assign a driver. Steps 2 and 3 are optional — you can complete them later from the Fleet menu.",
+        "step1Label": "First vehicle",
+        "step2Label": "GPS device",
+        "step3Label": "Driver",
+        "step1Desc": "Basic data for your first vehicle. Once created you can link a device and a driver.",
+        "step2Desc": "Link a GPS device to the vehicle to start tracking it. If you do not have one yet, skip this step.",
+        "step3Desc": "Assign a driver to the vehicle. You can load their data or invite them by email.",
+        "later": "Not now",
+        "start": "Start setup →"
+      }
+    },
+    "placeholder": {
+      "title": "Section under construction",
+      "comingSoon": "Coming soon."
     }
   }
 }

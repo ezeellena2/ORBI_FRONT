@@ -21,7 +21,13 @@ export function RequiereModulo({
   modulo: string
   children: ReactNode
 }) {
-  const modulos = useSessionStore((s) => s.organizacionActiva?.modulos ?? [])
+  // El `?? []` va AFUERA del selector, igual que en `RequierePermiso` y `usePermisos`. Zustand 5
+  // corre el selector dentro de `useSyncExternalStore`: con el default adentro, cada lectura
+  // construye un array NUEVO, React ve un snapshot distinto por render y entra en "Maximum update
+  // depth". Se dispara solo sin organizacion activa — que es justo la ruta degradada, la que menos
+  // se prueba y la unica en la que este guard importa.
+  const modulosDeLaOrg = useSessionStore((s) => s.organizacionActiva?.modulos)
+  const modulos = modulosDeLaOrg ?? []
 
   if (!modulos.includes(modulo)) {
     return <Navigate to="/app" replace />

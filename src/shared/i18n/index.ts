@@ -38,6 +38,20 @@ void i18n
     nonExplicitSupportedLngs: true,
     defaultNS: 'common',
     ns: ['common', 'flota'],
+    // `fallbackNS` NO es cosmetico: sin el, NINGUN `errors.*` se resuelve dentro de un modulo.
+    // react-i18next fija la `t` de `useTranslation(['flota','common'])` al PRIMER namespace y nada
+    // mas (`getFixedT(lng, nsMode === 'fallback' ? namespaces : namespaces[0])`, useTranslation.js).
+    // Como el catalogo de errores (28 `errors.flota.*` + los `errors.HTTP_*` + `errors.network` +
+    // `errors.unexpected`) vive SOLO en `common.json`, `resolveApiErrorMessage` fallaba sus 3
+    // primeros intentos y caia a `detail` — que el contrato define como fallback textual, NO como
+    // copy de UX (`errores.md` §Contrato de error). Sin `detail` se pintaba la cadena literal
+    // `errors.unexpected`, y una caida de red mostraba "Network Error" en ingles crudo.
+    //
+    // Se arregla aca y no cambiando el namespace de cada call site: los `validation.*` viven en los
+    // DOS archivos con contenidos distintos y `resolveApiFieldErrors` DEPENDE de la version de
+    // `flota`. Con fallback el orden queda bien (flota primero, common despues) y se verifico que
+    // no hay una sola clave homonima con texto distinto entre los 2 namespaces.
+    fallbackNS: 'common',
     interpolation: {
       escapeValue: false,
     },

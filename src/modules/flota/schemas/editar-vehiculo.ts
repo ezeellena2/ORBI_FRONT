@@ -87,11 +87,16 @@ export function aActualizarVehiculoRequest(
  * mensaje.
  */
 export function camposQueNoSePuedenBorrar(
-  valores: EditarVehiculoFormulario,
+  // Parcial: la fuente es `useWatch`, que tipa los campos como opcionales.
+  valores: Partial<EditarVehiculoFormulario>,
   actual: { alias?: string | null; kilometrajeActual?: number | null; notasOperativas?: string | null },
 ): Array<'alias' | 'kilometrajeActual' | 'notasOperativas'> {
-  const vaciado = (nuevo: string, previo: unknown) =>
-    nuevo.trim().length === 0 && previo !== null && previo !== undefined && previo !== ''
+  const vaciado = (nuevo: string | undefined, previo: unknown) =>
+    nuevo !== undefined &&
+    nuevo.trim().length === 0 &&
+    previo !== null &&
+    previo !== undefined &&
+    previo !== ''
 
   const campos: Array<'alias' | 'kilometrajeActual' | 'notasOperativas'> = []
   if (vaciado(valores.alias, actual.alias)) campos.push('alias')

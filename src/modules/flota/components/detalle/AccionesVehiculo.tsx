@@ -20,10 +20,12 @@ export function AccionesVehiculo({
   vehiculoFlotaId,
   onEditar,
   onDarDeBaja,
+  onCambiarDispositivo,
 }: {
   vehiculoFlotaId: string
   onEditar: () => void
   onDarDeBaja: () => void
+  onCambiarDispositivo: () => void
 }) {
   const { t } = useTranslation(['flota', 'common'])
   const { tienePermiso } = usePermisos()
@@ -31,15 +33,21 @@ export function AccionesVehiculo({
   const motivoSinPermiso = (permiso: string) => t('flota:detalle.acciones.sinPermiso', { permiso })
   const motivoProximoSlice = t('flota:detalle.acciones.llegaEnOtroSlice')
 
+  // "Cambiar dispositivo" dejó de estar apagada: abre el MISMO modal que el tab GPS (asociar y
+  // cambiar son la misma operación — el `POST` cierra la anterior). Sin permiso queda deshabilitada
+  // con su motivo, que es el comportamiento del verbo `asignar-*`, no oculta.
+  const puedeAsignarDispositivo = tienePermiso('flota.vehiculos.asignar-dispositivo')
+
   const items: ItemMenuAcciones[] = [
     {
       clave: 'dispositivo',
       etiqueta: t('flota:detalle.acciones.cambiarDispositivo'),
       icono: Smartphone,
-      deshabilitado: true,
-      motivo: tienePermiso('flota.vehiculos.asignar-dispositivo')
-        ? motivoProximoSlice
+      deshabilitado: !puedeAsignarDispositivo,
+      motivo: puedeAsignarDispositivo
+        ? undefined
         : motivoSinPermiso('flota.vehiculos.asignar-dispositivo'),
+      onSelect: onCambiarDispositivo,
     },
     {
       clave: 'conductores',

@@ -1,11 +1,12 @@
 /**
- * Espejo del contrato de Flota — slice-02 (vehiculos).
+ * Espejo del contrato de Flota — slice-02 (vehiculos) + slice-03 (dispositivos GPS, asignacion
+ * vehiculo<->dispositivo y catalogos growables).
  *
- * FUENTE UNICA: `TracAutoV2/src/Flota/docs/00-contrato/dtos.ts`. Redefinir un shape aca esta
- * prohibido: si falta un campo, se corrige el contrato del backend, no este archivo.
+ * FUENTE UNICA: `TracAutoV2/src/Flota/docs/00-contrato/dtos.ts` + `api.md`. Redefinir un shape aca
+ * esta prohibido: si falta un campo, se corrige el contrato del backend, no este archivo.
  *
- * Este archivo solo espeja lo que USA el slice-02. Los shapes de conductores, dispositivos,
- * geozonas, problemas, integraciones y mapa quedan fuera a proposito: llegan con sus slices.
+ * Este archivo solo espeja lo que USAN los slices construidos. Los shapes de conductores, geozonas,
+ * problemas, integraciones y mapa quedan fuera a proposito: llegan con sus slices.
  *
  * ─────────────────────────────────────────────────────────────────────────────────────────────
  * DRIFT CONTRATO ↔ BACKEND REAL (verificado contra
@@ -80,6 +81,8 @@ export type EstadoConexion = 'en_linea' | 'desconectado' | 'incompleto' | 'sin_d
  */
 export type EstadoOperativoVehiculo = 'operativo' | 'fuera_de_servicio' | 'baja_operativa'
 
+/** Los vocabularios de dispositivos (`EstadoStockDispositivo`, `FiltroAsignacionDispositivo`) viven en §5. */
+
 export type RolAsignacionConductor = 'principal' | 'secundario'
 
 /* ============================================================================
@@ -88,7 +91,10 @@ export type RolAsignacionConductor = 'principal' | 'secundario'
 
 export interface VehiculoDispositivoAsignadoDto {
   dispositivoFlotaId: string
-  alias: string // alias operativo
+  // DRIFT: el backend lo declara `string` no-nulable, pero la COLUMNA es `alias text NULL`
+  // (D-S3-12) y el DTO no lo coalesce. Se espeja como nullable para que la UI no tenga que confiar
+  // en una no-nulabilidad que la base no garantiza: el fallback es el IMEI, que siempre esta.
+  alias: string | null // alias operativo
   imei: string // proyeccion local del canonico
 }
 
@@ -115,7 +121,20 @@ export interface VehiculoListItemDto {
   modelo: string | null
   anio: number | null
   tipo: string | null // codigo del catalogo canonico de tipos, snake_case
-  dispositivo: VehiculoDispositivoAsignadoDto | null // null si sin dispositivo asignado
+  /**
+   * ⚠️ HOY VIENE SIEMPRE `null`, TAMBIEN CON UN GPS INSTALADO — no es "null si no tiene".
+   *
+   * `VehiculoFlotaService.MapearItem` lo hardcodea (`Dispositivo = null`) y `MapearDetalle` se apoya
+   * en ese mismo mapper, asi que el detalle lo hereda; `DispositivoAsignadoDto` no se construye en
+   * NINGUN punto de la solucion. Componer el GPS instalado del lado del vehiculo es alcance de
+   * slice-05, igual que `conexion` / `ultimaSenal` — el backend lo declara asi en el propio mapper.
+   *
+   * Consecuencia para la UI, y por eso esta escrito aca y no en un comentario suelto: toda rama
+   * `vehiculo.dispositivo !== null` es CODIGO MUERTO hasta slice-05. El tab "Dispositivo GPS" del
+   * vehiculo se queda en su vacio incluso justo despues de asignar con exito (la relacion SI se
+   * persiste y SI se ve del lado del dispositivo). No es un bug del front: el DTO viene vacio.
+   */
+  dispositivo: VehiculoDispositivoAsignadoDto | null
   conductorPrincipal: VehiculoConductorPrincipalDto | null // null si sin conductor
   conductoresCount: number // total asignados (incluye principal)
   estadoOperativo: EstadoOperativoVehiculo
@@ -304,4 +323,330 @@ export interface VersionCaminoCompletoDto {
   precioReferencia: number | null
   moneda: string | null
   etiqueta: string
+}
+
+/* ============================================================================
+ * 5. DISPOSITIVOS GPS — slice-03
+ *
+ * Espejo de `dtos.ts` §5, RECONCILIADO contra el contrato del 2026-08-11 (D-S3-5 … D-S3-35) y
+ * contra `Flota.Application/DTOs/DispositivoDtos.cs`, que es el codigo que corre.
+ *
+ * Lo que NO se espeja, y por que — ninguna de estas ausencias es un olvido:
+ *  - `DispositivoTelemetriaSnapshotDto` (`GET .../telemetria`): la fila existe en `api.md` pero el
+ *    endpoint NO esta implementado (`ESTADO.md` §"Superficie sin implementar": 12 filas, 11
+ *    implementadas). Es de slice-05. Un tipo para una llamada que hoy da 404 de routing es ruido.
+ *  - `ConfiguracionDispositivoDto` / `ActualizarConfiguracionDispositivoRequest`: sus 2 endpoints
+ *    fueron DEROGADOS de `api.md` (D-S3-22). No son "todavia no implementados": no estan
+ *    contratados, y `MatrizEndpointPermisoTests` ancla su ausencia.
+ *  - `QrInstalacionDto`: NUNCA existio. Su endpoint tambien se derogo (D-S3-23).
+ *  - `ComandoDispositivoRequest`: el endpoint esta BLOQUEADO (B-12) y responde siempre 500
+ *    `flota.telemetria.no_disponible`.
+ *  - `EventoDispositivoDto`: superficie ⚠ DEGRADADA (A-1), siempre 500 con el mismo code.
+ * ========================================================================== */
+
+/**
+ * Catalogo `flota.estados_stock_dispositivo_flota` (`datos.md` §3.3). Es el estado de INVENTARIO
+ * del dispositivo, NO su conexion: un dispositivo `en_stock` nunca emitio y su `conexion` vale
+ * `sin_dato`. Lifecycle: `en_stock -> instalado`; `instalado`/`en_stock` -> `en_reparacion` ->
+ * `en_stock`; cualquiera -> `dado_de_baja`, que es **TERMINAL** (no vuelve a `instalado`).
+ * `instalado` se alcanza SOLO via asignacion a un vehiculo, nunca por cambio de stock directo.
+ */
+export type EstadoStockDispositivo = 'en_stock' | 'instalado' | 'en_reparacion' | 'dado_de_baja'
+
+/**
+ * Filtro `asignacion` de `GET /api/flota/dispositivos` (D-C8). `sin_asignar` NO es un estado de
+ * conexion: se deriva de `vehiculoInstalado === null`. `conexion` y `asignacion` son ortogonales.
+ */
+export type FiltroAsignacionDispositivo = 'asignado' | 'sin_asignar'
+
+export interface DispositivoVehiculoInstaladoDto {
+  vehiculoFlotaId: string
+  // DRIFT: `dtos.ts` la declara no-nulable; el backend la sirve `string?` porque sale de la
+  // proyeccion canonica del vehiculo, que puede no estar vigente. Mismo criterio que §3.
+  patente: string | null
+}
+
+export interface DispositivoListItemDto {
+  id: string // flota.dispositivos_flota.id — el `dispositivoId` de la API
+  // D-S3-12: NULL si la fila no esta sincronizada con el canonico (ddl.sql §2.3). Era `string`.
+  dispositivoCanonicoId: string | null
+  // D-S3-12 + D-S3-34: `alias text NULL` y SIN indice unico. El comentario "unico en la org" que
+  // estaba aca era falso: hoy dos dispositivos con el mismo alias dan 201 los dos. La unicidad es
+  // la decision abierta B-15 del PO; hasta que se cierre, `flota.dispositivo.alias_duplicado` NO
+  // TIENE EMISOR y la UI no debe prometerla.
+  alias: string | null
+  imei: string // columna PROPIA de Flota, NO proyeccion canonica (datos.md §6.3)
+  // B-18: `modelo` dejo de ser texto libre. Es FK al catalogo growable
+  // `flota.modelos_dispositivo_flota`; el DTO expone id + nombre denormalizado.
+  modeloId: string | null
+  modeloNombre: string | null
+  estadoOperativo: EstadoStockDispositivo // el estado de STOCK (el nombre del campo es del contrato)
+  vehiculoInstalado: DispositivoVehiculoInstaladoDto | null // null si no esta instalado
+  // Estado de CONEXION compuesto desde Telemetria. Partial-data (D-C1 a): `sin_dato` cuando
+  // Telemetria no responde, sin flag nuevo en el DTO. NO se persiste en Flota (DA-DL-02).
+  conexion: EstadoConexion
+  // D-S3-27: NO se persiste (la columna se borro con migracion porque no tenia ningun escritor).
+  // Se compone al LEER desde Telemetria, que llega en slice-05: hasta entonces viaja SIEMPRE `null`
+  // y eso ES el comportamiento contratado (200 partial-data), no un bug.
+  ultimaSenal: string | null
+  // `fechaAltaOperativa` NO esta aca a proposito (D-S3-26): en el listado seria un join por pagina.
+  // Vive solo en `DispositivoDetalleDto`.
+  activo: boolean
+}
+
+export interface DispositivoAsignacionHistoricaDto {
+  vehiculoFlotaId: string
+  // DRIFT: `dtos.ts` la declara no-nulable; el backend la sirve `string?`
+  // (`AsignacionHistoricaDispositivoDto(Guid, string? Patente, …)`) porque sale de la proyeccion
+  // canonica del vehiculo, que puede no estar vigente. Mismo caso que `DispositivoVehiculoInstalado`
+  // §, que si tenia la nota. Quien construya la tabla de historial de asignaciones: `patente ?? id`,
+  // nunca `{patente}` crudo.
+  patente: string | null
+  fechaAsignacion: string
+  fechaDesasignacion: string | null // null = asignacion VIGENTE
+}
+
+export interface DispositivoDetalleDto extends DispositivoListItemDto {
+  // D-S3-25: se DERIVA de `modelos_dispositivo_flota.fabricante` con el mismo join del que sale
+  // `modeloNombre`. Dejo de ser proyeccion canonica (eran dos verdades del mismo dato). `null`
+  // cuando el alta no eligio modelo (D-S3-5) o cuando la fila del catalogo no declara fabricante.
+  fabricante: string | null
+  // D-S3-24: columna PROPIA `dispositivos_flota.numero_serie`, capturada en el alta. Dejo de ser
+  // proyeccion canonica: el canonico NO tiene esa columna, asi que proyectarla contrataba un `null`
+  // permanente.
+  numeroSerie: string | null
+  // D-S3-26: "ingreso al stock", repuesto desde la transicion INICIAL de stock. SOLO en el detalle.
+  // `null` unicamente si la fila no tiene transicion inicial (sembrada fuera de la API).
+  // NO es `fechaCreacion`: con alta -> baja -> alta las dos fechas divergen.
+  fechaAltaOperativa: string | null
+  // Operativos de la SIM. B-18: `proveedorSim` es FK al catalogo `flota.proveedores_sim_flota`,
+  // expuesto como id + nombre denormalizado.
+  numeroSim: string | null
+  proveedorSimId: string | null
+  proveedorSimNombre: string | null
+  // READ-ONLY en la API: ningun Request la escribe (OTA/firmware es fase 2). D-S3-35: es una columna
+  // persistida SIN NINGUN ESCRITOR — hoy vale `null` siempre. Su conservacion es la decision abierta
+  // B-16 del PO.
+  firmwareVersion: string | null
+  // `costoAdquisicionUsd` y `ubicacionDeposito` SE BORRARON del contrato (D-S3-12): no existen las
+  // columnas ni en `datos.md` §3.3 ni en `ddl.sql` §2.3. Eran escribibles en el POST y el PATCH y
+  // System.Text.Json los DESCARTABA en silencio — el cliente mandaba, recibia 200 y el dato se
+  // perdia sin un solo error. Si el negocio los quiere, es migracion + columnas, no campo de DTO.
+  notasOperativas: string | null
+  historialAsignaciones: DispositivoAsignacionHistoricaDto[]
+  fechaCreacion: string
+  fechaActualizacion: string
+  creadoPorUsuarioId: string | null
+  modificadoPorUsuarioId: string | null
+  creadoPorNombre: string | null // proyeccion usuario->persona
+  modificadoPorNombre: string | null // idem
+}
+
+/**
+ * POST /api/flota/dispositivos -> 201 `DispositivoDetalleDto`.
+ *
+ * SOLO MODO A (IMEI que ya existe en el canonico). `dispositivoNuevo` (Modo B) NO se espeja aunque
+ * `dtos.ts` lo declare: `plataforma_canonica.dispositivos` exige un `traccar_device_id` que NADA en
+ * la solucion genera (B-7), asi que el backend rechaza SIEMPRE con 400
+ * `flota.dispositivo.alta_modo_b_no_soportado`. Tipar un campo cuyo unico desenlace es un 400 es
+ * invitar a cablear un formulario que no puede guardar.
+ *
+ * `imei` es REQUERIDO (D-S3-32) y es lo que el usuario tipea: esta impreso en el equipo que tiene en
+ * la mano. Hasta esa decision `dtos.ts` no lo declaraba y un front tipado desde el contrato recibia
+ * 400 en TODAS las altas.
+ *
+ * `modeloId` es OPCIONAL desde D-S3-5 (DA-DL-09 lo declaraba requerido). Cuando viaja, sale del
+ * catalogo growable — nunca texto libre, nunca hardcodeado (B-18).
+ */
+export interface RegistrarDispositivoRequest {
+  imei: string // REQUERIDO (D-S3-32)
+  // Opcional: si viene, tiene que coincidir con el canonico que resuelve el IMEI; si no coincide,
+  // 404 `flota.dispositivo.canonico_no_existe`.
+  dispositivoCanonicoId?: string
+  alias: string
+  modeloId?: string // uuid del catalogo growable; 404 `flota.dispositivo.modelo_no_existe`
+  numeroSerie?: string // D-S3-24: dato propio de Flota, capturado aca. Read-only despues del alta.
+  numeroSim?: string
+  proveedorSimId?: string // uuid del catalogo; 404 `flota.dispositivo.proveedor_sim_no_existe`
+  notasOperativas?: string
+}
+
+/**
+ * PATCH /api/flota/dispositivos/{dispositivoId} -> 200 `DispositivoDetalleDto`.
+ * `imei` y `numeroSerie` son READ-ONLY despues del alta: el contrato no los expone aca.
+ *
+ * MISMA TRAMPA que el PATCH de vehiculos: para `System.Text.Json` "campo ausente" y "campo en null"
+ * son indistinguibles, asi que omitir un campo tambien puede borrarlo segun como lo resuelva el
+ * service. El front manda siempre el objeto completo que quiere dejar.
+ */
+export interface ActualizarDispositivoRequest {
+  alias?: string
+  modeloId?: string // uuid del catalogo (B-18)
+  numeroSim?: string
+  proveedorSimId?: string | null // null explicito = desvincular
+  notasOperativas?: string
+}
+
+/**
+ * POST /api/flota/dispositivos/{dispositivoId}/estado-stock -> 200 `DispositivoDetalleDto`.
+ *
+ * DOS destinos excluidos POR TIPO, y los dos por razones distintas:
+ *  - `instalado`: se alcanza SOLO asignando el dispositivo a un vehiculo (DA-DL-05).
+ *  - `dado_de_baja`: se alcanza SOLO por `POST .../baja` (D-S3-9). Este endpoint esta gateado por
+ *    `flota.dispositivos.gestionar-stock` (que supervisor tiene) y la baja por
+ *    `flota.dispositivos.eliminar` (que supervisor NO tiene): admitirlo aca ejecutaba la baja con
+ *    el permiso equivocado y el efecto era identico.
+ *
+ * Un selector que ofrezca cualquiera de los dos esta ofreciendo una operacion que el backend
+ * RECHAZA con 409 `flota.dispositivo.transicion_stock_invalida`.
+ */
+export interface CambiarEstadoStockRequest {
+  estadoNuevo: Exclude<EstadoStockDispositivo, 'instalado' | 'dado_de_baja'>
+  motivo?: string
+}
+
+/**
+ * GET /api/flota/dispositivos/{dispositivoId}/historial-stock ->
+ * `PagedResult<TransicionStockDto>` (ORDER BY fechaUtc DESC, transicionId).
+ *
+ * ⚠️ ESTA IMPLEMENTADO. El comentario que circulaba ("no hay tabla en el contrato de datos") quedo
+ * viejo: la tabla es `transiciones_stock_dispositivo_flota` y existe desde la migracion
+ * `Agregado_DispositivoGps_Y_Asignacion`.
+ */
+export interface TransicionStockDto {
+  transicionId: string
+  estadoAnterior: EstadoStockDispositivo | null // null = transicion inicial del alta
+  estadoNuevo: EstadoStockDispositivo
+  motivo: string | null
+  fechaUtc: string // ISO 8601
+  usuarioId: string | null
+  usuarioNombre: string | null
+}
+
+/**
+ * Campos ordenables de `GET /api/flota/dispositivos`. Default: `FechaCreacion` desc.
+ * `conexion` es compuesto desde Telemetria: filtrable, NO ordenable server-side.
+ */
+export type DispositivoSortBy = 'Imei' | 'FechaCreacion'
+
+/**
+ * Query del listado.
+ *
+ * DRIFT DECLARADO (D-S3-33): `api.md` documenta 5 filtros y el server solo DECLARA 4. `conexion`
+ * NO se espeja: es compuesto de Telemetria, no tiene fuente (B-9) y `DispositivosPageQuery` del
+ * backend no lo declara — un query param que el server no declara lo descarta el binder SIN ERROR,
+ * asi que el cliente lo manda y recibe 200 con la lista ENTERA sin filtrar. Es el modo de falla que
+ * este mismo listado ya sufrio con `modelo`. El chip de Conexion no se dibuja hasta slice-05.
+ */
+export interface DispositivosPageQuery extends SortedPageQuery<DispositivoSortBy> {
+  /** ✅ implementado (D-S3-33). `EXISTS` sobre la asignacion con periodo abierto; NO es `stock=instalado`. */
+  asignacion?: FiltroAsignacionDispositivo
+  stock?: EstadoStockDispositivo
+  /** El VALOR es el uuid del catalogo growable (B-18), no el nombre del modelo. */
+  modelo?: string
+  soloActivos?: boolean
+}
+
+/** Query de `GET .../historial-stock`. Solo paginacion: el contrato no declara filtros. */
+export type HistorialStockQuery = PageQuery
+
+/* ============================================================================
+ * 6. ASIGNACIONES vehiculo<->dispositivo — `api.md` §Asignaciones (bajo vehiculo)
+ *
+ * Las 2 filas de dispositivo estan IMPLEMENTADAS (2026-08-10, P2 resuelto por el PO). Las 2 de
+ * conductor son de slice-04 y no se espejan.
+ *
+ * El `POST` COORDINA CON PLATAFORMACANONICA ANTES DE PERSISTIR (D-S3-13): la correlacion
+ * dispositivo->vehiculo la posee el Canonico y es lo que hace que Telemetria acepte las posiciones.
+ * Si la coordinacion falla, el endpoint FALLA y no queda nada escrito — nunca 200 con la mitad hecha.
+ * ========================================================================== */
+
+/**
+ * Codigos del catalogo `motivos_cierre_asignacion_flota` (`ddl.sql` §1). NO es texto libre: el
+ * dominio rechaza cualquier valor fuera del catalogo.
+ */
+export type MotivoCierreAsignacion = 'reasignacion' | 'reparacion' | 'baja' | 'otro'
+
+/**
+ * POST /api/flota/vehiculos/{vehiculoFlotaId}/asignaciones/dispositivo -> 200
+ * `AsignacionVehiculoDispositivoDto`.
+ *
+ * `dtos.ts` declara ademas `vehiculoFlotaId` (duplicado de la URL) y `fechaInicio`. NINGUNO de los
+ * dos se implementa (D-S3-16) porque el contrato no tiene `code` con el que rechazar sus casos
+ * borde: "el body dice otro vehiculo que la URL" y "fechaInicio fuera de rango" no tienen fila en
+ * `errores.md`. Mandarlos no hace nada; declararlos aca haria creer que si.
+ */
+export interface AsignarDispositivoRequest {
+  dispositivoFlotaId: string // id LOCAL de Flota, no el canonico
+}
+
+/**
+ * Body OPCIONAL del
+ * DELETE /api/flota/vehiculos/{vehiculoFlotaId}/asignaciones/dispositivo/{asignacionId} -> 204.
+ * Sin body, el motivo de cierre es `otro` (D-S3-15).
+ */
+export interface DesasignarDispositivoRequest {
+  motivo?: MotivoCierreAsignacion
+}
+
+/**
+ * Respuesta del `POST`.
+ *
+ * ⚠️ SHAPE NO DEFINIDO EN `dtos.ts` — PENDIENTE (D-S3-16), ratificable por el PO. Se espeja el que
+ * sirve el backend. Es la UNICA fuente del `asignacionId`: `GET /vehiculos/{id}/asignaciones` NO
+ * esta implementado y los items de `historialAsignaciones` tampoco lo llevan, asi que un cliente que
+ * pierde esta respuesta NO PUEDE desasignar.
+ */
+export interface AsignacionVehiculoDispositivoDto {
+  asignacionId: string
+  vehiculoFlotaId: string // id LOCAL (A-4); la fila persiste el canonico y el service traduce
+  dispositivoFlotaId: string
+  fechaAsignacion: string // ISO 8601
+  fechaDesasignacion: string | null // null = vigente
+  motivoCierre: MotivoCierreAsignacion | null // solo al cerrar
+}
+
+/* ============================================================================
+ * 7. CATALOGOS GROWABLES DEL DISPOSITIVO — `api.md` §Catalogos para selects (b)
+ *
+ * Modelos de GPS y proveedores de SIM: `GET` (globales + de la org) + `POST` (alta por organizacion).
+ * Existen desde D-S3-20/21 y son la FUENTE de los selects del alta y la edicion de dispositivo:
+ * nada hardcodeado en UI (DA-DD-02 / DA-DL-03).
+ *
+ * NO usan `CatalogoItemDto` (`{codigo, etiqueta}`) ni `CatalogoCanonicoItemDto`: estas dos tablas no
+ * tienen columna `codigo`, su clave es un `id uuid` (D-8 / B-18) y los request de dispositivo
+ * referencian `modeloId` / `proveedorSimId`.
+ *
+ * NINGUNO PAGINA: son acotados por definicion y devuelven un array plano, no `PagedResult<T>`. Es la
+ * unica familia de listados del modulo exenta de la convencion 3, y lo esta por contrato.
+ * ========================================================================== */
+
+export interface CatalogoGrowableItemDto {
+  id: string // uuid — es el valor que viaja en `modeloId` / `proveedorSimId`
+  nombre: string
+  /** Solo `modelos_dispositivo_flota` lo tiene; en proveedores de SIM viaja SIEMPRE `null`. */
+  fabricante: string | null
+  /** `true` = fila sembrada por la plataforma. La UI la necesita para no ofrecer editarla. */
+  esGlobal: boolean
+}
+
+/**
+ * POST /api/flota/catalogos/modelos-dispositivo -> 201 `CatalogoGrowableItemDto`.
+ *
+ * NO lleva `organizacionId` ni `esGlobal`: el tenant sale del JWT y la fila nace SIEMPRE con la
+ * organizacion que llama. Si el request pudiera pedir "global", el endpoint seria una escalada de
+ * privilegio con forma de campo opcional.
+ *
+ * Nombre repetido DENTRO de la organizacion -> 409 `flota.catalogo.nombre_duplicado`
+ * (`args {catalogo, nombre}`). Repetir el nombre de una fila GLOBAL es legal y NO emite ese code
+ * (B-14, ratificacion abierta del PO): el select puede mostrar 2 entradas homonimas.
+ */
+export interface CrearModeloDispositivoRequest {
+  nombre: string
+  fabricante?: string
+}
+
+/** POST /api/flota/catalogos/proveedores-sim. Igual, SIN `fabricante`: la tabla no tiene esa columna. */
+export interface CrearProveedorSimRequest {
+  nombre: string
 }

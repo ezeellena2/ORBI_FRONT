@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
-import { Check, Smartphone, UserRound } from 'lucide-react'
+import { Check, UserRound } from 'lucide-react'
 import { Badge } from '@/shared/ui/Badge'
 import { SinAccesoOverlay } from '@/shared/ui/SinAccesoOverlay'
 import { Stepper, type PasoStepper } from '@/shared/ui/Stepper'
 import { useSessionStore } from '@/stores/session-store'
-import type { VehiculoDetalleDto } from '@/services/contracts/flota'
+import type {
+  AsignacionVehiculoDispositivoDto,
+  VehiculoDetalleDto,
+} from '@/services/contracts/flota'
 import { AltCtaImportarCsv } from '../components/onboarding/AltCtaImportarCsv'
+import { PasoDispositivo } from '../components/onboarding/PasoDispositivo'
 import { PasoPendiente } from '../components/onboarding/PasoPendiente'
 import { PasoVehiculo } from '../components/onboarding/PasoVehiculo'
 import { usePermisos } from '../hooks/usePermisos'
@@ -19,8 +23,11 @@ import { usePermisos } from '../hooks/usePermisos'
  *  1. EXACTAMENTE 3 pasos. NO existe un paso "Revisar".
  *  2. El paso 1 CREA el vehículo con un solo `POST` y el vehículo YA ES USABLE. No se "persiste al
  *     final": abandonar el wizard después del paso 1 no deshace nada.
- *  3. Los pasos 2 (dispositivo) y 3 (conductor) son de los slices 03 y 04: se renderizan
- *     deshabilitados con hint, y "Saltar" NO EMITE NINGÚN REQUEST.
+ *  3. El paso 2 (dispositivo) ya es real (`f-08`): asigna un GPS `en_stock` con
+ *     `POST .../asignaciones/dispositivo`, o se salta. El paso 3 (conductor) es de slice-04 y sigue
+ *     deshabilitado con hint. **En los dos, "Saltar" NO EMITE NINGÚN REQUEST.**
+ *  4. Saltar el paso 2 no es una salida de emergencia: la mayoría de los vehículos se cargan antes
+ *     de tener el GPS instalado, así que es el camino esperado y no se penaliza en la UI.
  *
  * ESTADOS DE PANTALLA (ficha §9):
  *  - loading      → del botón de submit y de los selects de catálogo, no de la página: es un
@@ -51,29 +58,53 @@ export default function OnboardingFlotaPage() {
 
   const [paso, setPaso] = useState<NumeroPaso>(1)
   const [vehiculo, setVehiculo] = useState<VehiculoDetalleDto | null>(null)
+  /**
+   * La asignación que hizo el paso 2, entera. `null` = todavía no asignó (o saltó).
+   *
+   * No es un `boolean`: el `asignacionId` que trae es la ÚNICA fuente del id que pide el `DELETE`
+   * (D-S3-16), así que se propaga hasta la ficha del vehículo por el `state` del enlace. Guardar
+   * solo "sí/no" acá era tirar la respuesta un nivel más arriba que en `PasoDispositivo`, con el
+   * mismo resultado: el usuario termina el wizard sin forma de deshacer lo que acaba de hacer.
+   */
+  const [asignacion, setAsignacion] = useState<AsignacionVehiculoDispositivoDto | null>(null)
+
+  /**
+   * El paso 2 encadena su asignación al `vehiculoFlotaId` que dejó el paso 1 (`f-08` §2): sin ese id
+   * el paso NO se renderiza y se vuelve al 1. Se DERIVA en vez de sincronizarse con un efecto — un
+   * efecto acá sería un render extra y una segunda fuente de verdad para el mismo hecho.
+   */
+  const pasoVisible: NumeroPaso = paso === 2 && vehiculo === null ? 1 : paso
 
   /**
    * EXACTAMENTE 3 ítems. Ningún "Revisar".
    *
-   * `salteado` ≠ `pendiente`: el paso al que ya se le dijo que no aplica se dibuja tachado, no en
-   * gris de "todavía no". Y el paso 1 solo pasa a `completado` cuando el `POST` respondió — el
-   * stepper refleja el estado real del backend, no una fantasía de la UI.
+   * `salteado` ≠ `pendiente` ≠ `completado`: el paso al que ya se le dijo que no aplica se dibuja
+   * tachado, no en gris de "todavía no", y el que efectivamente asignó un GPS se dibuja completado.
+   * El paso 1 solo pasa a `completado` cuando el `POST` respondió — el stepper refleja el estado
+   * real del backend, no una fantasía de la UI.
    */
   const pasos: PasoStepper[] = [
     {
       clave: 'vehiculo',
       etiqueta: t('flota:onboarding.pasos.vehiculo.etiqueta'),
-      estado: paso === 1 ? 'activo' : 'completado',
+      estado: pasoVisible === 1 ? 'activo' : 'completado',
     },
     {
       clave: 'dispositivo',
       etiqueta: t('flota:onboarding.pasos.dispositivo.etiqueta'),
-      estado: paso === 2 ? 'activo' : paso > 2 ? 'salteado' : 'pendiente',
+      estado:
+        pasoVisible === 2
+          ? 'activo'
+          : pasoVisible > 2
+            ? asignacion !== null
+              ? 'completado'
+              : 'salteado'
+            : 'pendiente',
     },
     {
       clave: 'conductor',
       etiqueta: t('flota:onboarding.pasos.conductor.etiqueta'),
-      estado: paso === 3 ? 'activo' : 'pendiente',
+      estado: pasoVisible === 3 ? 'activo' : 'pendiente',
     },
   ]
 
@@ -99,7 +130,7 @@ export default function OnboardingFlotaPage() {
 
       <Stepper pasos={pasos} />
 
-      {paso === 1 ? (
+      {pasoVisible === 1 ? (
         <PasoVehiculo
           onCreado={(creado) => {
             setVehiculo(creado)
@@ -108,19 +139,19 @@ export default function OnboardingFlotaPage() {
         />
       ) : null}
 
-      {paso === 2 ? (
-        <PasoPendiente
-          icono={Smartphone}
-          titulo={t('flota:onboarding.pasos.dispositivo.titulo')}
-          descripcion={t('flota:onboarding.pasos.dispositivo.descripcion')}
-          hint={t('flota:onboarding.pasos.dispositivo.hint')}
-          textoSaltar={t('flota:onboarding.pasos.saltarAlSiguiente')}
+      {pasoVisible === 2 && vehiculo !== null ? (
+        <PasoDispositivo
+          vehiculo={vehiculo}
+          onAsignado={(creada) => {
+            setAsignacion(creada)
+            setPaso(3)
+          }}
           // "Saltar" solo mueve el estado local del wizard. Cero requests.
           onSaltar={() => setPaso(3)}
         />
       ) : null}
 
-      {paso === 3 ? (
+      {pasoVisible === 3 ? (
         <PasoPendiente
           icono={UserRound}
           titulo={t('flota:onboarding.pasos.conductor.titulo')}
@@ -131,7 +162,11 @@ export default function OnboardingFlotaPage() {
         />
       ) : null}
 
-      {vehiculo === null ? <AltCtaImportarCsv /> : <VehiculoYaCreado vehiculo={vehiculo} />}
+      {vehiculo === null ? (
+        <AltCtaImportarCsv />
+      ) : (
+        <VehiculoYaCreado vehiculo={vehiculo} asignacion={asignacion} />
+      )}
 
       <Pie />
     </div>
@@ -160,7 +195,13 @@ function Encabezado({ nombreOrganizacion }: { nombreOrganizacion: string | undef
  * El vehículo del paso 1 YA EXISTE y ya es consultable. Decirlo explícitamente es lo que hace que
  * "Saltar" no dé miedo: el usuario no está abandonando un alta a medio hacer.
  */
-function VehiculoYaCreado({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
+function VehiculoYaCreado({
+  vehiculo,
+  asignacion,
+}: {
+  vehiculo: VehiculoDetalleDto
+  asignacion: AsignacionVehiculoDispositivoDto | null
+}) {
   const { t } = useTranslation(['flota', 'common'])
 
   return (
@@ -168,6 +209,13 @@ function VehiculoYaCreado({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
       {t('flota:onboarding.vehiculoCreado', { patente: vehiculo.patente ?? '' })}{' '}
       <Link
         to={`/app/flota/vehiculos/${vehiculo.id}`}
+        /*
+          La asignación viaja por el `state` del enlace, no por la URL: es un id interno y la regla
+          de privacidad prohíbe meterlo en la query string. La ficha lo usa para poder ofrecer
+          "Desasociar" — sin esto, el GPS que el wizard acaba de instalar solo se puede sacar
+          volviendo a asignar otro.
+        */
+        state={asignacion === null ? undefined : { asignacionDispositivo: asignacion }}
         className="font-medium text-accion underline-offset-4 hover:underline"
       >
         {t('flota:onboarding.verFicha')}

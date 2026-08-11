@@ -23,10 +23,12 @@ export function HeroVehiculo({
   vehiculo,
   onEditar,
   onDarDeBaja,
+  onCambiarDispositivo,
 }: {
   vehiculo: VehiculoDetalleDto
   onEditar: () => void
   onDarDeBaja: () => void
+  onCambiarDispositivo: () => void
 }) {
   const { t, i18n } = useTranslation(['flota', 'common'])
 
@@ -76,6 +78,7 @@ export function HeroVehiculo({
         vehiculoFlotaId={vehiculo.id}
         onEditar={onEditar}
         onDarDeBaja={onDarDeBaja}
+        onCambiarDispositivo={onCambiarDispositivo}
       />
     </section>
   )
