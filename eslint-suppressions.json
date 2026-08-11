@@ -62,11 +62,6 @@
       "count": 1
     }
   },
-  "src/shared/hooks/useMultiStepUrl.ts": {
-    "react-hooks/refs": {
-      "count": 3
-    }
-  },
   "src/shared/ui/legacy/TracAutoMark.tsx": {
     "orbi/sin-clase-arbitraria-de-color": {
       "count": 1
