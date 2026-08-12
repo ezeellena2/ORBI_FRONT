@@ -21,14 +21,22 @@ import { claveDeConexion, claveDeTipoVehiculo, varianteDeConexion } from './voca
  */
 export function HeroVehiculo({
   vehiculo,
+  identidadConductorDeSesion,
   onEditar,
   onDarDeBaja,
   onCambiarDispositivo,
+  onGestionarConductores,
 }: {
   vehiculo: VehiculoDetalleDto
+  /**
+   * Identidad del conductor asignado en ESTA sesión, si lo hubo. Es lo único que la ficha puede
+   * afirmar sobre el conductor mientras `conductorPrincipal` no se componga.
+   */
+  identidadConductorDeSesion: string | null
   onEditar: () => void
   onDarDeBaja: () => void
   onCambiarDispositivo: () => void
+  onGestionarConductores: () => void
 }) {
   const { t, i18n } = useTranslation(['flota', 'common'])
 
@@ -67,9 +75,19 @@ export function HeroVehiculo({
               valor: formatearFechaHora(vehiculo.ultimaSenal?.fechaUtc, i18n.language),
             })}
           </span>
+          {/*
+            🔴 CORRECCIÓN DE MENTIRA (f-07). Acá decía `?? t('detalle.sinConductor')`, o sea
+            "Sin conductor asignado" — y `conductorPrincipal` viene `null` en el 100% de las
+            respuestas, también con conductor asignado (composición faltante, slice-05). O sea que la
+            meta-línea del hero AFIRMABA, en todos los vehículos de todas las organizaciones, algo que
+            Flota no puede saber. Ahora cae al marcador de dato ausente, salvo que la asignación se
+            haya hecho en esta sesión: eso sí consta.
+          */}
           <span className="inline-flex items-center gap-1.5">
             <Icono icono={User} tamano="xs" />
-            {vehiculo.conductorPrincipal?.nombreCompleto ?? t('flota:detalle.sinConductor')}
+            {vehiculo.conductorPrincipal?.nombreCompleto ??
+              identidadConductorDeSesion ??
+              t('flota:detalle.conductorNoDisponible')}
           </span>
         </div>
       </div>
@@ -79,6 +97,7 @@ export function HeroVehiculo({
         onEditar={onEditar}
         onDarDeBaja={onDarDeBaja}
         onCambiarDispositivo={onCambiarDispositivo}
+        onGestionarConductores={onGestionarConductores}
       />
     </section>
   )

@@ -4,7 +4,9 @@
     "vehiculoDetalle": "Vehicle",
     "vehiculosOnboarding": "New vehicle",
     "dispositivosListado": "Devices",
-    "dispositivoDetalle": "Device"
+    "dispositivoDetalle": "Device",
+    "conductoresListado": "Drivers",
+    "conductorDetalle": "Driver"
   },
   "estadoConexion": {
     "en_linea": "Online",
@@ -47,13 +49,13 @@
     },
     "celda": {
       "sinDato": "—",
-      "sinDispositivo": "No device",
-      "sinConductor": "No driver",
       "conductoresAsignados_one": "{{count}} assigned",
       "conductoresAsignados_other": "{{count}} assigned",
       "conductoresExtra": "+{{count}}",
       "sinSenal": "No signal yet",
-      "velocidad": "{{velocidad}} km/h"
+      "velocidad": "{{velocidad}} km/h",
+      "dispositivoSinComponer": "Fleet does not show the GPS from the vehicle yet. The installed device is visible in the device inventory.",
+      "conductorSinComponer": "Fleet does not show the driver from the vehicle yet. The current assignment is visible on the driver profile."
     },
     "acciones": {
       "abrirMenu": "Vehicle actions",
@@ -104,7 +106,8 @@
     "volverAVehiculos": "Back to vehicles",
     "volverADispositivos": "Back to devices",
     "noSePuedeBorrar": "Clearing a field does not delete it yet: {{campos}} will stay as they were. The rest of your changes are saved.",
-    "separadorLista": ", "
+    "separadorLista": ", ",
+    "volverAConductores": "Back to drivers"
   },
   "forbidden": {
     "titulo": "No access",
@@ -128,7 +131,6 @@
     "cargando": "Loading vehicle…",
     "identidadNoDisponible": "Vehicle identity not available",
     "ultimaSenal": "Last signal: {{valor}}",
-    "sinConductor": "No driver assigned",
     "noEncontrado": {
       "titulo": "Vehicle not found",
       "descripcion": "It may have been deleted, or the link may no longer be valid."
@@ -144,8 +146,7 @@
       "cambiarDispositivo": "Change device",
       "gestionarConductores": "Manage drivers",
       "darDeBaja": "Delete vehicle",
-      "sinPermiso": "You need the {{permiso}} permission",
-      "llegaEnOtroSlice": "Device and driver assignments are not available yet."
+      "sinPermiso": "You need the {{permiso}} permission"
     },
     "miniStats": {
       "titulo": "Vehicle status",
@@ -190,12 +191,22 @@
     },
     "conductor": {
       "titulo": "Assigned drivers",
-      "vacioTitulo": "No driver assigned",
-      "vacioDescripcion": "You will be able to assign a driver to this vehicle from here once driver management is available.",
+      "vacioTitulo": "We cannot show this vehicle's drivers",
+      "vacioDescripcion": "Fleet does not compose this information on the vehicle side yet, so it stays empty even when the vehicle has an assigned driver. The current assignment is visible on the driver page.",
       "dni": "ID number",
       "licencia": "License",
       "telefono": "Phone",
-      "asignadoDesde": "Assigned since"
+      "asignadoDesde": "Assigned since",
+      "irAConductores": "Go to drivers",
+      "asignar": "Assign driver",
+      "cambiar": "Change driver",
+      "quitar": "Remove driver",
+      "quitarSinId": "Removing the driver needs the assignment made in this session. If someone else assigned it, remove it from the driver profile.",
+      "verPerfil": "View profile",
+      "recienAsignadoTitulo": "Driver assigned in this session",
+      "recienAsignadoDescripcion": "The assignment was saved. The person details are on their profile: Fleet does not compose them on the vehicle side yet.",
+      "pillAlMenos": "{{cantidad}}+",
+      "pillSinDato": "—"
     },
     "dispositivo": {
       "titulo": "Linked GPS device",
@@ -256,7 +267,8 @@
       "bloqueadaPorAsignaciones": "The vehicle cannot be deleted: it still has a driver or a device assigned. Unassign them first.",
       "etiquetaTipeo": "To confirm, type the plate",
       "confirmar": "Delete vehicle"
-    }
+    },
+    "conductorNoDisponible": "Driver not available"
   },
   "onboarding": {
     "bienvenida": "Welcome to {{organizacion}}",
@@ -296,9 +308,8 @@
       "sinFilaFantasma": "No vehicle was created: you can retry without risk of duplicating it."
     },
     "pasos": {
-      "accionNoDisponible": "Not available yet",
       "saltarAlSiguiente": "Skip this step",
-      "finalizar": "Finish and go to vehicles",
+      "finalizar": "Finish and go to the dashboard",
       "vehiculo": {
         "etiqueta": "First vehicle"
       },
@@ -315,7 +326,11 @@
         "etiqueta": "Driver",
         "titulo": "Assign a driver",
         "descripcion": "Optional. You can skip it and do it later.",
-        "hint": "You will be able to assign a driver from the vehicle record once driver management is available."
+        "continuar": "Assign and finish",
+        "asignando": "Assigning…",
+        "asignado": "You assigned {{nombre}} to this vehicle.",
+        "vacio": "There are no drivers in your organization yet. You can skip this step and assign one later from the vehicle detail.",
+        "vacioCta": "Go to drivers"
       }
     },
     "importar": {
@@ -381,6 +396,65 @@
     },
     "dispositivo_flota_id": {
       "required": "Pick a device from the list."
+    },
+    "persona_id": {
+      "required": "The person identifier is required",
+      "invalid": "The person identifier is not valid"
+    },
+    "tipo_documento": {
+      "required": "The document type is required"
+    },
+    "numero_documento": {
+      "required": "The document number is required"
+    },
+    "apellido": {
+      "required": "The last name is required"
+    },
+    "telefono": {
+      "max_length": "The phone cannot exceed 30 characters."
+    },
+    "numero_legajo": {
+      "max_length": "The employee number cannot exceed 50 characters."
+    },
+    "notas": {
+      "max_length": "Notes cannot exceed 500 characters."
+    },
+    "conductor_flota_id": {
+      "required": "Pick a driver"
+    },
+    "rol": {
+      "invalid": "That assignment role is not valid."
+    },
+    "estado_nuevo": {
+      "invalid": "That target status is not valid."
+    },
+    "url_externa": {
+      "invalid": "The link is not valid",
+      "https_required": "The link must start with https"
+    },
+    "fecha_vencimiento": {
+      "invalid": "The expiry date is not valid"
+    },
+    "fecha_emision": {
+      "invalid": "The issue date is not valid"
+    },
+    "documento": {
+      "max_length": "The document type and number cannot exceed 50 characters together."
+    },
+    "numero": {
+      "max_length": "The number cannot exceed 100 characters."
+    },
+    "vehiculo_flota_id": {
+      "required": "Pick a vehicle from the list."
+    },
+    "persona": {
+      "modo_invalido": "Pick a single way to add the driver: an existing person or a new document."
+    },
+    "licencia": {
+      "sin_destino": "The license is not loaded when creating the driver: upload it as a document from the driver page."
+    },
+    "enviar_invitacion": {
+      "no_soportado": "Email invitations to drivers cannot be sent yet."
     }
   },
   "estadoStockDispositivo": {
@@ -672,5 +746,450 @@
     "reparacion": "Repair",
     "baja": "Decommission",
     "otro": "Other"
+  },
+  "conductoresAndamio": {
+    "descripcion": "We are building this screen. You will be able to manage your organization drivers from here."
+  },
+  "estadoConductor": {
+    "pendiente_documentacion": "Pending paperwork",
+    "disponible": "Available",
+    "en_servicio": "On duty",
+    "pausado": "Paused",
+    "suspendido": "Suspended"
+  },
+  "estadoConductorBadge": {
+    "activo": "Active",
+    "inactivo": "Inactive",
+    "pendiente": "Pending"
+  },
+  "estadoDocumento": {
+    "vigente": "Valid",
+    "por_vencer": "Expiring soon",
+    "vencido": "Expired",
+    "sin_cargar": "Not uploaded"
+  },
+  "tipoDocumentoConductor": {
+    "licencia": "Driver's license",
+    "dni": "ID document",
+    "psicofisico": "Medical check",
+    "art": "Work insurance",
+    "defensivo": "Defensive driving",
+    "contrato": "Contract"
+  },
+  "filtroEstadoConductor": {
+    "activo": "Active",
+    "inactivo": "Inactive",
+    "licencia_proxima_a_vencer": "License expiring soon",
+    "licencia_vencida": "License expired"
+  },
+  "filtroAsignacionConductor": {
+    "con_vehiculo": "With vehicle",
+    "sin_vehiculo": "Without vehicle"
+  },
+  "conductoresListado": {
+    "titulo": "Drivers",
+    "subtitulo": "The operational drivers of your organization.",
+    "nuevoConductor": "New driver",
+    "sinPermisoCrear": "You need the flota.conductores.crear permission",
+    "filtros": {
+      "estado": "Status",
+      "estadoTodos": "All statuses",
+      "asignacion": "Assignment",
+      "asignacionTodos": "All",
+      "soloActivos": "Active only",
+      "limpiar": "Clear filters"
+    },
+    "columnas": {
+      "conductor": "Driver",
+      "dni": "ID",
+      "telefono": "Phone",
+      "asignaciones": "Assignments",
+      "licencia": "License",
+      "estado": "Status",
+      "acciones": "Actions"
+    },
+    "celda": {
+      "sinDato": "—",
+      "sinNombre": "No name on file",
+      "identidadNoDisponible": "Personal data is managed by the platform and is not available to your organization yet.",
+      "sinLicencia": "No license on file",
+      "sinCategoria": "Class not available",
+      "sinAsignar": "Unassigned",
+      "vehiculosAsignados_one": "{{count}} vehicle",
+      "vehiculosAsignados_other": "{{count}} vehicles",
+      "licenciaVence": "Expires on {{fecha}}",
+      "licenciaVencida": "Expired",
+      "licenciaVenceEnDias_one": "Expires in {{count}} day",
+      "licenciaVenceEnDias_other": "Expires in {{count}} days",
+      "legajo": "Employee no. {{valor}}",
+      "sinLegajo": "No employee number",
+      "licenciaVencidaHace_one": "Expired {{count}} day ago",
+      "licenciaVencidaHace_other": "Expired {{count}} days ago"
+    },
+    "acciones": {
+      "abrirMenu": "Driver actions",
+      "verDetalle": "View details",
+      "editar": "Edit",
+      "cambiarEstado": "Change status",
+      "asignarVehiculo": "Assign vehicle",
+      "asignarDispositivo": "Link device",
+      "gestionarDocumentos": "Documents",
+      "desactivar": "Deactivate",
+      "reactivar": "Reactivate",
+      "eliminar": "Delete permanently",
+      "sinPermiso": "You need the {{permiso}} permission"
+    },
+    "paginacion": {
+      "rango": "Showing {{desde}}-{{hasta}} of {{total}}",
+      "porPagina": "Per page",
+      "anterior": "Previous",
+      "siguiente": "Next"
+    },
+    "vacioSinDatos": {
+      "titulo": "You have not added any drivers yet",
+      "descripcion": "Once you register them you can assign vehicles and track their license expiry.",
+      "cta": "Create first driver"
+    },
+    "vacioSinResultados": {
+      "titulo": "No driver matches your filters",
+      "descripcion": "Try adjusting the active filters.",
+      "cta": "Clear filters"
+    },
+    "error": {
+      "titulo": "We could not load the drivers",
+      "reintentar": "Retry",
+      "tituloRefresco": "We could not refresh the list"
+    },
+    "sinAcceso": {
+      "titulo": "No access",
+      "descripcion": "You need the flota.conductores.leer permission to view this screen.",
+      "volver": "Back to dashboard"
+    }
+  },
+  "conductorAlta": {
+    "titulo": "New driver",
+    "subtitulo": "Enter the driver details. You can assign a vehicle and a device later.",
+    "modo": "How do we add them?",
+    "modoExistente": "Already a person known to the organization",
+    "modoNuevo": "Add by document",
+    "modoAyuda": "If you do not have the person identifier, add them by document: the platform looks them up and creates them if they do not exist.",
+    "personaId": "Person identifier",
+    "personaIdAyuda": "Only works for people your organization has registered before.",
+    "tipoDocumento": "Document type",
+    "numeroDocumento": "Document number",
+    "nombre": "First name",
+    "apellido": "Last name",
+    "telefono": "Phone",
+    "telefonoAyuda": "Optional. Stored on the driver operational record.",
+    "numeroLegajo": "Employee number",
+    "notas": "Notes",
+    "licenciaAparte": "The license is uploaded later, from the driver record, as a document.",
+    "invitacionNoDisponible": "Email invitations to drivers are not sent yet.",
+    "estadoInicial": "The driver stays as Pending paperwork until you upload the required documents.",
+    "guardar": "Create driver",
+    "guardando": "Creating…"
+  },
+  "conductorEditar": {
+    "titulo": "Edit driver",
+    "guardar": "Save changes",
+    "numeroLegajo": "Employee number",
+    "notas": "Notes",
+    "leyendaCanonicos": "Name, document, email and phone are managed on the person record, outside Fleet.",
+    "licenciaAparte": "License details are edited from the documents tab.",
+    "campos": {
+      "numeroLegajo": "employee number",
+      "notas": "notes"
+    },
+    "errorCarga": "We could not load the driver data"
+  },
+  "conductorEstado": {
+    "titulo": "Change driver status",
+    "estadoActual": "Current status",
+    "nuevoEstado": "New status",
+    "sinDestinos": "There is no available change from this status.",
+    "suspendidoSinVuelta": "A suspended driver cannot be reinstated from here. Check with your organization administrator.",
+    "motivo": "Reason",
+    "motivoAyuda": "Optional. It is recorded on the change event, not on the driver record.",
+    "confirmar": "Change status"
+  },
+  "conductorBaja": {
+    "titulo": "Deactivate driver",
+    "descripcion": "You are about to deactivate {{nombre}}. All history is kept and you can reactivate them any time.",
+    "noDesasigna": "Deactivating does not unassign anything on its own: if they have a vehicle or a device linked, unlink those first.",
+    "bloqueadaPorAsignaciones": "This driver has active assignments. Unlink them before deactivating.",
+    "etiquetaTipeo": "Type {{valor}} to confirm",
+    "confirmar": "Deactivate"
+  },
+  "conductorReactivar": {
+    "titulo": "Reactivate driver",
+    "descripcion": "You are about to reactivate {{nombre}}.",
+    "noResetaEstado": "They come back with the same operational status they had before. Check their paperwork before assigning a vehicle.",
+    "confirmar": "Reactivate"
+  },
+  "conductorEliminar": {
+    "titulo": "Delete permanently",
+    "descripcion": "You are about to delete {{nombre}} for good. This cannot be undone.",
+    "etiquetaTipeo": "Type {{valor}} to confirm",
+    "confirmar": "Delete permanently",
+    "cancelar": "Cancel"
+  },
+  "conductorDetalle": {
+    "cargando": "Loading driver…",
+    "noEncontrado": {
+      "titulo": "Driver not found",
+      "descripcion": "This driver does not exist or does not belong to your organization."
+    },
+    "error": {
+      "titulo": "We could not load the driver",
+      "descripcion": "Try again in a few seconds.",
+      "tituloRefresco": "We could not refresh this driver"
+    },
+    "sinAcceso": {
+      "descripcion": "You need the flota.conductores.leer permission to view this record."
+    },
+    "hero": {
+      "legajo": "Employee no. {{valor}}",
+      "sinLegajo": "No employee number",
+      "dni": "ID {{valor}}",
+      "telefono": "Phone {{valor}}",
+      "conduce": "Drives {{patente}}",
+      "sinVehiculo": "No vehicle assigned",
+      "altaOperativa": "In the fleet since {{fecha}}",
+      "identidadNoDisponible": "Personal data not available"
+    },
+    "acciones": {
+      "editar": "Edit",
+      "masAcciones": "More actions",
+      "cambiarEstado": "Change status",
+      "asignarVehiculo": "Assign vehicle",
+      "asignarDispositivo": "Link device",
+      "desactivar": "Deactivate",
+      "reactivar": "Reactivate",
+      "eliminar": "Delete permanently",
+      "sinPermiso": "You need the {{permiso}} permission",
+      "asignarOtroVehiculo": "Assign another vehicle"
+    },
+    "tabs": {
+      "info": "Overview",
+      "asignaciones": "Assignments",
+      "documentos": "License and documents",
+      "actividad": "Activity"
+    },
+    "miniStats": {
+      "titulo": "Activity for the period",
+      "kmTotales": "Total km",
+      "horas": "Hours driving",
+      "viajes": "Trips",
+      "score": "Driving score",
+      "sinFuente": "No telemetry data"
+    },
+    "info": {
+      "titulo": "Driver details",
+      "nombre": "Name",
+      "dni": "ID",
+      "email": "Email",
+      "telefono": "Phone",
+      "legajo": "Employee number",
+      "estado": "Status",
+      "alta": "Operational start",
+      "notas": "Notes",
+      "creado": "Created",
+      "modificado": "Modified",
+      "porUsuario": "by {{usuario}}",
+      "identidadCanonica": "Name, document and contact details are managed outside Fleet, on the person record.",
+      "identidadNoDisponible": "Not available to your organization yet.",
+      "emailSinFuente": "The driver email is not stored in Fleet."
+    },
+    "licencia": {
+      "titulo": "Driver's license",
+      "categoria": "Class",
+      "categoriaSinDato": "The license class cannot be stored yet.",
+      "numero": "Number",
+      "emision": "Issued",
+      "vencimiento": "Expires",
+      "diasParaVencer_one": "in {{count}} day",
+      "diasParaVencer_other": "in {{count}} days",
+      "vencidaHace_one": "expired {{count}} day ago",
+      "vencidaHace_other": "expired {{count}} days ago",
+      "vacioTitulo": "No license on file",
+      "vacioDescripcion": "Upload the license as a document so you can assign a vehicle.",
+      "cargar": "Upload license"
+    },
+    "asignaciones": {
+      "vehiculoTitulo": "Assigned vehicle",
+      "vehiculoVacioTitulo": "No vehicle assigned",
+      "vehiculoVacioDescripcion": "Assign a vehicle so they can operate.",
+      "verVehiculo": "View vehicle",
+      "asignarVehiculo": "Assign vehicle",
+      "desasignar": "Unassign",
+      "desasignarSinId": "To unassign you need to open the assignment history.",
+      "rol": "Role",
+      "desde": "Since",
+      "dispositivoTitulo": "Linked devices",
+      "dispositivoVacioTitulo": "No devices linked",
+      "dispositivoVacioDescripcion": "The link is used to attribute trips and events.",
+      "asignarDispositivo": "Link device",
+      "desvincular": "Unlink",
+      "atribucionNota": "This link is for attribution: the driver location always comes from the vehicle they drive.",
+      "historialTitulo": "Assignment history",
+      "historialColumnas": {
+        "vehiculo": "Vehicle",
+        "rol": "Role",
+        "desde": "From",
+        "hasta": "To",
+        "motivo": "Closing reason"
+      },
+      "historialVigente": "Current",
+      "historialVacioTitulo": "No assignments",
+      "historialVacioDescripcion": "This driver has not been assigned to any vehicle yet.",
+      "historialErrorTitulo": "We could not load the history",
+      "motivoSinEspecificar": "Not specified",
+      "masVigentes_one": "This driver has {{count}} more open assignment. It is in the history below.",
+      "masVigentes_other": "This driver has {{count}} more open assignments. They are in the history below."
+    },
+    "documentos": {
+      "titulo": "Documents",
+      "agregar": "Add document",
+      "renovarLicencia": "Renew license",
+      "columnas": {
+        "documento": "Document",
+        "numero": "Number",
+        "estado": "Status",
+        "vencimiento": "Expiry",
+        "archivo": "File",
+        "acciones": "Actions"
+      },
+      "verArchivo": "View file",
+      "sinArchivo": "No file",
+      "eliminar": "Delete",
+      "vacioTitulo": "No documents uploaded",
+      "vacioDescripcion": "Upload the license and the required paperwork so they can go on duty.",
+      "errorTitulo": "We could not load the documents",
+      "sinPermisoTitulo": "No access to documents",
+      "sinPermisoDescripcion": "You need the flota.conductores.gestionar-documentos permission to view this section.",
+      "obligatoriosTitulo": "Required paperwork",
+      "obligatoriosDescripcion": "While a required document is expired or missing, the driver cannot go On duty.",
+      "subir": "Upload"
+    },
+    "actividad": {
+      "sinFuenteTitulo": "No telemetry data",
+      "sinFuenteDescripcion": "Trips per driver do not have an available data source yet."
+    },
+    "ubicacion": {
+      "titulo": "Current location",
+      "sinFuenteTitulo": "No location data",
+      "sinFuenteDescripcion": "The driver's location comes from the vehicle they drive and has no data source available yet."
+    },
+    "auditoria": {
+      "titulo": "Audit",
+      "sinNombreUsuario": "We cannot show which user made each change yet."
+    }
+  },
+  "documentoConductor": {
+    "titulo": "Upload document",
+    "tipo": "Document type",
+    "tipoPlaceholder": "Pick a type",
+    "numero": "Number",
+    "fechaEmision": "Issue date",
+    "fechaVencimiento": "Expiry date",
+    "urlExterna": "Link to the file",
+    "urlExternaAyuda": "It must start with https. Optional: you can save the details now and add the file later.",
+    "sinBinariosAviso": "Files are not uploaded for now: we store the link to wherever it is already published.",
+    "guardar": "Upload document",
+    "guardando": "Uploading…",
+    "cancelar": "Cancel",
+    "eliminarTitulo": "Delete document",
+    "eliminarDescripcion": "You are about to delete {{documento}} from the driver record.",
+    "eliminarNoBorraArchivo": "The original file is untouched: only the record in Fleet is deleted.",
+    "eliminarConfirmar": "Delete"
+  },
+  "asignacionConductor": {
+    "titulo": "Assign driver",
+    "descripcion": "Pick a driver from your organization for this vehicle.",
+    "conductor": "Driver",
+    "conductorPlaceholder": "Pick a driver",
+    "rol": "Role",
+    "rolPrincipal": "Primary",
+    "rolSecundario": "Secondary",
+    "rolAyuda": "A vehicle has a single primary driver at a time.",
+    "sinDisponibles": "There are no drivers available to assign.",
+    "sinDisponiblesCta": "Go to drivers",
+    "cambiarTitulo": "Change driver",
+    "cambiarDescripcion": "You are about to replace the driver assigned to this vehicle.",
+    "cambiarNoAtomico": "The change takes two steps: the current driver is removed first and the new one is assigned after. If the second step fails, the vehicle is left without a driver.",
+    "asignar": "Assign",
+    "asignando": "Assigning…",
+    "exitoAsignar": "Driver assigned.",
+    "desasignarTitulo": "Remove driver",
+    "desasignarDescripcion": "You are about to remove {{nombre}} from this vehicle. History is kept.",
+    "desasignar": "Remove driver",
+    "desasignando": "Removing…",
+    "exitoDesasignar": "Driver unassigned.",
+    "motivo": "Reason",
+    "motivoAyuda": "It is recorded in the assignment history.",
+    "cancelar": "Cancel",
+    "sinPermiso": "You need the flota.vehiculos.asignar-conductor permission",
+    "sinPermisoLectura": "You need the flota.conductores.leer permission to see the list.",
+    "buscar": "Search driver",
+    "buscarPlaceholder": "Search by name or document",
+    "limpiarBusqueda": "Clear search",
+    "sinResultados": "No driver matches the search.",
+    "cargando": "Loading drivers…",
+    "soloPrimeros": "Showing the first {{cantidad}}. If you cannot find the driver, look them up from the list.",
+    "actualizar": "Refresh list",
+    "noAvisaAlConductor": "The assignment does not notify the driver.",
+    "errorElegirOtro": "That driver cannot be assigned right now. Pick another one or review their status and license.",
+    "errorConflicto": "The assignment changed while you were filling the form. Refresh and try again.",
+    "errorNoEncontrado": "We could not find that driver or assignment. Refresh the screen.",
+    "errorGenerico": "We could not complete the operation. Check the current state before retrying.",
+    "identidadNoDisponible": "Identity not available",
+    "cambioAMediasTitulo": "The vehicle was left without a driver",
+    "cambioAMedias": "{{nombre}} was removed but the new driver was not assigned. Try the assignment again: the removal step is not repeated."
+  },
+  "vinculoDispositivoConductor": {
+    "titulo": "Link device",
+    "descripcion": "The link is used to attribute trips and events to this driver.",
+    "dispositivo": "Device",
+    "dispositivoPlaceholder": "Pick a device",
+    "notas": "Notes",
+    "sinDisponibles": "There are no devices to link.",
+    "sinDisponiblesCta": "Go to devices",
+    "atribucionAviso": "Linking a device does not install it on a vehicle nor change its inventory status.",
+    "asignar": "Link",
+    "asignando": "Linking…",
+    "exitoAsignar": "Device linked.",
+    "cerrarTitulo": "Unlink device",
+    "cerrarDescripcion": "You are about to close the link with {{dispositivo}}. History is kept.",
+    "cerrar": "Unlink",
+    "cerrando": "Unlinking…",
+    "exitoCerrar": "Device unlinked.",
+    "motivo": "Reason",
+    "motivoAyuda": "It is recorded in the link history.",
+    "cancelar": "Cancel",
+    "sinPermiso": "You need the flota.conductores.asignar-dispositivo permission"
+  },
+  "licenciaVisible": {
+    "sin_cargar": "Not on file",
+    "sin_vencimiento": "No expiry date",
+    "vencida": "Expired",
+    "vigente": "Valid"
+  },
+  "asignacionVehiculo": {
+    "titulo": "Assign vehicle",
+    "descripcion": "Pick a vehicle from your organization for this driver.",
+    "vehiculo": "Vehicle",
+    "cargando": "Loading vehicles…",
+    "sinDisponibles": "There are no active vehicles in your organization.",
+    "sinDisponiblesCta": "Go to vehicles",
+    "sinPatente": "No plate",
+    "buscar": "Search vehicle",
+    "buscarPlaceholder": "Search by plate, alias, make or model",
+    "limpiarBusqueda": "Clear search",
+    "sinResultados": "No vehicle matches your search.",
+    "soloPrimeros": "Showing the first {{cantidad}} of {{total}}. If you cannot find the vehicle, look it up from the list.",
+    "sinPermisoLectura": "You need the {{permiso}} permission to see the vehicle list.",
+    "asignar": "Assign vehicle",
+    "noLiberaElActual": "This does NOT release the vehicle they already drive: it adds an assignment. To close the previous one, use \"Remove\" on the Assignments tab.",
+    "listaSinFiltrar": "Every active vehicle is listed: we cannot tell yet which ones already have a driver. If the one you pick already has a primary driver, the assignment is rejected on save."
   }
 }

@@ -1,5 +1,7 @@
 import type {
+  ConductoresPageQuery,
   DispositivosPageQuery,
+  HistorialConductorQuery,
   HistorialStockQuery,
   VehiculosPageQuery,
 } from '@/services/contracts/flota'
@@ -48,6 +50,33 @@ export const flotaKeys = {
   dispositivoHistorialStock: (dispositivoId: string, query: HistorialStockQuery) =>
     ['flota', 'dispositivos', dispositivoId, 'historial-stock', query] as const,
 
+  /** Prefijo del recurso conductor: listado + detalle + sus 3 sub-recursos. */
+  conductores: () => ['flota', 'conductores'] as const,
+
+  conductoresListado: (query: ConductoresPageQuery) => ['flota', 'conductores', query] as const,
+
+  conductorDetalle: (conductorId: string) => ['flota', 'conductores', conductorId] as const,
+
+  /**
+   * Historial de asignaciones a vehiculos de UN conductor. Cuelga del prefijo del detalle a
+   * proposito: asignar o desasignar invalida `conductorDetalle(id)` y el historial cae dentro de ese
+   * prefijo, asi que se refresca con la misma invalidacion. La `query` va al final para que el
+   * prefijo siga alcanzando a cualquier pagina.
+   */
+  conductorAsignaciones: (conductorId: string, query: HistorialConductorQuery) =>
+    ['flota', 'conductores', conductorId, 'asignaciones', query] as const,
+
+  /** Vinculos conductor<->dispositivo (activos + historial). Mismo criterio de anidado. */
+  conductorDispositivos: (conductorId: string, query: HistorialConductorQuery) =>
+    ['flota', 'conductores', conductorId, 'dispositivos', query] as const,
+
+  /**
+   * Documentos del conductor. SIN `query`: el endpoint devuelve un array plano, no `PagedResult<T>`
+   * (`api.md` no declara paginacion para esa fila).
+   */
+  conductorDocumentos: (conductorId: string) =>
+    ['flota', 'conductores', conductorId, 'documentos'] as const,
+
   /**
    * Catalogos GROWABLES del dispositivo (`flota.modelos_dispositivo_flota` /
    * `flota.proveedores_sim_flota`). Prefijo propio: el alta de una fila propia los invalida a ellos,
@@ -91,3 +120,36 @@ export const flotaKeys = {
  */
 export const flotaKeysAfectadasPorAsignacion = () =>
   [flotaKeys.vehiculos(), flotaKeys.dispositivos()] as const
+
+/**
+ * Las keys que hay que invalidar despues de ASIGNAR o DESASIGNAR un conductor a un vehiculo.
+ *
+ * ⚠️ Es el gemelo de `flotaKeysAfectadasPorAsignacion` y hace falta por la MISMA razon: una
+ * asignacion de conductor mueve superficies en DOS arboles de cache distintos.
+ *  1. detalle del CONDUCTOR — `vehiculosAsignados`, `vehiculosAsignadosCount` y su historial;
+ *  2. listado de CONDUCTORES — la columna Asignaciones y el filtro `asignacion`;
+ *  3. detalle del VEHICULO — su bloque de conductores;
+ *  4. listado de VEHICULOS — la columna de conductores.
+ *
+ * ⚠️ Las 2 superficies del VEHICULO **hoy no cambian visiblemente**: `conductorPrincipal`,
+ * `conductoresCount` y `conductoresAsignados` vienen `null`/`0`/`[]` en el 100% de las respuestas
+ * (composicion faltante, ver el contrato §3). Se invalidan igual: cuando slice-05 componga esos
+ * campos, la invalidacion ya va a estar puesta y no hay que acordarse. Invalidar de mas cuesta un
+ * refetch; invalidar de menos deja la pantalla mintiendo hasta un F5.
+ *
+ * Se invalidan los 2 PREFIJOS enteros y no keys puntuales porque "cambiar conductor" son DOS
+ * requests (DELETE + POST) sobre asignaciones distintas, y enumerar ids exige conocer de antemano
+ * cual era el conductor saliente.
+ */
+export const flotaKeysAfectadasPorAsignacionConductor = () =>
+  [flotaKeys.vehiculos(), flotaKeys.conductores()] as const
+
+/**
+ * Las keys que hay que invalidar despues de abrir o cerrar un vinculo conductor<->dispositivo.
+ *
+ * Toca el detalle del CONDUCTOR (`dispositivosAsignados` + la lista paginada de vinculos) y, del
+ * otro lado, el dispositivo: el vinculo es N:N historico y un mismo GPS puede estar vinculado a
+ * varios conductores. NO toca vehiculos: es atribucion, no instalacion.
+ */
+export const flotaKeysAfectadasPorVinculoConductorDispositivo = () =>
+  [flotaKeys.conductores(), flotaKeys.dispositivos()] as const

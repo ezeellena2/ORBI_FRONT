@@ -24,9 +24,9 @@ import { Spinner } from '@/shared/ui/Spinner'
  * pantalla montada aca queda inalcanzable — sin error, sin warning, sin nada que lo delate salvo
  * abrir la URL. Es lo que paso con dispositivos: las 2 paginas existian y no las montaba nadie.
  *
- * Rutas de otros slices (mapa, conductores, geozonas, problemas, integraciones) todavia NO estan
- * aca: siguen resueltas por el `AppRouter` con su placeholder. Se mudan a este archivo cuando su
- * slice las construya, con el mismo par de pasos.
+ * Rutas de otros slices (mapa, geozonas, problemas, integraciones) todavia NO estan aca: siguen
+ * resueltas por el `AppRouter` con su placeholder. Se mudan a este archivo cuando su slice las
+ * construya, con el mismo par de pasos.
  */
 
 const VehiculosListPage = lazy(() => import('./pages/VehiculosListPage'))
@@ -34,6 +34,8 @@ const VehiculoDetallePage = lazy(() => import('./pages/VehiculoDetallePage'))
 const OnboardingFlotaPage = lazy(() => import('./pages/OnboardingFlotaPage'))
 const DispositivosListPage = lazy(() => import('./pages/DispositivosListPage'))
 const DispositivoDetallePage = lazy(() => import('./pages/DispositivoDetallePage'))
+const ConductoresListPage = lazy(() => import('./pages/ConductoresListPage'))
+const ConductorDetallePage = lazy(() => import('./pages/ConductorDetallePage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 function FlotaCargando() {
@@ -103,6 +105,33 @@ export default function FlotaRoutes() {
             element={
               <RequierePermiso permiso="flota.dispositivos.leer">
                 <DispositivoDetallePage />
+              </RequierePermiso>
+            }
+          />
+
+          {/*
+            Conductores operativos (slice-04). Mismo par listado/detalle y el MISMO gate que los
+            otros dos recursos: `RequierePermiso` bloquea con overlay y muestra el permiso literal,
+            nunca redirige (B-3).
+
+            ⚠️ Al montar esto se BORRO `<Route path="flota/conductores" ...>` de `AppRouter`: ese
+            segmento estatico rankeaba por encima del splat `flota/*` y habria dejado estas 2 rutas
+            inalcanzables, sin error ni warning.
+          */}
+          <Route
+            path="conductores"
+            element={
+              <RequierePermiso permiso="flota.conductores.leer">
+                <ConductoresListPage />
+              </RequierePermiso>
+            }
+          />
+
+          <Route
+            path="conductores/:conductorId"
+            element={
+              <RequierePermiso permiso="flota.conductores.leer">
+                <ConductorDetallePage />
               </RequierePermiso>
             }
           />

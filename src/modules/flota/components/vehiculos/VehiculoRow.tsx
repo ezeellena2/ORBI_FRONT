@@ -94,19 +94,38 @@ export function CeldaVehiculo({ vehiculo }: CeldaVehiculoProps) {
  * El alias del dispositivo va en mono y como TEXTO, no como enlace: la pantalla de detalle de
  * dispositivo llega en su propio slice y un enlace al 404 interno de Flota es peor que texto plano.
  * Cuando exista `/app/flota/dispositivos/:id`, esta celda pasa a enlace (ficha §8).
+ *
+ * 🔴 `dispositivo` viene `null` en el 100% de las respuestas, también con un GPS instalado
+ * (`MapearItem` lo hardcodea; componerlo es alcance de slice-05). Por eso el vacío NO dice "Sin
+ * dispositivo", que era una afirmación falsa en toda fila de toda organización: dice que no hay dato
+ * y manda —en el título— al inventario, que es donde el join SÍ está hecho
+ * (`DispositivoListItemDto.vehiculoInstalado`).
  */
 export function CeldaDispositivo({ vehiculo }: CeldaVehiculoProps) {
   const { t } = useTranslation('flota')
 
   if (vehiculo.dispositivo === null) {
     return (
-      <span className="text-fg-terciario">{t('vehiculosListado.celda.sinDispositivo')}</span>
+      <span
+        className="text-fg-terciario"
+        title={t('vehiculosListado.celda.dispositivoSinComponer')}
+      >
+        {t('vehiculosListado.celda.sinDato')}
+      </span>
     )
   }
 
   return <span title={vehiculo.dispositivo.imei}>{vehiculo.dispositivo.alias}</span>
 }
 
+/**
+ * 🔴 Mismo caso que la celda de arriba: `conductorPrincipal` viene `null` y `conductoresCount` viene
+ * `0` en el 100% de las respuestas. Decir "Sin conductor" era afirmar algo que Flota no puede saber
+ * — la asignación existe y se ve desde la ficha del conductor. Se pinta el marcador de dato ausente.
+ *
+ * Las 2 ramas de abajo NO son código muerto por elección: son lo que se ve apenas slice-05 componga
+ * los campos, y borrarlas obliga a reescribirlas entonces.
+ */
 export function CeldaConductores({ vehiculo }: CeldaVehiculoProps) {
   const { t } = useTranslation('flota')
 
@@ -116,7 +135,9 @@ export function CeldaConductores({ vehiculo }: CeldaVehiculoProps) {
         {t('vehiculosListado.celda.conductoresAsignados', { count: vehiculo.conductoresCount })}
       </span>
     ) : (
-      <span className="text-fg-terciario">{t('vehiculosListado.celda.sinConductor')}</span>
+      <span className="text-fg-terciario" title={t('vehiculosListado.celda.conductorSinComponer')}>
+        {t('vehiculosListado.celda.sinDato')}
+      </span>
     )
   }
 

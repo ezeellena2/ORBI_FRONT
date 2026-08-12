@@ -2,9 +2,12 @@ import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type {
   ActualizarVehiculoRequest,
+  AsignacionVehiculoConductorDto,
   AsignacionVehiculoDispositivoDto,
+  AsignarConductorRequest,
   AsignarDispositivoRequest,
   CrearVehiculoRequest,
+  DesasignarConductorRequest,
   DesasignarDispositivoRequest,
   PagedResult,
   RecorridoDto,
@@ -110,4 +113,60 @@ export const vehiculosService = {
       `${BASE}/${vehiculoFlotaId}/asignaciones/dispositivo/${asignacionId}`,
       { ...configFlota, data },
     ),
+
+  /**
+   * POST /api/flota/vehiculos/{vehiculoFlotaId}/asignaciones/conductor -> 200
+   * `AsignacionVehiculoConductorDto`. Permiso `flota.vehiculos.asignar-conductor` (grupo VEHICULOS,
+   * no conductores: asignar es una operacion del vehiculo).
+   *
+   * ⚠️ A DIFERENCIA de `asignarDispositivo`, NO COORDINA CON PLATAFORMACANONICA. Es la lectura
+   * correcta del contrato (ninguna frontera declara un write canonico de conductor), pero tiene una
+   * consecuencia SILENCIOSA que la UI no debe tapar (B-20, abierta): el Canonico sigue respondiendo
+   * "este vehiculo no tiene conductor principal" y **Notificaciones no le avisa al conductor**. No
+   * prometer un aviso que nadie manda.
+   *
+   * ⚠️ EL PRINCIPAL NO SE REASIGNA SOLO: "cambiar conductor" es DELETE de la vigente + POST de la
+   * nueva, **2 requests sin atomicidad**. Si el POST falla, la UI no puede dejar el vehiculo sin
+   * conductor en silencio: muestra el error y ofrece reintentar.
+   *
+   * Asignar tampoco pasa al conductor a `en_servicio`: eso es una transicion explicita por
+   * `POST /conductores/{id}/estado`.
+   *
+   * Errores que se distinguen POR `code`, los 3 en 409:
+   *  - `flota.conductor.suspendido_no_asignable` — estado `suspendido` en DB.
+   *  - `flota.conductor.licencia_vencida` — solo `vencido` bloquea; `por_vencer` avisa y
+   *    `sin_cargar` NO bloquea (el contrato no tiene code para "todavia no cargo la licencia").
+   *  - `flota.vehiculo.ya_tiene_principal` — el unico cupo de principal del vehiculo esta ocupado.
+   *    Sale del choque real del indice unico parcial (23505), no de un check-then-act.
+   *
+   * `secundario` NO tiene restriccion de unicidad en v1: el indice parcial es solo del principal.
+   */
+  asignarConductor: (vehiculoFlotaId: string, data: AsignarConductorRequest) =>
+    httpClient.post<AsignacionVehiculoConductorDto>(
+      `${BASE}/${vehiculoFlotaId}/asignaciones/conductor`,
+      data,
+      configFlota,
+    ),
+
+  /**
+   * DELETE /api/flota/vehiculos/{vehiculoFlotaId}/asignaciones/conductor/{asignacionId} -> 204.
+   * Mismo permiso que el `POST`. Body OPCIONAL con `motivo` (codigo del catalogo); sin body, `otro`.
+   *
+   * Una `asignacionId` de OTRO vehiculo -> 404 `flota.recurso.organizacion_invalida`; inexistente,
+   * de otra organizacion o YA CERRADA -> 404 `flota.asignacion.no_existe`.
+   *
+   * ⚠️ EL `asignacionId` NO SE PUEDE DESCUBRIR desde el vehiculo: `GET /vehiculos/{id}/asignaciones`
+   * no esta implementado (B-19) y `VehiculoDetalleDto.conductoresAsignados` viene vacio SIEMPRE (ver
+   * §3 del contrato). Los 2 origenes reales son la respuesta del `POST` de esta sesion y
+   * `GET /conductores/{conductorId}/asignaciones`, que SI esta implementado y SI lo trae.
+   */
+  desasignarConductor: (
+    vehiculoFlotaId: string,
+    asignacionId: string,
+    data?: DesasignarConductorRequest,
+  ) =>
+    httpClient.delete<void>(`${BASE}/${vehiculoFlotaId}/asignaciones/conductor/${asignacionId}`, {
+      ...configFlota,
+      data,
+    }),
 }

@@ -21,22 +21,28 @@ export function AccionesVehiculo({
   onEditar,
   onDarDeBaja,
   onCambiarDispositivo,
+  onGestionarConductores,
 }: {
   vehiculoFlotaId: string
   onEditar: () => void
   onDarDeBaja: () => void
   onCambiarDispositivo: () => void
+  onGestionarConductores: () => void
 }) {
   const { t } = useTranslation(['flota', 'common'])
   const { tienePermiso } = usePermisos()
 
   const motivoSinPermiso = (permiso: string) => t('flota:detalle.acciones.sinPermiso', { permiso })
-  const motivoProximoSlice = t('flota:detalle.acciones.llegaEnOtroSlice')
 
   // "Cambiar dispositivo" dejó de estar apagada: abre el MISMO modal que el tab GPS (asociar y
   // cambiar son la misma operación — el `POST` cierra la anterior). Sin permiso queda deshabilitada
   // con su motivo, que es el comportamiento del verbo `asignar-*`, no oculta.
   const puedeAsignarDispositivo = tienePermiso('flota.vehiculos.asignar-dispositivo')
+
+  // 🔴 "Gestionar conductores" dejó de estar apagada por "llega en otro slice": ese motivo quedó
+  // FALSO al construirse `f-07` — la asignación de conductor existe y funciona. Abre el mismo modal
+  // que el tab Conductor. Sin permiso queda deshabilitada con su motivo, nunca oculta.
+  const puedeAsignarConductor = tienePermiso('flota.vehiculos.asignar-conductor')
 
   const items: ItemMenuAcciones[] = [
     {
@@ -53,10 +59,11 @@ export function AccionesVehiculo({
       clave: 'conductores',
       etiqueta: t('flota:detalle.acciones.gestionarConductores'),
       icono: Users,
-      deshabilitado: true,
-      motivo: tienePermiso('flota.vehiculos.asignar-conductor')
-        ? motivoProximoSlice
+      deshabilitado: !puedeAsignarConductor,
+      motivo: puedeAsignarConductor
+        ? undefined
         : motivoSinPermiso('flota.vehiculos.asignar-conductor'),
+      onSelect: onGestionarConductores,
     },
   ]
 

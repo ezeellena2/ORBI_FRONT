@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { camposDispositivoQueNoSePuedenBorrar } from './editar-dispositivo'
+import { camposConductorQueNoSePuedenBorrar } from './editar-conductor'
 import { camposQueNoSePuedenBorrar } from './editar-vehiculo'
 
 /**
@@ -89,5 +90,26 @@ describe('camposQueNoSePuedenBorrar (vehículo)', () => {
     expect(camposQueNoSePuedenBorrar(vaciados, { ...actual, kilometrajeActual: 0 })).toEqual([
       'kilometrajeActual',
     ])
+  })
+})
+
+describe('camposConductorQueNoSePuedenBorrar', () => {
+  const actual = { numeroLegajo: 'L-0042', notas: 'Turno mañana' }
+
+  it('detecta los 2 campos del PATCH de conductor', () => {
+    expect(camposConductorQueNoSePuedenBorrar({ numeroLegajo: '', notas: '  ' }, actual)).toEqual([
+      'numeroLegajo',
+      'notas',
+    ])
+  })
+
+  it('no avisa si el campo ya venía vacío: no hay nada que el usuario crea haber borrado', () => {
+    expect(
+      camposConductorQueNoSePuedenBorrar({ numeroLegajo: '', notas: '' }, { numeroLegajo: null, notas: null }),
+    ).toEqual([])
+  })
+
+  it('un campo todavía no registrado por el form no es "vaciado", es "no lo tocaron"', () => {
+    expect(camposConductorQueNoSePuedenBorrar({}, actual)).toEqual([])
   })
 })

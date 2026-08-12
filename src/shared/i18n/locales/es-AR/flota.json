@@ -4,7 +4,9 @@
     "vehiculoDetalle": "Vehículo",
     "vehiculosOnboarding": "Nuevo vehículo",
     "dispositivosListado": "Dispositivos",
-    "dispositivoDetalle": "Dispositivo"
+    "dispositivoDetalle": "Dispositivo",
+    "conductoresListado": "Conductores",
+    "conductorDetalle": "Conductor"
   },
   "estadoConexion": {
     "en_linea": "En línea",
@@ -47,13 +49,13 @@
     },
     "celda": {
       "sinDato": "—",
-      "sinDispositivo": "Sin dispositivo",
-      "sinConductor": "Sin conductor",
       "conductoresAsignados_one": "{{count}} asignado",
       "conductoresAsignados_other": "{{count}} asignados",
       "conductoresExtra": "+{{count}}",
       "sinSenal": "Sin señal aún",
-      "velocidad": "{{velocidad}} km/h"
+      "velocidad": "{{velocidad}} km/h",
+      "dispositivoSinComponer": "Flota todavía no muestra el GPS desde el vehículo. El equipo instalado se ve en el inventario de dispositivos.",
+      "conductorSinComponer": "Flota todavía no muestra el conductor desde el vehículo. La asignación vigente se ve en la ficha del conductor."
     },
     "acciones": {
       "abrirMenu": "Acciones del vehículo",
@@ -104,7 +106,8 @@
     "volverAVehiculos": "Volver a vehículos",
     "volverADispositivos": "Volver a dispositivos",
     "noSePuedeBorrar": "Vaciar un campo todavía no lo borra: {{campos}} van a quedar como estaban. El resto de los cambios sí se guarda.",
-    "separadorLista": ", "
+    "separadorLista": ", ",
+    "volverAConductores": "Volver a conductores"
   },
   "forbidden": {
     "titulo": "Sin acceso",
@@ -128,7 +131,6 @@
     "cargando": "Cargando el vehículo…",
     "identidadNoDisponible": "Identidad del vehículo no disponible",
     "ultimaSenal": "Última señal: {{valor}}",
-    "sinConductor": "Sin conductor asignado",
     "noEncontrado": {
       "titulo": "Vehículo no encontrado",
       "descripcion": "Puede que se haya dado de baja o que el enlace ya no sea válido."
@@ -144,8 +146,7 @@
       "cambiarDispositivo": "Cambiar dispositivo",
       "gestionarConductores": "Gestionar conductores",
       "darDeBaja": "Dar de baja",
-      "sinPermiso": "Necesitás el permiso {{permiso}}",
-      "llegaEnOtroSlice": "Las asignaciones de dispositivo y conductor todavía no están disponibles."
+      "sinPermiso": "Necesitás el permiso {{permiso}}"
     },
     "miniStats": {
       "titulo": "Estado del vehículo",
@@ -190,12 +191,22 @@
     },
     "conductor": {
       "titulo": "Conductores asignados",
-      "vacioTitulo": "Sin conductor asignado",
-      "vacioDescripcion": "Vas a poder asignar un conductor a este vehículo desde acá cuando esté disponible la gestión de conductores.",
+      "vacioTitulo": "No podemos mostrar los conductores de este vehículo",
+      "vacioDescripcion": "Flota todavía no compone esta información del lado del vehículo, así que acá no se ve ni cuando el vehículo tiene conductor asignado. La asignación vigente se ve en la ficha del conductor.",
       "dni": "DNI",
       "licencia": "Licencia",
       "telefono": "Teléfono",
-      "asignadoDesde": "Asignado desde"
+      "asignadoDesde": "Asignado desde",
+      "irAConductores": "Ir a conductores",
+      "asignar": "Asignar conductor",
+      "cambiar": "Cambiar conductor",
+      "quitar": "Quitar conductor",
+      "quitarSinId": "Para quitar al conductor hace falta la asignación de esta sesión. Si no la asignaste vos, quitala desde la ficha del conductor.",
+      "verPerfil": "Ver perfil",
+      "recienAsignadoTitulo": "Conductor asignado en esta sesión",
+      "recienAsignadoDescripcion": "La asignación quedó guardada. Los datos de la persona se ven en su ficha: Flota todavía no los compone del lado del vehículo.",
+      "pillAlMenos": "{{cantidad}}+",
+      "pillSinDato": "—"
     },
     "dispositivo": {
       "titulo": "Dispositivo GPS asociado",
@@ -256,7 +267,8 @@
       "bloqueadaPorAsignaciones": "No se puede dar de baja: el vehículo todavía tiene un conductor o un dispositivo asignado. Primero hay que desasignarlos.",
       "etiquetaTipeo": "Para confirmar, escribí la patente",
       "confirmar": "Dar de baja"
-    }
+    },
+    "conductorNoDisponible": "Conductor sin dato"
   },
   "onboarding": {
     "bienvenida": "Bienvenido a {{organizacion}}",
@@ -296,9 +308,8 @@
       "sinFilaFantasma": "No se creó ningún vehículo: podés reintentar sin miedo a duplicarlo."
     },
     "pasos": {
-      "accionNoDisponible": "Todavía no disponible",
       "saltarAlSiguiente": "Saltar este paso",
-      "finalizar": "Finalizar e ir a vehículos",
+      "finalizar": "Finalizar e ir al panel",
       "vehiculo": {
         "etiqueta": "Primer vehículo"
       },
@@ -315,7 +326,11 @@
         "etiqueta": "Conductor",
         "titulo": "Asignar un conductor",
         "descripcion": "Opcional. Podés saltarlo y hacerlo más adelante.",
-        "hint": "Vas a poder asignar un conductor desde el detalle del vehículo cuando esté disponible la gestión de conductores."
+        "continuar": "Asignar y finalizar",
+        "asignando": "Asignando…",
+        "asignado": "Asignaste a {{nombre}} a este vehículo.",
+        "vacio": "Todavía no hay conductores en tu organización. Podés saltar este paso y asignarlo después desde el detalle del vehículo.",
+        "vacioCta": "Ir a conductores"
       }
     },
     "importar": {
@@ -381,6 +396,65 @@
     },
     "dispositivo_flota_id": {
       "required": "Elegí un dispositivo de la lista."
+    },
+    "persona_id": {
+      "required": "El identificador de la persona es obligatorio",
+      "invalid": "El identificador de la persona no es válido"
+    },
+    "tipo_documento": {
+      "required": "El tipo de documento es obligatorio"
+    },
+    "numero_documento": {
+      "required": "El número de documento es obligatorio"
+    },
+    "apellido": {
+      "required": "El apellido es obligatorio"
+    },
+    "telefono": {
+      "max_length": "El teléfono no puede superar los 30 caracteres."
+    },
+    "numero_legajo": {
+      "max_length": "El legajo no puede superar los 50 caracteres."
+    },
+    "notas": {
+      "max_length": "Las notas no pueden superar los 500 caracteres."
+    },
+    "conductor_flota_id": {
+      "required": "Elegí un conductor"
+    },
+    "rol": {
+      "invalid": "Ese rol de asignación no es válido."
+    },
+    "estado_nuevo": {
+      "invalid": "Ese estado destino no es válido."
+    },
+    "url_externa": {
+      "invalid": "El enlace no es válido",
+      "https_required": "El enlace tiene que empezar con https"
+    },
+    "fecha_vencimiento": {
+      "invalid": "La fecha de vencimiento no es válida"
+    },
+    "fecha_emision": {
+      "invalid": "La fecha de emisión no es válida"
+    },
+    "documento": {
+      "max_length": "El tipo y el número de documento no pueden superar los 50 caracteres juntos."
+    },
+    "numero": {
+      "max_length": "El número no puede superar los 100 caracteres."
+    },
+    "vehiculo_flota_id": {
+      "required": "Elegí un vehículo de la lista."
+    },
+    "persona": {
+      "modo_invalido": "Elegí una sola forma de alta: una persona ya conocida o un documento nuevo."
+    },
+    "licencia": {
+      "sin_destino": "La licencia no se carga en el alta: cargala como documento desde la ficha del conductor."
+    },
+    "enviar_invitacion": {
+      "no_soportado": "Todavía no se pueden enviar invitaciones por email a los conductores."
     }
   },
   "estadoStockDispositivo": {
@@ -672,5 +746,450 @@
     "reparacion": "Reparación",
     "baja": "Baja",
     "otro": "Otro"
+  },
+  "conductoresAndamio": {
+    "descripcion": "Estamos construyendo esta pantalla. Vas a poder gestionar los conductores de tu organización desde acá."
+  },
+  "estadoConductor": {
+    "pendiente_documentacion": "Pendiente de documentación",
+    "disponible": "Disponible",
+    "en_servicio": "En servicio",
+    "pausado": "Pausado",
+    "suspendido": "Suspendido"
+  },
+  "estadoConductorBadge": {
+    "activo": "Activo",
+    "inactivo": "Inactivo",
+    "pendiente": "Pendiente"
+  },
+  "estadoDocumento": {
+    "vigente": "Vigente",
+    "por_vencer": "Por vencer",
+    "vencido": "Vencido",
+    "sin_cargar": "Sin cargar"
+  },
+  "tipoDocumentoConductor": {
+    "licencia": "Licencia de conducir",
+    "dni": "DNI",
+    "psicofisico": "Psicofísico",
+    "art": "ART",
+    "defensivo": "Manejo defensivo",
+    "contrato": "Contrato"
+  },
+  "filtroEstadoConductor": {
+    "activo": "Activos",
+    "inactivo": "Inactivos",
+    "licencia_proxima_a_vencer": "Licencia por vencer",
+    "licencia_vencida": "Licencia vencida"
+  },
+  "filtroAsignacionConductor": {
+    "con_vehiculo": "Con vehículo",
+    "sin_vehiculo": "Sin vehículo"
+  },
+  "conductoresListado": {
+    "titulo": "Conductores",
+    "subtitulo": "Los conductores operativos de tu organización.",
+    "nuevoConductor": "Nuevo conductor",
+    "sinPermisoCrear": "Necesitás el permiso flota.conductores.crear",
+    "filtros": {
+      "estado": "Estado",
+      "estadoTodos": "Todos los estados",
+      "asignacion": "Asignación",
+      "asignacionTodos": "Todas",
+      "soloActivos": "Solo activos",
+      "limpiar": "Limpiar filtros"
+    },
+    "columnas": {
+      "conductor": "Conductor",
+      "dni": "DNI",
+      "telefono": "Teléfono",
+      "asignaciones": "Asignaciones",
+      "licencia": "Licencia",
+      "estado": "Estado",
+      "acciones": "Acciones"
+    },
+    "celda": {
+      "sinDato": "—",
+      "sinNombre": "Sin nombre cargado",
+      "identidadNoDisponible": "Los datos personales los administra la plataforma y todavía no están disponibles para tu organización.",
+      "sinLicencia": "Sin licencia cargada",
+      "sinCategoria": "Categoría no disponible",
+      "sinAsignar": "Sin asignar",
+      "vehiculosAsignados_one": "{{count}} vehículo",
+      "vehiculosAsignados_other": "{{count}} vehículos",
+      "licenciaVence": "Vence el {{fecha}}",
+      "licenciaVencida": "Vencida",
+      "licenciaVenceEnDias_one": "Vence en {{count}} día",
+      "licenciaVenceEnDias_other": "Vence en {{count}} días",
+      "legajo": "Legajo {{valor}}",
+      "sinLegajo": "Sin legajo",
+      "licenciaVencidaHace_one": "Venció hace {{count}} día",
+      "licenciaVencidaHace_other": "Venció hace {{count}} días"
+    },
+    "acciones": {
+      "abrirMenu": "Acciones del conductor",
+      "verDetalle": "Ver detalle",
+      "editar": "Editar",
+      "cambiarEstado": "Cambiar estado",
+      "asignarVehiculo": "Asignar vehículo",
+      "asignarDispositivo": "Vincular dispositivo",
+      "gestionarDocumentos": "Documentos",
+      "desactivar": "Desactivar",
+      "reactivar": "Reactivar",
+      "eliminar": "Eliminar definitivamente",
+      "sinPermiso": "Necesitás el permiso {{permiso}}"
+    },
+    "paginacion": {
+      "rango": "Mostrando {{desde}}-{{hasta}} de {{total}}",
+      "porPagina": "Por página",
+      "anterior": "Anterior",
+      "siguiente": "Siguiente"
+    },
+    "vacioSinDatos": {
+      "titulo": "Aún no cargaste conductores",
+      "descripcion": "Cuando los registres vas a poder asignarlos a vehículos y seguir el vencimiento de sus licencias.",
+      "cta": "Crear primer conductor"
+    },
+    "vacioSinResultados": {
+      "titulo": "Ningún conductor coincide con tus filtros",
+      "descripcion": "Probá ajustar los filtros activos.",
+      "cta": "Limpiar filtros"
+    },
+    "error": {
+      "titulo": "No pudimos cargar los conductores",
+      "reintentar": "Reintentar",
+      "tituloRefresco": "No pudimos actualizar el listado"
+    },
+    "sinAcceso": {
+      "titulo": "Sin acceso",
+      "descripcion": "Necesitás el permiso flota.conductores.leer para ver esta pantalla.",
+      "volver": "Volver al dashboard"
+    }
+  },
+  "conductorAlta": {
+    "titulo": "Nuevo conductor",
+    "subtitulo": "Cargá los datos del conductor. Podés asignarle vehículo y dispositivo después.",
+    "modo": "¿Cómo lo damos de alta?",
+    "modoExistente": "Ya es una persona conocida por la organización",
+    "modoNuevo": "Cargar por documento",
+    "modoAyuda": "Si no tenés el identificador de la persona, cargala por documento: la plataforma la busca y, si no existe, la crea.",
+    "personaId": "Identificador de la persona",
+    "personaIdAyuda": "Solo funciona con personas que tu organización ya registró antes.",
+    "tipoDocumento": "Tipo de documento",
+    "numeroDocumento": "Número de documento",
+    "nombre": "Nombre",
+    "apellido": "Apellido",
+    "telefono": "Teléfono",
+    "telefonoAyuda": "Opcional. Se guarda en la ficha operativa del conductor.",
+    "numeroLegajo": "Número de legajo",
+    "notas": "Notas",
+    "licenciaAparte": "La licencia se carga después, desde la ficha del conductor, como documento.",
+    "invitacionNoDisponible": "Todavía no se envían invitaciones por email a los conductores.",
+    "estadoInicial": "El conductor queda como Pendiente de documentación hasta que cargues su documentación obligatoria.",
+    "guardar": "Crear conductor",
+    "guardando": "Creando…"
+  },
+  "conductorEditar": {
+    "titulo": "Editar conductor",
+    "guardar": "Guardar cambios",
+    "numeroLegajo": "Número de legajo",
+    "notas": "Notas",
+    "leyendaCanonicos": "El nombre, el documento, el email y el teléfono se administran en la ficha de la persona, fuera de Flota.",
+    "licenciaAparte": "Los datos de la licencia se editan desde la pestaña de documentos.",
+    "campos": {
+      "numeroLegajo": "número de legajo",
+      "notas": "notas"
+    },
+    "errorCarga": "No pudimos cargar los datos del conductor"
+  },
+  "conductorEstado": {
+    "titulo": "Cambiar estado del conductor",
+    "estadoActual": "Estado actual",
+    "nuevoEstado": "Nuevo estado",
+    "sinDestinos": "Desde este estado no hay ningún cambio disponible.",
+    "suspendidoSinVuelta": "Un conductor suspendido no se puede rehabilitar desde acá. Consultá con el administrador de la organización.",
+    "motivo": "Motivo",
+    "motivoAyuda": "Opcional. Queda registrado en el evento del cambio, no en la ficha del conductor.",
+    "confirmar": "Cambiar estado"
+  },
+  "conductorBaja": {
+    "titulo": "Desactivar conductor",
+    "descripcion": "Vas a desactivar a {{nombre}}. Se conserva todo el historial y podés reactivarlo cuando quieras.",
+    "noDesasigna": "La desactivación no desasigna nada por su cuenta: si tiene un vehículo o un dispositivo vinculado, primero hay que desvincularlos.",
+    "bloqueadaPorAsignaciones": "Este conductor tiene asignaciones activas. Desvinculalas antes de desactivarlo.",
+    "etiquetaTipeo": "Escribí {{valor}} para confirmar",
+    "confirmar": "Desactivar"
+  },
+  "conductorReactivar": {
+    "titulo": "Reactivar conductor",
+    "descripcion": "Vas a reactivar a {{nombre}}.",
+    "noResetaEstado": "Vuelve con el mismo estado operativo que tenía antes de la baja. Verificá su documentación antes de asignarle un vehículo.",
+    "confirmar": "Reactivar"
+  },
+  "conductorEliminar": {
+    "titulo": "Eliminar definitivamente",
+    "descripcion": "Vas a eliminar a {{nombre}} para siempre. Esto no se puede deshacer.",
+    "etiquetaTipeo": "Escribí {{valor}} para confirmar",
+    "confirmar": "Eliminar definitivamente",
+    "cancelar": "Cancelar"
+  },
+  "conductorDetalle": {
+    "cargando": "Cargando conductor…",
+    "noEncontrado": {
+      "titulo": "Conductor no encontrado",
+      "descripcion": "Este conductor no existe o no pertenece a tu organización."
+    },
+    "error": {
+      "titulo": "No pudimos cargar el conductor",
+      "descripcion": "Probá de nuevo en unos segundos.",
+      "tituloRefresco": "No pudimos actualizar la ficha"
+    },
+    "sinAcceso": {
+      "descripcion": "Necesitás el permiso flota.conductores.leer para ver esta ficha."
+    },
+    "hero": {
+      "legajo": "Legajo {{valor}}",
+      "sinLegajo": "Sin legajo",
+      "dni": "DNI {{valor}}",
+      "telefono": "Tel. {{valor}}",
+      "conduce": "Conduce {{patente}}",
+      "sinVehiculo": "Sin vehículo asignado",
+      "altaOperativa": "En la flota desde {{fecha}}",
+      "identidadNoDisponible": "Datos personales no disponibles"
+    },
+    "acciones": {
+      "editar": "Editar",
+      "masAcciones": "Más acciones",
+      "cambiarEstado": "Cambiar estado",
+      "asignarVehiculo": "Asignar vehículo",
+      "asignarDispositivo": "Vincular dispositivo",
+      "desactivar": "Desactivar",
+      "reactivar": "Reactivar",
+      "eliminar": "Eliminar definitivamente",
+      "sinPermiso": "Necesitás el permiso {{permiso}}",
+      "asignarOtroVehiculo": "Asignar otro vehículo"
+    },
+    "tabs": {
+      "info": "Info general",
+      "asignaciones": "Asignaciones",
+      "documentos": "Licencia y documentos",
+      "actividad": "Actividad"
+    },
+    "miniStats": {
+      "titulo": "Actividad del período",
+      "kmTotales": "Km totales",
+      "horas": "Horas al volante",
+      "viajes": "Viajes",
+      "score": "Score de manejo",
+      "sinFuente": "Sin datos de telemetría"
+    },
+    "info": {
+      "titulo": "Datos del conductor",
+      "nombre": "Nombre",
+      "dni": "DNI",
+      "email": "Email",
+      "telefono": "Teléfono",
+      "legajo": "Legajo",
+      "estado": "Estado",
+      "alta": "Alta operativa",
+      "notas": "Notas",
+      "creado": "Creado",
+      "modificado": "Modificado",
+      "porUsuario": "por {{usuario}}",
+      "identidadCanonica": "El nombre, el documento y el contacto se administran fuera de Flota, en la ficha de la persona.",
+      "identidadNoDisponible": "Todavía no están disponibles para tu organización.",
+      "emailSinFuente": "El email del conductor no se guarda en Flota."
+    },
+    "licencia": {
+      "titulo": "Licencia de conducir",
+      "categoria": "Categoría",
+      "categoriaSinDato": "La categoría todavía no se puede guardar.",
+      "numero": "Número",
+      "emision": "Emitida",
+      "vencimiento": "Vence",
+      "diasParaVencer_one": "en {{count}} día",
+      "diasParaVencer_other": "en {{count}} días",
+      "vencidaHace_one": "venció hace {{count}} día",
+      "vencidaHace_other": "venció hace {{count}} días",
+      "vacioTitulo": "Sin licencia cargada",
+      "vacioDescripcion": "Cargá la licencia como documento para poder asignarle un vehículo.",
+      "cargar": "Cargar licencia"
+    },
+    "asignaciones": {
+      "vehiculoTitulo": "Vehículo asignado",
+      "vehiculoVacioTitulo": "Sin vehículo asignado",
+      "vehiculoVacioDescripcion": "Asignale un vehículo para que pueda operar.",
+      "verVehiculo": "Ver vehículo",
+      "asignarVehiculo": "Asignar vehículo",
+      "desasignar": "Desasignar",
+      "desasignarSinId": "Para desasignar hace falta abrir el historial de asignaciones.",
+      "rol": "Rol",
+      "desde": "Desde",
+      "dispositivoTitulo": "Dispositivos vinculados",
+      "dispositivoVacioTitulo": "Sin dispositivos vinculados",
+      "dispositivoVacioDescripcion": "El vínculo sirve para atribuirle viajes y eventos.",
+      "asignarDispositivo": "Vincular dispositivo",
+      "desvincular": "Desvincular",
+      "atribucionNota": "Este vínculo es de atribución: la ubicación del conductor sale siempre del vehículo que maneja.",
+      "historialTitulo": "Historial de asignaciones",
+      "historialColumnas": {
+        "vehiculo": "Vehículo",
+        "rol": "Rol",
+        "desde": "Desde",
+        "hasta": "Hasta",
+        "motivo": "Motivo de cierre"
+      },
+      "historialVigente": "Vigente",
+      "historialVacioTitulo": "Sin asignaciones",
+      "historialVacioDescripcion": "Este conductor todavía no estuvo asignado a ningún vehículo.",
+      "historialErrorTitulo": "No pudimos cargar el historial",
+      "motivoSinEspecificar": "Sin especificar",
+      "masVigentes_one": "Este conductor tiene {{count}} asignación vigente más. Está en el historial de abajo.",
+      "masVigentes_other": "Este conductor tiene {{count}} asignaciones vigentes más. Están en el historial de abajo."
+    },
+    "documentos": {
+      "titulo": "Documentos",
+      "agregar": "Agregar documento",
+      "renovarLicencia": "Renovar licencia",
+      "columnas": {
+        "documento": "Documento",
+        "numero": "Número",
+        "estado": "Estado",
+        "vencimiento": "Vencimiento",
+        "archivo": "Archivo",
+        "acciones": "Acciones"
+      },
+      "verArchivo": "Ver archivo",
+      "sinArchivo": "Sin archivo",
+      "eliminar": "Eliminar",
+      "vacioTitulo": "Sin documentos cargados",
+      "vacioDescripcion": "Cargá la licencia y la documentación obligatoria para poder ponerlo en servicio.",
+      "errorTitulo": "No pudimos cargar los documentos",
+      "sinPermisoTitulo": "Sin acceso a los documentos",
+      "sinPermisoDescripcion": "Necesitás el permiso flota.conductores.gestionar-documentos para ver esta sección.",
+      "obligatoriosTitulo": "Documentación obligatoria",
+      "obligatoriosDescripcion": "Mientras haya un documento obligatorio vencido o sin cargar, el conductor no puede pasar a En servicio.",
+      "subir": "Subir"
+    },
+    "actividad": {
+      "sinFuenteTitulo": "Sin datos de telemetría",
+      "sinFuenteDescripcion": "Los recorridos por conductor todavía no tienen una fuente de datos disponible."
+    },
+    "ubicacion": {
+      "titulo": "Ubicación actual",
+      "sinFuenteTitulo": "Sin datos de ubicación",
+      "sinFuenteDescripcion": "La ubicación del conductor sale del vehículo que maneja y todavía no tiene una fuente de datos disponible."
+    },
+    "auditoria": {
+      "titulo": "Auditoría",
+      "sinNombreUsuario": "Todavía no se puede mostrar qué usuario hizo cada cambio."
+    }
+  },
+  "documentoConductor": {
+    "titulo": "Cargar documento",
+    "tipo": "Tipo de documento",
+    "tipoPlaceholder": "Elegí un tipo",
+    "numero": "Número",
+    "fechaEmision": "Fecha de emisión",
+    "fechaVencimiento": "Fecha de vencimiento",
+    "urlExterna": "Enlace al archivo",
+    "urlExternaAyuda": "Tiene que empezar con https. Opcional: podés cargar los datos ahora y el archivo después.",
+    "sinBinariosAviso": "Por ahora no se suben archivos: se guarda el enlace a donde ya esté publicado.",
+    "guardar": "Cargar documento",
+    "guardando": "Cargando…",
+    "cancelar": "Cancelar",
+    "eliminarTitulo": "Eliminar documento",
+    "eliminarDescripcion": "Vas a eliminar {{documento}} de la ficha del conductor.",
+    "eliminarNoBorraArchivo": "El archivo original no se toca: se elimina el registro en Flota.",
+    "eliminarConfirmar": "Eliminar"
+  },
+  "asignacionConductor": {
+    "titulo": "Asignar conductor",
+    "descripcion": "Elegí un conductor de tu organización para este vehículo.",
+    "conductor": "Conductor",
+    "conductorPlaceholder": "Elegí un conductor",
+    "rol": "Rol",
+    "rolPrincipal": "Principal",
+    "rolSecundario": "Secundario",
+    "rolAyuda": "Un vehículo tiene un solo conductor principal a la vez.",
+    "sinDisponibles": "No hay conductores disponibles para asignar.",
+    "sinDisponiblesCta": "Ir a conductores",
+    "cambiarTitulo": "Cambiar conductor",
+    "cambiarDescripcion": "Vas a reemplazar al conductor asignado a este vehículo.",
+    "cambiarNoAtomico": "El cambio son dos pasos: primero se quita el conductor actual y después se asigna el nuevo. Si el segundo falla, el vehículo queda sin conductor.",
+    "asignar": "Asignar",
+    "asignando": "Asignando…",
+    "exitoAsignar": "Conductor asignado.",
+    "desasignarTitulo": "Quitar conductor",
+    "desasignarDescripcion": "Vas a quitar a {{nombre}} de este vehículo. El historial se conserva.",
+    "desasignar": "Quitar conductor",
+    "desasignando": "Quitando…",
+    "exitoDesasignar": "Conductor desasignado.",
+    "motivo": "Motivo",
+    "motivoAyuda": "Queda registrado en el historial de la asignación.",
+    "cancelar": "Cancelar",
+    "sinPermiso": "Necesitás el permiso flota.vehiculos.asignar-conductor",
+    "sinPermisoLectura": "Necesitás el permiso flota.conductores.leer para ver la lista.",
+    "buscar": "Buscar conductor",
+    "buscarPlaceholder": "Buscar por nombre o documento",
+    "limpiarBusqueda": "Limpiar búsqueda",
+    "sinResultados": "Ningún conductor coincide con la búsqueda.",
+    "cargando": "Cargando conductores…",
+    "soloPrimeros": "Se muestran los primeros {{cantidad}}. Si no encontrás al conductor, buscalo desde el listado.",
+    "actualizar": "Actualizar lista",
+    "noAvisaAlConductor": "La asignación no le avisa al conductor.",
+    "errorElegirOtro": "Ese conductor no se puede asignar en este momento. Elegí otro o revisá su estado y su licencia.",
+    "errorConflicto": "La asignación cambió mientras completabas el formulario. Actualizá y probá de nuevo.",
+    "errorNoEncontrado": "No encontramos ese conductor o esa asignación. Actualizá la pantalla.",
+    "errorGenerico": "No pudimos completar la operación. Verificá el estado antes de reintentar.",
+    "identidadNoDisponible": "Identidad no disponible",
+    "cambioAMediasTitulo": "El vehículo quedó sin conductor",
+    "cambioAMedias": "Se quitó a {{nombre}} pero el conductor nuevo no se asignó. Volvé a intentar la asignación: el paso de quitar no se repite."
+  },
+  "vinculoDispositivoConductor": {
+    "titulo": "Vincular dispositivo",
+    "descripcion": "El vínculo sirve para atribuirle viajes y eventos a este conductor.",
+    "dispositivo": "Dispositivo",
+    "dispositivoPlaceholder": "Elegí un dispositivo",
+    "notas": "Notas",
+    "sinDisponibles": "No hay dispositivos para vincular.",
+    "sinDisponiblesCta": "Ir a dispositivos",
+    "atribucionAviso": "Vincular un dispositivo no lo instala en un vehículo ni cambia su estado de inventario.",
+    "asignar": "Vincular",
+    "asignando": "Vinculando…",
+    "exitoAsignar": "Dispositivo vinculado.",
+    "cerrarTitulo": "Desvincular dispositivo",
+    "cerrarDescripcion": "Vas a cerrar el vínculo con {{dispositivo}}. El historial se conserva.",
+    "cerrar": "Desvincular",
+    "cerrando": "Desvinculando…",
+    "exitoCerrar": "Dispositivo desvinculado.",
+    "motivo": "Motivo",
+    "motivoAyuda": "Queda registrado en el historial del vínculo.",
+    "cancelar": "Cancelar",
+    "sinPermiso": "Necesitás el permiso flota.conductores.asignar-dispositivo"
+  },
+  "licenciaVisible": {
+    "sin_cargar": "Sin cargar",
+    "sin_vencimiento": "Sin vencimiento",
+    "vencida": "Vencida",
+    "vigente": "Vigente"
+  },
+  "asignacionVehiculo": {
+    "titulo": "Asignar vehículo",
+    "descripcion": "Elegí un vehículo de tu organización para este conductor.",
+    "vehiculo": "Vehículo",
+    "cargando": "Cargando vehículos…",
+    "sinDisponibles": "No hay vehículos activos en tu organización.",
+    "sinDisponiblesCta": "Ir a vehículos",
+    "sinPatente": "Sin patente",
+    "buscar": "Buscar vehículo",
+    "buscarPlaceholder": "Buscar por patente, alias, marca o modelo",
+    "limpiarBusqueda": "Limpiar búsqueda",
+    "sinResultados": "Ningún vehículo coincide con la búsqueda.",
+    "soloPrimeros": "Se muestran los primeros {{cantidad}} de {{total}}. Si no encontrás el vehículo, buscalo desde el listado.",
+    "sinPermisoLectura": "Necesitás el permiso {{permiso}} para ver la lista de vehículos.",
+    "asignar": "Asignar vehículo",
+    "noLiberaElActual": "Esto NO libera el vehículo que ya conduce: se suma una asignación. Para cerrar la anterior, usá \"Quitar\" en el tab Asignaciones.",
+    "listaSinFiltrar": "Se listan todos los vehículos activos: todavía no podemos saber cuáles ya tienen conductor. Si el elegido ya tiene principal, la asignación se rechaza al guardar."
   }
 }

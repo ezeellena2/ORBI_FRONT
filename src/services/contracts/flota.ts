@@ -1,12 +1,13 @@
 /**
  * Espejo del contrato de Flota — slice-02 (vehiculos) + slice-03 (dispositivos GPS, asignacion
- * vehiculo<->dispositivo y catalogos growables).
+ * vehiculo<->dispositivo y catalogos growables) + slice-04 (conductores operativos, vinculo
+ * conductor<->dispositivo, documentos y asignacion vehiculo<->conductor).
  *
  * FUENTE UNICA: `TracAutoV2/src/Flota/docs/00-contrato/dtos.ts` + `api.md`. Redefinir un shape aca
  * esta prohibido: si falta un campo, se corrige el contrato del backend, no este archivo.
  *
- * Este archivo solo espeja lo que USAN los slices construidos. Los shapes de conductores, geozonas,
- * problemas, integraciones y mapa quedan fuera a proposito: llegan con sus slices.
+ * Este archivo solo espeja lo que USAN los slices construidos. Los shapes de geozonas, problemas,
+ * integraciones y mapa quedan fuera a proposito: llegan con sus slices.
  *
  * ─────────────────────────────────────────────────────────────────────────────────────────────
  * DRIFT CONTRATO ↔ BACKEND REAL (verificado contra
@@ -104,6 +105,18 @@ export interface VehiculoConductorPrincipalDto {
   nombreCompleto: string // proyeccion local
 }
 
+/**
+ * ⚠️ MISMA FILA 🔴 QUE `dispositivo`, verificada al cerrar el backend de slice-04:
+ * `VehiculoFlotaService.MapearItem` escribe `ConductorPrincipal = null` y `ConductoresCount = 0`, y
+ * `MapearDetalle` escribe `ConductoresAsignados = []`, en el **100% de las respuestas** — tambien
+ * cuando el vehiculo SI tiene conductores asignados. La tabla
+ * `asignaciones_vehiculo_conductor_flota` existe desde la migracion `Conductores`, asi que es
+ * COMPOSICION faltante, no dato faltante (`ESTADO.md` §"Superficie sin implementar").
+ *
+ * Consecuencia para la UI: es PARTIAL-DATA, no "no tiene conductor". Ninguna pantalla puede afirmar
+ * "este vehiculo no tiene conductor" leyendo estos 3 campos, porque Flota todavia no lo sabe.
+ */
+
 export interface UltimaSenalDto {
   fechaUtc: string // ISO 8601
   velocidadKmH: number
@@ -135,8 +148,10 @@ export interface VehiculoListItemDto {
    * persiste y SI se ve del lado del dispositivo). No es un bug del front: el DTO viene vacio.
    */
   dispositivo: VehiculoDispositivoAsignadoDto | null
-  conductorPrincipal: VehiculoConductorPrincipalDto | null // null si sin conductor
-  conductoresCount: number // total asignados (incluye principal)
+  /** ⚠️ HOY VIENE SIEMPRE `null` — ver el bloque de `VehiculoConductorPrincipalDto`. Partial-data. */
+  conductorPrincipal: VehiculoConductorPrincipalDto | null
+  /** ⚠️ HOY VIENE SIEMPRE `0`, tambien con conductores asignados. Partial-data, no "no tiene". */
+  conductoresCount: number
   estadoOperativo: EstadoOperativoVehiculo
   // Estado de CONEXION compuesto desde Telemetria. Partial-data (D-C1 a): si Telemetria no
   // responde vale `sin_dato` y los datos propios se sirven igual, sin flag nuevo en el DTO.
@@ -175,6 +190,7 @@ export interface VehiculoDetalleDto extends VehiculoListItemDto {
   combustible: string | null
   kilometrajeActual: number | null // dato operativo de Flota (km)
   notasOperativas: string | null
+  /** ⚠️ HOY VIENE SIEMPRE `[]` — ver el bloque de `VehiculoConductorPrincipalDto`. Partial-data. */
   conductoresAsignados: VehiculoConductorAsignadoDto[]
   geozonasAsignadas: VehiculoGeozonaAsignadaDto[] // DIFERIDO DA-08 — no borrar
   fechaActualizacion: string
@@ -649,4 +665,495 @@ export interface CrearModeloDispositivoRequest {
 /** POST /api/flota/catalogos/proveedores-sim. Igual, SIN `fabricante`: la tabla no tiene esa columna. */
 export interface CrearProveedorSimRequest {
   nombre: string
+}
+
+/* ============================================================================
+ * 8. CONDUCTORES OPERATIVOS — slice-04
+ *
+ * Espejo de `dtos.ts` §4 + §6 + §10, RECONCILIADO contra
+ * `Flota.Application/DTOs/{ConductorDtos,AsignacionConductorDtos,DocumentoDtos}.cs`, que es el
+ * codigo que corre, y contra `ConductoresController` (17 endpoints).
+ *
+ * ── POR QUE ESTE ESPEJO TIENE MENOS CAMPOS QUE `dtos.ts` ─────────────────────────────────────
+ * `dtos.ts` §4 declara 6 campos de `ConductorDetalleDto` que el backend NO SERIALIZA porque no
+ * tienen columna ni fuente canonica accesible: `telefono` (duplica `telefonoPrincipal`),
+ * `fechaNacimiento`, `cuil`, `direccion`, `contactoEmergencia` y `geozonasAsignadas` (DIFERIDO
+ * DA-08). Tambien declara 3 campos extra dentro de `licencia` (`lugarEmision`, `observaciones`,
+ * `fechaUltimaRenovacion`) sin columna fuente.
+ *
+ * NO se espejan: un campo que el server no manda llega `undefined`, la UI lo pinta vacio y NADA
+ * falla — se contrata un `null` permanente disfrazado de dato. Es el mismo criterio con que
+ * D-S3-27 borro `ultima_senal_utc`. Drift REPORTADO contra `dtos.ts`; lo cierra el PO.
+ *
+ * ── LO QUE NO SE ESPEJA DE LA SUPERFICIE (y por que no es un olvido) ─────────────────────────
+ *  - Filtro `licencia` (`a|b1|...|e2`) de `GET /conductores`: `api.md` lo contrata y
+ *    `ConductoresPageQuery` del backend NO LO DECLARA — la categoria no tiene columna en ninguna
+ *    tabla (B-21). Un query param no declarado lo descarta el binder SIN ERROR: el cliente lo manda
+ *    y recibe 200 con la lista ENTERA. El chip no se dibuja.
+ *  - Param `search`: el contrato no declara busqueda libre en este listado.
+ *  - `licencia` y `enviarInvitacion` en `CrearConductorRequest` / `ActualizarConductorRequest`: el
+ *    Validator los RECHAZA con 400 (no los descarta en silencio). La licencia se carga por
+ *    `POST /conductores/{id}/documentos` con `tipoDocumento: 'licencia'`; el canal de invitacion no
+ *    existe (`fronteras/notificaciones.md`: Flota no invoca Notificaciones).
+ *  - `ConductorStatsDto` y `RecorridoDto` por conductor: sus 2 endpoints responden SIEMPRE 500
+ *    `flota.telemetria.no_disponible` (convencion 8b). El front NO debe emitir el request.
+ *  - Infracciones, import y export de conductores: fuera de alcance v1 (0 endpoints).
+ * ========================================================================== */
+
+/**
+ * Catalogo `flota.estados_conductor_flota`. Es el estado OPERATIVO y es ORTOGONAL a `activo`
+ * (DA-CD2-19): `suspendido` es un estado con `activo = true`; `activo = false` es baja logica
+ * reversible. El catalogo NO tiene estado terminal.
+ *
+ * Lifecycle (`datos.md` §3.2): `pendiente_documentacion` -> `disponible` -> `en_servicio`;
+ * `en_servicio` <-> `pausado` -> `disponible`; cualquiera -> `suspendido`.
+ *
+ * ⚠️ `suspendido` NO TIENE SALIDA en v1 (B-22, abierta): el contrato no declara ninguna arista de
+ * vuelta y el backend la implementa literal. La unica salida hoy es baja + re-alta. Una UI que
+ * ofrezca "rehabilitar" desde `suspendido` esta ofreciendo un 409.
+ */
+export type EstadoConductor =
+  | 'pendiente_documentacion'
+  | 'disponible'
+  | 'en_servicio'
+  | 'pausado'
+  | 'suspendido'
+
+/**
+ * Estado derivado de un documento adjunto. Se CALCULA al leer (umbral 30 dias, backend f-01), NO se
+ * persiste: el front no recalcula el umbral.
+ *
+ * `dtos.ts` declara ademas un superset SOLO para la licencia (`aprobado` | `por_renovar`,
+ * DA-CD2-09). El backend NO los emite en v1 —ningun doc dice cuando aplican, no hay columna de
+ * aprobacion ni regla—, asi que no se espejan.
+ */
+export type EstadoDocumento = 'vigente' | 'por_vencer' | 'vencido' | 'sin_cargar'
+
+/**
+ * Codigos del catalogo DB `tipos_documento_conductor_flota` (`ddl.sql` §1.1), en el orden del seed.
+ *
+ * ⚠️ ES UN CATALOGO DE TABLA SIN ENDPOINT: `api.md` no expone `GET /catalogos/tipos-documento`
+ * (PENDIENTE de f-04 paso 7). Hasta que exista, los 6 codigos se usan literales — es lo que f-06
+ * paso 6 manda explicitamente. Si una organizacion agrega un tipo, el select no lo va a ver.
+ *
+ * La obligatoriedad (`es_obligatorio`) NO esta aca: vive en la fila, y lo que la expone es
+ * `ConductorDetalleDto.documentosObligatorios`.
+ */
+export type TipoDocumentoConductor =
+  | 'licencia'
+  | 'dni'
+  | 'psicofisico'
+  | 'art'
+  | 'defensivo'
+  | 'contrato'
+
+/**
+ * Vocabulario cerrado del filtro `estado` de `GET /conductores`.
+ *
+ * ⚠️ NO ES `EstadoConductor`, aunque el parametro se llame igual. `activo`/`inactivo` miran el flag
+ * `activo` (baja logica), no el estado operativo — asi que NINGUNO de los 5 codigos del catalogo es
+ * un valor valido de este filtro, y no hay valor para `pendiente_documentacion` (PENDIENTE del
+ * contrato: la lista cierra en 4). Los otros 2 se derivan del documento de tipo `licencia`.
+ *
+ * `inactivo` LEVANTA el query filter de `activo` aunque `soloActivos` siga en `true`: sin eso el
+ * valor seria inalcanzable por construccion.
+ */
+export type FiltroEstadoConductor =
+  | 'activo'
+  | 'inactivo'
+  | 'licencia_proxima_a_vencer'
+  | 'licencia_vencida'
+
+/**
+ * Vocabulario cerrado del filtro `asignacion` de `GET /conductores`.
+ *
+ * ⚠️ NO se reusa `FiltroAsignacionDispositivo` (`asignado`/`sin_asignar`): el contrato les da
+ * vocabularios distintos y el valor viaja LITERAL en el query string. Colapsarlos hace que
+ * `?asignacion=con_vehiculo` no filtre.
+ */
+export type FiltroAsignacionConductor = 'con_vehiculo' | 'sin_vehiculo'
+
+/**
+ * Objeto `licencia` del conductor. NO es tabla propia: es la fila de `documentos_conductor_flota`
+ * con `tipo_documento = 'licencia'` (`dtos.ts` §4 declara esa fuente).
+ *
+ * ⚠️ `categoria` VIENE SIEMPRE `null`: no tiene columna en ninguna tabla — es el PENDIENTE ex
+ * DA-CD2-08 que `ddl.sql` §2.2 declara BLOQUEANTE (B-21 del PO). Es la misma causa por la que el
+ * filtro `licencia` del listado no existe y por la que el alta rechaza el bloque `licencia` con 400.
+ * Una celda que pinte la categoria muestra su fallback, no un dato.
+ *
+ * `diasParaVencer` lo calcula el backend con la MISMA cuenta que `estadoDerivado`; es negativo si ya
+ * vencio y `null` si no hay fecha cargada. El front no recalcula el umbral.
+ */
+export interface LicenciaConductorDto {
+  categoria: string | null // ⚠️ SIEMPRE null en v1 (B-21)
+  numero: string | null
+  vencimiento: string | null // ISO date
+  diasParaVencer: number | null // negativo = vencida
+  fechaEmision: string | null // ISO date
+}
+
+/**
+ * Fila del listado de conductores. Es un COMPOSITE de 3 capas: perfil operativo de Flota +
+ * proyeccion de identidad canonica + la licencia (que sale de documentos).
+ *
+ * ⚠️ PARTIAL-DATA ESTRUCTURAL (convencion 8a), no borde: `nombreCompleto`, `dni` y
+ * `telefonoPrincipal` salen de `proyeccion_personas_canonicas_flota` y el `find-or-create` del
+ * Canonico GATEA LA PII — solo devuelve nombre/apellido/documento si la organizacion que llama ya
+ * tenia relacion con esa Persona (`fronteras/plataforma-canonica.md` §5.1). Lo que Flota proyecta es
+ * lo que el operador tipeo en el alta; si el conductor nacio por otra via, la proyeccion queda
+ * vacia. La UI muestra su fallback y NO afirma que la persona no tiene nombre.
+ */
+export interface ConductorListItemDto {
+  id: string // flota.conductores_flota.id — el `conductorId` de la API, NUNCA el personaId
+  personaId: string // referencia historica a plataforma_canonica.personas
+  numeroLegajo: string | null
+  // DRIFT: `dtos.ts` los declara `string` no-nulable. La columna es `text NULL` y el gate de PII
+  // hace que `null` sea el caso NORMAL, no el borde. Se espejan nullable.
+  nombreCompleto: string | null
+  dni: string | null
+  /**
+   * ⚠️ VIENE SIEMPRE `null`: la proyeccion de persona (`datos.md` §6.2) tiene `nombre_mostrable`,
+   * `documento_resumen` y `telefono_principal` — NO TIENE EMAIL, y el `find-or-create` tampoco lo
+   * devuelve. El backend no inventa columna. Toda columna "Email" del mockup queda en fallback.
+   */
+  email: string | null
+  telefonoPrincipal: string | null
+  estado: EstadoConductor
+  licencia: LicenciaConductorDto | null // null si no hay documento de tipo `licencia` cargado
+  vehiculosAsignadosCount: number // asignaciones VIGENTES (hasta IS NULL y activo)
+  fechaAltaOperativa: string // ISO 8601
+  activo: boolean // false = baja logica (reversible por POST /reactivar)
+}
+
+/** Item de `vehiculosAsignados` — asignaciones VIGENTES del conductor. */
+export interface VehiculoAsignadoConductorDto {
+  vehiculoFlotaId: string // id LOCAL (A-4): la fila persiste el canonico y el repo traduce al leer
+  patente: string | null // de la proyeccion canonica; null si no esta vigente
+  rol: RolAsignacionConductor
+  fechaAsignacion: string // ISO 8601
+}
+
+/**
+ * Item de `dispositivosAsignados` — vinculo conductor<->dispositivo. Incluye los CERRADOS: `activa`
+ * los distingue. Es de ATRIBUCION (espeja el driver<->device de Traccar), NO fuente de posicion: la
+ * posicion del conductor deriva del VEHICULO que conduce (D1).
+ */
+export interface DispositivoAsignadoConductorDto {
+  asignacionId: string
+  dispositivoFlotaId: string
+  alias: string | null
+  imei: string
+  fechaAsignacion: string // ISO 8601
+  activa: boolean
+}
+
+/**
+ * Item de `documentosObligatorios`: una fila POR CADA tipo con `es_obligatorio = true` en el
+ * catalogo, tenga o no documento cargado (sin fila => `sin_cargar`). Es lo que gobierna el paso a
+ * `en_servicio` (409 `flota.conductor.documento_vencido`).
+ */
+export interface DocumentoObligatorioConductorDto {
+  tipo: string // codigo del catalogo `tipos_documento_conductor_flota`
+  estado: EstadoDocumento
+  fechaVencimiento: string | null // ISO date
+}
+
+/** Detalle del conductor. Ver el bloque de §8 para los 6 campos de `dtos.ts` que NO se espejan. */
+export interface ConductorDetalleDto extends ConductorListItemDto {
+  notas: string | null
+  vehiculosAsignados: VehiculoAsignadoConductorDto[] // solo VIGENTES; el historial es otro endpoint
+  dispositivosAsignados: DispositivoAsignadoConductorDto[] // vigentes + cerrados (ver `activa`)
+  documentosObligatorios: DocumentoObligatorioConductorDto[]
+  fechaCreacion: string // ISO 8601
+  fechaActualizacion: string // ISO 8601
+  creadoPorUsuarioId: string | null
+  modificadoPorUsuarioId: string | null
+  // ⚠️ VIENEN SIEMPRE `null`: Flota no tiene proyeccion usuario->persona (la de personas se indexa
+  // por `persona_id`, no por `usuario_id`). Misma ausencia que en vehiculo y dispositivo.
+  creadoPorNombre: string | null
+  modificadoPorNombre: string | null
+}
+
+/**
+ * Modo B del alta: la Persona canonica se resuelve o se crea POR DOCUMENTO. Es el camino REAL del
+ * alta (el operador tiene el documento en la mano, no un uuid) y ya no degrada: la superficie
+ * `find-or-create-por-documento` existe desde el 2026-08-11 (B-10 cerrado).
+ *
+ * ⚠️ `email` y `fechaNacimiento` SE DESCARTAN: el contrato firme del Canonico es
+ * `{tipoDocumento, numeroDocumento, nombre?, apellido?}` y la proyeccion de Flota no tiene esas
+ * columnas. Se declaran para no romper el shape de `dtos.ts` y NO se persisten — no pintar un campo
+ * de formulario cuyo valor se pierde en silencio.
+ *
+ * `nombre` y `apellido` son obligatorios SIEMPRE aunque el Canonico solo los exija al crear: quien
+ * llama no sabe de antemano si va a crear, y mandarlos vacios convierte un alta legitima en un 400.
+ * Si la Persona ya existe, el Canonico NO los pisa: la identidad la posee el.
+ */
+export interface PersonaNuevaConductorDto {
+  tipoDocumento: string // codigo canonico (`dni`, `pasaporte`, ...); lo valida el Canonico
+  numeroDocumento: string
+  nombre: string
+  apellido: string
+  email?: string // ⚠️ se descarta (sin destino ni en el Canonico ni en Flota)
+  telefono?: string // si tiene destino: `proyeccion_personas_canonicas_flota.telefono_principal`
+  fechaNacimiento?: string // ⚠️ se descarta (ISO date)
+}
+
+/**
+ * POST /api/flota/conductores -> 201 `ConductorDetalleDto`.
+ *
+ * EXACTAMENTE UNO de `personaId` (Modo A) o `persona` (Modo B); lo valida el server.
+ *
+ * ⚠️ Modo A: Flota NO puede verificar el `personaId` contra el Canonico —su superficie interna no
+ * tiene un `GET` de persona por id, solo el find-or-create POR DOCUMENTO—, asi que valida contra la
+ * unica evidencia que posee (que exista la proyeccion para esa persona y esa organizacion) y
+ * devuelve 404 `flota.conductor.persona_no_existe` si no. En la practica el Modo A solo alcanza
+ * personas que ESTA organizacion ya proyecto.
+ *
+ * ⚠️ `licencia` y `enviarInvitacion` NO SE DECLARAN: los dos se rechazan con 400 (ver el bloque de
+ * §8). Tiparlos invita a cablear un formulario que no puede guardar — el mismo error que
+ * `dispositivoNuevo` en el alta de GPS.
+ *
+ * El conductor nace en `pendiente_documentacion`.
+ *
+ * Errores que la UI distingue POR `code`:
+ *  - 404 `flota.conductor.persona_no_existe` (Modo A).
+ *  - 409 `flota.conductor.persona_ya_es_conductor` — el indice unico es PARCIAL sobre `activo`, asi
+ *    que un conductor dado de baja NO ocupa a la persona.
+ *  - 400 `flota.conductor.datos_canonicos_invalidos` — el Canonico rechazo el documento. NO
+ *    reintentable con los mismos datos.
+ *  - 500 `flota.conductor.canonico_no_creable` — la coordinacion no llego a destino. SI es
+ *    reintentable y NO quedo nada escrito.
+ *
+ * ⚠️ Esos 2 ultimos `code` estan IMPLEMENTADOS pero NO en la tabla de `errores.md`: esperan
+ * ratificacion del PO (B-24). Si el PO los renombra, cambian aca y en los 2 locales.
+ */
+export interface CrearConductorRequest {
+  personaId?: string // Modo A
+  persona?: PersonaNuevaConductorDto // Modo B
+  numeroLegajo?: string
+  notas?: string
+}
+
+/**
+ * PATCH /api/flota/conductores/{conductorId} -> 200 `ConductorDetalleDto`.
+ *
+ * SOLO datos operativos. Los de Persona (nombre, DNI, email, telefono) son proyeccion canonica
+ * READ-ONLY (P-A) y ni siquiera se declaran: no hay forma de que Flota escriba el canonico por este
+ * verbo. El modal los muestra DESHABILITADOS con la leyenda de Persona.
+ *
+ * MISMA TRAMPA que los otros PATCH del modulo: `System.Text.Json` no distingue "campo ausente" de
+ * "campo en null", asi que el service PRESERVA el valor actual cuando llega `null` — vaciar un campo
+ * es hoy un no-op con 200 OK (B-18, abierta). El front avisa antes de guardar.
+ */
+export interface ActualizarConductorRequest {
+  numeroLegajo?: string
+  notas?: string
+}
+
+/**
+ * POST /api/flota/conductores/{conductorId}/estado -> 204 (sin cuerpo).
+ *
+ * `pendiente_documentacion` esta excluido POR TIPO: es el estado con el que nace el conductor y no
+ * es destino de este verbo. NO toca el flag `activo` (ortogonalidad DA-CD2-19): desactivar es
+ * `POST .../baja`.
+ *
+ * El vocabulario del request no es lo mismo que la validez de la transicion DESDE el estado actual:
+ * un destino legal pero inalcanzable vuelve 409 `flota.conductor.transicion_invalida`
+ * (`args {estadoActual, estadoDestino}`), y `en_servicio` con documentacion obligatoria vencida o
+ * sin cargar vuelve 409 `flota.conductor.documento_vencido` (`args {tipoDocumento}`).
+ *
+ * ⚠️ `motivo` NO SE PERSISTE: no hay columna ni tabla de historial de estado del conductor. Viaja al
+ * evento `flota.conductor-operativo-estado-cambiado.v1` y muere ahi. Un tab "historial de estados"
+ * no tiene fuente.
+ */
+export interface CambiarEstadoConductorRequest {
+  estadoNuevo: Exclude<EstadoConductor, 'pendiente_documentacion'>
+  motivo?: string // texto libre, max 500; no se persiste
+}
+
+/** Campos ordenables de `GET /api/flota/conductores`. Default: `Nombre` ASC (no Desc). */
+export type ConductorSortBy = 'Nombre' | 'FechaCreacion'
+
+/**
+ * Query del listado.
+ *
+ * DRIFT DECLARADO: `api.md` documenta 4 filtros y el server solo DECLARA 3. `licencia` NO se espeja
+ * — ver el bloque de §8. Tampoco existe `search`.
+ */
+export interface ConductoresPageQuery extends SortedPageQuery<ConductorSortBy> {
+  estado?: FiltroEstadoConductor
+  asignacion?: FiltroAsignacionConductor
+  soloActivos?: boolean // default true en el backend
+}
+
+/**
+ * Item del historial de asignaciones de vehiculo del conductor —
+ * `GET /conductores/{id}/asignaciones` -> `PagedResult<...>`, ORDER BY desde DESC, id DESC.
+ *
+ * Es el historial COMPLETO (activas + cerradas): `fechaFin === null` marca la vigente.
+ */
+export interface AsignacionConductorHistorialDto {
+  asignacionId: string
+  vehiculoFlotaId: string // id LOCAL (A-4)
+  patente: string | null // de la proyeccion canonica; `patente ?? id`, nunca `{patente}` crudo
+  rol: RolAsignacionConductor
+  fechaInicio: string // ISO 8601
+  fechaFin: string | null // null = activa
+  motivoCierre: MotivoCierreAsignacion | null
+}
+
+/** Query de `GET /conductores/{id}/asignaciones` y de `GET /conductores/{id}/dispositivos`. */
+export type HistorialConductorQuery = PageQuery
+
+/**
+ * Vinculo conductor<->dispositivo — `GET`/`POST /conductores/{id}/dispositivos`.
+ * De ATRIBUCION, nunca fuente de posicion (D1).
+ */
+export interface AsignacionConductorDispositivoDto {
+  asignacionId: string
+  conductorFlotaId: string
+  dispositivoFlotaId: string
+  alias: string | null
+  imei: string
+  fechaInicio: string // ISO 8601
+  fechaFin: string | null // null = activa
+  motivoCierre: MotivoCierreAsignacion | null
+  notas: string | null
+  activa: boolean
+}
+
+/**
+ * POST /api/flota/conductores/{conductorId}/dispositivos -> 200
+ * `AsignacionConductorDispositivoDto`. Permiso `flota.conductores.asignar-dispositivo`.
+ *
+ * ⚠️ `fechaEntrega` NO se declara aunque `dtos.ts` la de como opcional: aceptar un inicio elegido
+ * por el cliente permite abrir un periodo en el futuro o anterior a otro que se cierra, y
+ * `errores.md` no tiene `code` con el que rechazar esos casos. Mismo criterio que `fechaInicio` en
+ * la asignacion de dispositivo (D-S3-16). El default del contrato (ahora) es el que corre.
+ */
+export interface AsignarDispositivoConductorRequest {
+  dispositivoFlotaId: string // id LOCAL del GPS de la flota
+  notas?: string // unica tabla de asignacion con columna `notas`
+}
+
+/**
+ * Body OPCIONAL del `DELETE /conductores/{conductorId}/dispositivos/{asignacionId}` -> 204.
+ * Sin body, el motivo de cierre es `otro` (mismo default que D-S3-15).
+ *
+ * ⚠️ `dtos.ts` NO declara body para este DELETE: el backend lo agrego por simetria con los otros 2
+ * cierres (la columna `motivo_cierre` existe en esta tabla igual que en aquellas) y lo dejo
+ * reportado para ratificacion del PO.
+ */
+export interface CerrarVinculoConductorDispositivoRequest {
+  motivo?: MotivoCierreAsignacion
+}
+
+/* ── Asignacion vehiculo<->conductor (cuelga del VEHICULO, `api.md` §Asignaciones) ───────────── */
+
+/**
+ * POST /api/flota/vehiculos/{vehiculoFlotaId}/asignaciones/conductor -> 200
+ * `AsignacionVehiculoConductorDto`. Permiso `flota.vehiculos.asignar-conductor` (grupo VEHICULOS, no
+ * conductores: la accion vive sobre el vinculo).
+ *
+ * ⚠️ A DIFERENCIA del gemelo de dispositivo, NO coordina con PlataformaCanonica: el conductor de un
+ * vehiculo es un hecho operativo propio de Flota y ninguna frontera declara un write canonico.
+ * Consecuencia REAL y silenciosa (B-20, abierta): `plataforma_canonica.vehiculo_conductores` no se
+ * entera, el Canonico sigue diciendo "no hay principal" y Notificaciones NO le avisa a nadie. La UI
+ * NO debe prometer que se notifica al conductor.
+ *
+ * ⚠️ El principal NO se reasigna solo: cambiar de principal es DESASIGNAR + ASIGNAR, dos requests
+ * sin atomicidad. Y asignar NO pasa al conductor a `en_servicio`: eso es una transicion explicita.
+ *
+ * Errores que la UI distingue POR `code`, los 3 en 409:
+ *  - `flota.conductor.suspendido_no_asignable`
+ *  - `flota.conductor.licencia_vencida` (solo `vencido` bloquea; `por_vencer` avisa y `sin_cargar`
+ *    no bloquea — el contrato no da code para "todavia no cargo la licencia")
+ *  - `flota.vehiculo.ya_tiene_principal` — sale del choque real del indice unico parcial (23505).
+ */
+export interface AsignarConductorRequest {
+  conductorFlotaId: string // id LOCAL del conductor
+  rol: RolAsignacionConductor // REQUERIDO: no hay default adoptado
+}
+
+/**
+ * Body OPCIONAL del
+ * DELETE /api/flota/vehiculos/{vehiculoFlotaId}/asignaciones/conductor/{asignacionId} -> 204.
+ * Sin body, el motivo de cierre es `otro`.
+ *
+ * `dtos.ts` declara ademas `vehiculoFlotaId` y `conductorFlotaId`; el backend NO los implementa: los
+ * dos son identidad de la ruta y duplicarlos crea contradicciones sin `code` con el que rechazarlas.
+ */
+export interface DesasignarConductorRequest {
+  motivo?: MotivoCierreAsignacion
+}
+
+/**
+ * Respuesta del `POST` de asignacion de conductor.
+ *
+ * ⚠️ SHAPE NO DEFINIDO EN `dtos.ts` — mismo hueco que D-S3-16 destapo para el gemelo de dispositivo,
+ * ratificable por el PO. Es la UNICA fuente del `asignacionId` que el `DELETE` pide en la URL:
+ * `GET /vehiculos/{id}/asignaciones` NO esta implementado y `VehiculoDetalleDto.conductoresAsignados`
+ * no lo lleva (y encima viene vacio siempre, ver §3). Un cliente que descarta esta respuesta deja al
+ * usuario sin forma de desasignar.
+ */
+export interface AsignacionVehiculoConductorDto {
+  asignacionId: string
+  vehiculoFlotaId: string // id LOCAL (A-4)
+  conductorFlotaId: string
+  rol: RolAsignacionConductor
+  fechaAsignacion: string // ISO 8601
+  fechaDesasignacion: string | null // null = vigente
+  motivoCierre: MotivoCierreAsignacion | null
+}
+
+/* ── Documentos adjuntos — fase 1 con URL externa (D-C2) ─────────────────────────────────────── */
+
+/**
+ * Documento adjunto del conductor. `GET /conductores/{id}/documentos` devuelve un ARRAY PLANO, no
+ * `PagedResult<T>`: `api.md` no declara paginacion para esa fila.
+ *
+ * ⚠️ Los 3 endpoints de documentos piden `flota.conductores.gestionar-documentos`, TAMBIEN EL `GET`
+ * — no `leer`. Es la fila de la matriz que no sigue la intuicion (P-F) y esta transcripta tal cual:
+ * un usuario con `leer` y sin `gestionar-documentos` recibe 403 AL LISTAR.
+ *
+ * FASE 1 (D-C2): sin binarios. `storageKey` y `urlDescarga` no existen en v1 — entran con
+ * `Platform.Storage` en fase 2.
+ */
+export interface DocumentoDto {
+  id: string
+  // El request lo llama `tipoDocumento` y la respuesta `tipo`: los 2 nombres los fija `dtos.ts` §10.
+  tipo: string // codigo del catalogo `tipos_documento_conductor_flota`
+  numero: string | null
+  fechaEmision: string | null // ISO date
+  fechaVencimiento: string | null // ISO date
+  estadoDerivado: EstadoDocumento // calculado al leer, NUNCA persistido (umbral 30 dias, backend)
+  urlExterna: string | null // null = metadatos cargados sin archivo todavia
+  fechaCreacion: string // ISO 8601
+}
+
+/**
+ * POST /api/flota/conductores/{conductorId}/documentos -> 201 `DocumentoDto`.
+ *
+ * ⚠️ `application/json`, NUNCA `multipart/form-data`: Flota no recibe binarios en v1 (D-C2). El
+ * formulario pide una URL `https` + metadatos — nada de `input type="file"`. El upload de binario
+ * llega en fase 2, cuando exista `Platform.Storage` (hoy NO existe).
+ *
+ * `urlExterna` es OPCIONAL: se admite cargar metadatos y adjuntar el archivo despues.
+ *
+ * ACA SE CARGA LA LICENCIA (`tipoDocumento: 'licencia'`): es la fuente que `dtos.ts` §4 declara para
+ * el objeto `licencia`, y el motivo por el que el alta rechaza ese bloque mientras B-21 siga abierta.
+ * Escribe `numero`, `fechaEmision` y `fechaVencimiento`; `categoria` sigue sin destino.
+ *
+ * Errores POR `code`:
+ *  - 400 `flota.documento.tipo_invalido` (`args {tipo}`) — fuera del catalogo DB de la organizacion.
+ *  - 400 `flota.documento.url_no_permitida` (`args {url}`) — misma regla anti-SSRF que los webhooks:
+ *    exige `https`, rechaza IP privada/loopback/link-local y hostname que resuelva a rango privado.
+ */
+export interface SubirDocumentoRequest {
+  tipoDocumento: string // codigo del catalogo; lo valida el SERVICE contra la tabla, no el Validator
+  urlExterna?: string // https; opcional
+  numero?: string
+  fechaEmision?: string // ISO date
+  fechaVencimiento?: string // ISO date
 }
