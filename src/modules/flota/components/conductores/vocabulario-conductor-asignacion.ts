@@ -165,14 +165,16 @@ export function identidadDeConductor(conductor: {
  * Que puede AFIRMAR el pill del tab "Conductor" de la ficha del vehiculo.
  *
  * ⚠️ `VehiculoListItemDto.conductoresCount` viene **`0` en el 100% de las respuestas, tambien con
- * conductores asignados** (`VehiculoFlotaService.MapearItem` lo hardcodea; componerlo es alcance de
- * slice-05). O sea que el `0` NO significa "no tiene conductores": significa "Flota no lo compone".
+ * conductores asignados** (`VehiculoFlotaService.MapearItem` lo hardcodea). O sea que el `0` NO
+ * significa "no tiene conductores": significa "Flota no lo compone". ⚠️ **DUENIO ACTUALIZADO**: este
+ * comentario decia "componerlo es alcance de slice-05", y slice-05 **cerro el 2026-08-12 sin
+ * tomarlo** (es composicion intra-schema, no depende de Telemetria). Dueno declarado: el **PO**.
  *
  * Pintar ese `0` en el pill —que es lo que hacia la ficha— es afirmar algo que el backend no sabe, y
  * encima contradice a la tarjeta de abajo cuando el usuario acaba de asignar a alguien. Por eso hay
  * tres resultados y ninguno miente:
  *
- *  - `conteo`   — el backend compuso el numero (hoy inalcanzable, listo para slice-05).
+ *  - `conteo`   — el backend compuso el numero (hoy inalcanzable; listo para el dia que se componga).
  *  - `al_menos` — el conteo no llego pero la asignacion se hizo en ESTA sesion: consta que hay **al
  *                 menos** una. No se dice "1", que seria ignorar a los secundarios que no vemos.
  *  - `sin_dato` — no se sabe. Se pinta el marcador de dato ausente, no un cero.

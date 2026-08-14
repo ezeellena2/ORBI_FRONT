@@ -185,8 +185,15 @@ export function TabHistorialStock({
             anterior: t('flota:dispositivosListado.paginacion.anterior'),
             siguiente: t('flota:dispositivosListado.paginacion.siguiente'),
             porPagina: t('flota:dispositivosListado.paginacion.porPagina'),
+            // `count` ademas de `total`: es el nombre que i18next usa para elegir la forma plural.
+            // Sin el, un dispositivo recien dado de alta decia "de 1 movimientos".
             rango: (desde, hasta, total) =>
-              t('flota:dispositivoDetalle.historialStock.rango', { desde, hasta, total }),
+              t('flota:dispositivoDetalle.historialStock.rango', {
+                desde,
+                hasta,
+                total,
+                count: total,
+              }),
           }}
         />
       ) : null}

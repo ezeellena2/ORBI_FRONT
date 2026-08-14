@@ -346,10 +346,20 @@ function FichaConductor({
         }}
       />
 
+      {/*
+        BAJA LOGICA DESDE LA FICHA: hay que IRSE de la URL, igual que con el hard-delete de abajo, y
+        por la MISMA causa aunque la operacion sea reversible. `GET /conductores/{id}` sale por
+        `ObtenerCompuesto`, que no levanta el query filter global (`x => x.Activo`): apenas la baja
+        se aplica, el refetch del detalle vuelve **404** y la pantalla dice "este conductor no existe
+        o no pertenece a tu organizacion" sobre alguien que el usuario acaba de dar de baja a
+        proposito, y que sigue existiendo. Desde el LISTADO no hace falta: ahi la fila se va de la
+        tabla y eso ES el resultado (y "Reactivar" sigue en el kebab de la fila).
+      */}
       <DialogoBajaConductor
         conductor={conductor}
         abierto={modal === 'baja'}
         onCerrar={() => setModal('ninguno')}
+        onHecho={() => navigate('/app/flota/conductores', { replace: true })}
       />
 
       <DialogoReactivarConductor

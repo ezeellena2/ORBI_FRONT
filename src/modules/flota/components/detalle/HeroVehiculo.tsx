@@ -1,20 +1,32 @@
 import { useTranslation } from 'react-i18next'
 import { Clock, User } from 'lucide-react'
-import { Badge } from '@/shared/ui/Badge'
 import { Icono } from '@/shared/ui/Icono'
 import type { VehiculoDetalleDto } from '@/services/contracts/flota'
+import { BadgeConexion } from '../BadgeConexion'
 import { AccionesVehiculo } from './AccionesVehiculo'
 import { SIN_DATO, componerSubtitulo, formatearFechaHora } from './formato'
-import { claveDeConexion, claveDeTipoVehiculo, varianteDeConexion } from './vocabulario'
+import { claveDeTipoVehiculo } from './vocabulario'
 
 /**
  * Encabezado de la ficha: patente + badge de conexión + subtítulo + meta-línea, y las acciones.
  *
- * PARTIAL-DATA (capa (a) de D-C1) — es el punto más visible de la pantalla. Telemetría hoy no se
- * compone (llega en slice-05), así que `estado` vale `sin_dato` y `ultimaSenal` es `null`: el badge
- * muestra "Sin datos de telemetría" y la última señal muestra `—`. Lo propio de Flota (patente,
- * marca, conductor principal) se sigue viendo entero. Nunca se inventa una velocidad ni una
- * dirección, y la pantalla no se rompe.
+ * ⚠️ DECISIÓN VENCIDA CORREGIDA. Este bloque decía *"Telemetría hoy no se compone (llega en
+ * slice-05), así que `estado` vale `sin_dato` y `ultimaSenal` es `null`"*, y quedó FALSO el
+ * 2026-08-12: `VehiculoFlotaService.ObtenerPorId` llama a `ObtenerEstadoDeUnVehiculo` y le pasa el
+ * resultado a `MapearDetalle`, así que el `GET` de esta ficha trae `estado` y `ultimaSenal`
+ * **reales**. El badge de acá pinta un dato vivo, no un placeholder.
+ *
+ * ── POR QUÉ EL BADGE ES `BadgeConexion` Y NO UN `Badge` SUELTO ────────────────────────────────
+ * Tenía su propia composición: variante + etiqueta, **sin la línea de ayuda**. O sea que la ficha
+ * —el lugar al que entra el operador justamente cuando algo le llama la atención— era la única
+ * superficie donde "Sin dato" aparecía SOLO, sin nada que dijera que no es una desconexión. En los
+ * listados el badge sí lo explica. `sin_dato` es ausencia de fila upstream (nunca reportó · no
+ * tiene GPS · Telemetría no respondió, y ahí caen TODOS de golpe); `desconectado` es una afirmación
+ * del upstream. La etiqueta sola no alcanza para distinguirlos.
+ *
+ * PARTIAL-DATA (capa (a) de D-C1): si Telemetría no responde, `estado` vale `sin_dato` y
+ * `ultimaSenal` es `null` — y lo propio de Flota (patente, marca, conductor principal) se sigue
+ * viendo entero. Nunca se inventa una velocidad ni una dirección, y la pantalla no se rompe.
  *
  * La identidad canónica también es nullable: si la proyección no está vigente, `patente` llega en
  * `null` y el hero cae al alias o al marcador de dato ausente en vez de imprimir "null".
@@ -59,9 +71,7 @@ export function HeroVehiculo({
           <h1 className="font-mono text-2xl font-semibold tracking-wide text-fg-primario">
             {vehiculo.patente ?? vehiculo.alias ?? SIN_DATO}
           </h1>
-          <Badge punto variante={varianteDeConexion(vehiculo.estado)}>
-            {t(`flota:${claveDeConexion(vehiculo.estado)}`)}
-          </Badge>
+          <BadgeConexion estado={vehiculo.estado} />
         </div>
 
         <p className="text-sm text-fg-secundario">
@@ -78,7 +88,9 @@ export function HeroVehiculo({
           {/*
             🔴 CORRECCIÓN DE MENTIRA (f-07). Acá decía `?? t('detalle.sinConductor')`, o sea
             "Sin conductor asignado" — y `conductorPrincipal` viene `null` en el 100% de las
-            respuestas, también con conductor asignado (composición faltante, slice-05). O sea que la
+            respuestas, también con conductor asignado (composición faltante; ⚠️ **NO es de
+            slice-05**, que cerró el 2026-08-12 sin tomarla: es intra-schema y su dueño es el PO).
+            O sea que la
             meta-línea del hero AFIRMABA, en todos los vehículos de todas las organizaciones, algo que
             Flota no puede saber. Ahora cae al marcador de dato ausente, salvo que la asignación se
             haya hecho en esta sesión: eso sí consta.

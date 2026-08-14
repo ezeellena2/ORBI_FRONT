@@ -22,7 +22,11 @@ import { SIN_DATO } from '../../detalle/formato'
  * visibles explica **por que** el dato falta, en vez de dejar un hueco silencioso donde el usuario
  * cree que la feature no existe.
  *
- * Cuando Telemetria persista viajes (slice-05), esto pasa a leer del endpoint sin mover el layout.
+ * ⚠️ **NO llega con slice-05, y este comentario decia que si** ("cuando Telemetria persista viajes
+ * (slice-05)"). Slice-05 cerro el 2026-08-12 y `stats` sigue devolviendo 500: lo que falta no es un
+ * paso de Flota sino una capacidad de **otro equipo** (B-9 — Telemetria no persiste historico ni
+ * modela viajes, y el pedido formal `22-pedido-flota-historial-y-viajes.md` **ni siquiera esta
+ * creado**). Cuando esa fuente exista, esto pasa a leer del endpoint sin mover el layout.
  */
 export function MiniStatsConductor() {
   const { t } = useTranslation(['flota', 'common'])

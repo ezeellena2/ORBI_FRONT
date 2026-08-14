@@ -1,26 +1,35 @@
 /**
  * Espejo del contrato de Flota — slice-02 (vehiculos) + slice-03 (dispositivos GPS, asignacion
  * vehiculo<->dispositivo y catalogos growables) + slice-04 (conductores operativos, vinculo
- * conductor<->dispositivo, documentos y asignacion vehiculo<->conductor).
+ * conductor<->dispositivo, documentos y asignacion vehiculo<->conductor) + slice-05 (composicion
+ * con Telemetria: estado de conexion y ultima senal REALES en los 2 listados, filtros compuestos,
+ * snapshot tecnico del dispositivo y mapa en vivo).
  *
  * FUENTE UNICA: `TracAutoV2/src/Flota/docs/00-contrato/dtos.ts` + `api.md`. Redefinir un shape aca
  * esta prohibido: si falta un campo, se corrige el contrato del backend, no este archivo.
  *
- * Este archivo solo espeja lo que USAN los slices construidos. Los shapes de geozonas, problemas,
- * integraciones y mapa quedan fuera a proposito: llegan con sus slices.
+ * Este archivo solo espeja lo que USAN los slices construidos. Los shapes de geozonas, problemas e
+ * integraciones quedan fuera a proposito: llegan con sus slices. El mapa entra en §9 porque su
+ * backend se construyo en slice-05 `f-04` (`MapaController`, 2 endpoints).
  *
  * ─────────────────────────────────────────────────────────────────────────────────────────────
  * DRIFT CONTRATO ↔ BACKEND REAL (verificado contra
- * `TracAutoV2/src/Flota/Flota.Application/DTOs/VehiculoDtos.cs`, que es el codigo que corre)
+ * `TracAutoV2/src/Flota/Flota.Application/DTOs/{Vehiculo,Dispositivo,Mapa}Dtos.cs`, que es el
+ * codigo que corre). Regla: cuando `dtos.ts` es mas ESTRICTO que la fuente, manda el server y el
+ * drift se DECLARA aca — nunca se inventa un valor para cumplir el tipo.
  *
- * `dtos.ts` declara `patente`, `marca`, `modelo`, `anio` y `tipo` como NO nulables. El backend los
- * declara nullable a proposito (`string?` / `int?`), porque salen de la proyeccion local del
- * canonico y esa proyeccion puede no estar vigente. Tiparlos no-nulos aca no arregla el dato: solo
- * mueve la explosion de la capa de red al `.toUpperCase()` de una celda de tabla. Se espejan como
- * `| null` y la UI resuelve la ausencia con su fallback.
- *
- * Lo mismo con `pagination.fromItem` / `toItem`: `dtos.ts` dice `number`, `Platform.Pagination`
- * los emite `long?` y valen `null` cuando la pagina viene vacia.
+ * 1. `dtos.ts` declara `patente`, `marca`, `modelo`, `anio` y `tipo` como NO nulables. El backend
+ *    los declara nullable a proposito (`string?` / `int?`), porque salen de la proyeccion local del
+ *    canonico y esa proyeccion puede no estar vigente. Tiparlos no-nulos aca no arregla el dato:
+ *    solo mueve la explosion de la capa de red al `.toUpperCase()` de una celda de tabla.
+ * 2. `pagination.fromItem` / `toItem`: `dtos.ts` dice `number`, `Platform.Pagination` los emite
+ *    `long?` y valen `null` cuando la pagina viene vacia.
+ * 3. `ignicion` (en `UltimaSenalDto`, `MapaItemDto` y `VehiculoEnVivoDto`): `dtos.ts` dice
+ *    `boolean` y upstream es `bool?`. El backend lo sirve NULLABLE: mandar `false` sin dato
+ *    afirmaria "motor apagado", un hecho que Flota no verifico.
+ * 4. `ubicacion.direccionGrados` (rumbo) y `alertasActivasCount` del mapa: `dtos.ts` los tipa
+ *    `number` no-nulable y el backend los sirve SIEMPRE `null` (B-33, sin fuente batch). La
+ *    alternativa era `0`, que significa "al norte" y "sin alertas".
  * ─────────────────────────────────────────────────────────────────────────────────────────────
  */
 
@@ -69,11 +78,53 @@ export interface PagedResult<T> {
  * ========================================================================== */
 
 /**
- * Estado de CONEXION (derivado, compuesto por Flota desde Telemetria).
- * `incompleto` = sin dispositivo asignado; `sin_dato` = Telemetria no responde o unknown.
- * Hoy el backend sirve SIEMPRE `sin_dato`: Telemetria se compone en slice-05 (partial-data, D-C1).
+ * Estado de CONEXION (derivado, compuesto por Flota desde Telemetria). ✅ Se compone DE VERDAD
+ * desde slice-05 `f-03` (2026-08-12): el mapeo cerrado vive en `fronteras/telemetria.md` §3 y es
+ * `online -> en_linea` · `offline -> desconectado` · `unknown -> sin_dato`.
+ *
+ * ⚠️ `sin_dato` NO ES `desconectado`, y confundirlos es el error mas caro de este slice:
+ *  - `desconectado` es una AFIRMACION del upstream: el equipo reportaba y dejo de hacerlo (umbral
+ *    de 5 min, lo decide Telemetria; Flota no recalcula offline).
+ *  - `sin_dato` es una AUSENCIA: no hay fila upstream para ese vehiculo/dispositivo. Un GPS
+ *    `en_stock` nunca aparece en la fuente batch, asi que su conexion es `sin_dato` POR AUSENCIA —
+ *    no esta apagado ni fallado. Y si Telemetria no responde, TODOS quedan en `sin_dato`: eso es
+ *    partial-data (D-C1 a), no "toda la flota desconectada".
+ * Pintarlos igual manda a un operador a llamar al proveedor de GPS por una flota que esta bien.
+ *
+ * ⚠️ `incompleto` NO SE EMITE NUNCA hoy (B-31, abierta): el contrato lo define dos veces y
+ * distinto — `fronteras/telemetria.md` §3 dice "vehiculo sin dispositivo asignado" y `datos.md`
+ * §2.1 dice "sin GPS **o** sin conductor" — y el backend paro en vez de elegir. Un vehiculo sin GPS
+ * cae hoy en `sin_dato`. El valor queda en el tipo porque el vocabulario es cerrado y el filtro lo
+ * acepta (devolviendo lista vacia), pero NINGUNA pantalla debe ofrecerlo como opcion de filtro
+ * mientras B-31 siga abierta: ver `VALORES_FILTRO_CONEXION` en
+ * `modules/flota/vocabulario-conexion.ts`.
  */
 export type EstadoConexion = 'en_linea' | 'desconectado' | 'incompleto' | 'sin_dato'
+
+/**
+ * Vocabulario cerrado del filtro `situacion` de `GET /api/flota/vehiculos` (`api.md` §Vehiculos).
+ * ✅ implementado en slice-05 `f-02` con los 4 valores: son `EXISTS`/`NOT EXISTS` INTRA-SCHEMA
+ * sobre las tablas de asignacion (periodo abierto), asi que **no dependen de Telemetria** y no se
+ * caen con ella.
+ *
+ * Es un TERCER eje, ortogonal a los otros dos y no colapsable con ninguno: `situacion` dice que
+ * recursos tiene atados el vehiculo, `estado` (`EstadoConexion`) dice si el GPS reporta y
+ * `estadoOperativo` dice si la organizacion lo tiene operativo.
+ *
+ * `con_conductor` cuenta CUALQUIER asignacion vigente, no solo la del principal (`datos.md` §4
+ * admite secundarios y turnos).
+ *
+ * ⚠️ NOMBRE SIN DUENIO EN `dtos.ts`. Los 4 valores son transcripcion exacta de `api.md` §Vehiculos
+ * y de `FiltrosSituacionVehiculo` del backend, pero `dtos.ts` —que es el dueño de los shapes— NO
+ * declara un tipo con nombre para este vocabulario (a diferencia de `EstadoConexion`, que si esta
+ * en `dtos.ts:82`). O sea: los VALORES son contrato, el NOMBRE del alias es de este archivo. Si el
+ * PO le da nombre en `dtos.ts`, se renombra aca y no cambia ningun valor. PENDIENTE: PO + `dtos.ts`.
+ */
+export type SituacionVehiculo =
+  | 'con_dispositivo_gps'
+  | 'sin_dispositivo_gps'
+  | 'con_conductor'
+  | 'sin_conductor'
 
 /**
  * Estado OPERATIVO persistido (`flota.vehiculos_flota.estado_operativo`). Distinto de
@@ -117,10 +168,17 @@ export interface VehiculoConductorPrincipalDto {
  * "este vehiculo no tiene conductor" leyendo estos 3 campos, porque Flota todavia no lo sabe.
  */
 
+/**
+ * Ultima senal recibida, compuesta desde `vehiculos/estado` de Telemetria — la MISMA llamada que
+ * trae `estado` (1 request upstream por listado, C-17). `null` en el item = no hay fila upstream:
+ * el vehiculo nunca reporto, no tiene GPS instalado, o Telemetria no respondio (partial-data).
+ */
 export interface UltimaSenalDto {
-  fechaUtc: string // ISO 8601
+  fechaUtc: string // ISO 8601 — instante del reporte EN EL DISPOSITIVO
   velocidadKmH: number
-  ignicion: boolean
+  // DRIFT 3 del encabezado: `dtos.ts` dice `boolean`, upstream es `bool?` y el backend lo sirve
+  // nullable. `null` = el equipo no reporto ignicion; NO es "motor apagado".
+  ignicion: boolean | null
 }
 
 export interface VehiculoListItemDto {
@@ -139,13 +197,19 @@ export interface VehiculoListItemDto {
    *
    * `VehiculoFlotaService.MapearItem` lo hardcodea (`Dispositivo = null`) y `MapearDetalle` se apoya
    * en ese mismo mapper, asi que el detalle lo hereda; `DispositivoAsignadoDto` no se construye en
-   * NINGUN punto de la solucion. Componer el GPS instalado del lado del vehiculo es alcance de
-   * slice-05, igual que `conexion` / `ultimaSenal` — el backend lo declara asi en el propio mapper.
+   * NINGUN punto de la solucion.
+   *
+   * ⚠️ DUENIO ACTUALIZADO (2026-08-13). Este bloque decia "componerlo es alcance de slice-05, igual
+   * que `conexion` / `ultimaSenal`". Esos 2 SI se compusieron (`f-03`), pero **este no**: es
+   * composicion INTRA-SCHEMA (la tabla de asignaciones existe desde slice-03) y el backend de
+   * slice-05 cerro el 2026-08-12 sin tomarla. `ESTADO.md` §"Superficie sin implementar" deja el
+   * dueño en "PO / `f-05` de slice-04". O sea que la espera **no** termina con este slice.
    *
    * Consecuencia para la UI, y por eso esta escrito aca y no en un comentario suelto: toda rama
-   * `vehiculo.dispositivo !== null` es CODIGO MUERTO hasta slice-05. El tab "Dispositivo GPS" del
-   * vehiculo se queda en su vacio incluso justo despues de asignar con exito (la relacion SI se
-   * persiste y SI se ve del lado del dispositivo). No es un bug del front: el DTO viene vacio.
+   * `vehiculo.dispositivo !== null` es INALCANZABLE hasta que alguien componga el campo. El tab
+   * "Dispositivo GPS" del vehiculo se queda en su vacio incluso justo despues de asignar con exito
+   * (la relacion SI se persiste y SI se ve del lado del dispositivo). No es un bug del front: el DTO
+   * viene vacio.
    */
   dispositivo: VehiculoDispositivoAsignadoDto | null
   /** ⚠️ HOY VIENE SIEMPRE `null` — ver el bloque de `VehiculoConductorPrincipalDto`. Partial-data. */
@@ -153,10 +217,17 @@ export interface VehiculoListItemDto {
   /** ⚠️ HOY VIENE SIEMPRE `0`, tambien con conductores asignados. Partial-data, no "no tiene". */
   conductoresCount: number
   estadoOperativo: EstadoOperativoVehiculo
-  // Estado de CONEXION compuesto desde Telemetria. Partial-data (D-C1 a): si Telemetria no
-  // responde vale `sin_dato` y los datos propios se sirven igual, sin flag nuevo en el DTO.
+  /**
+   * Estado de CONEXION, ✅ compuesto DE VERDAD desde slice-05 `f-03` (antes venia siempre
+   * `sin_dato`). Partial-data (D-C1 a): si Telemetria no responde vale `sin_dato` y los datos
+   * propios se sirven igual, sin flag nuevo en el DTO — la ausencia se lee por el valor.
+   *
+   * ⚠️ NO es `estadoOperativo` (catalogo persistido de Flota) ni `activo` (baja logica): tres ejes
+   * distintos que no se colapsan. Y `sin_dato` !== `desconectado` — ver `EstadoConexion` en §2.
+   */
   estado: EstadoConexion
-  ultimaSenal: UltimaSenalDto | null // null si nunca emitio
+  /** ✅ Poblada desde slice-05 `f-03`. `null` = sin fila upstream (nunca emitio, o partial-data). */
+  ultimaSenal: UltimaSenalDto | null
   fechaCreacion: string // ISO 8601
   activo: boolean
 }
@@ -245,14 +316,29 @@ export interface ActualizarVehiculoRequest {
 export type VehiculoSortBy = 'FechaCreacion' | 'Patente'
 
 /**
- * Query del listado.
+ * Query del listado. Los 5 filtros que `api.md` §Vehiculos contrata estan declarados por el server
+ * y filtran de verdad (tabla de estado fila por fila en `api.md`, D-S3-33): ninguno se acepta para
+ * ignorarlo.
  *
- * DRIFT: `api.md` §Vehiculos documenta ademas los filtros `estado` (conexion) y `situacion`
- * (con/sin GPS, con/sin conductor). `VehiculosPageQuery` del backend NO los declara, porque no
- * tienen fuente hasta los slices 03/04/05. Declararlos aca seria ofrecer un filtro que no filtra.
+ * ⚠️ `estado` y `situacion` se resuelven DISTINTO, y conviene saberlo antes de dibujar los chips:
+ *  - `situacion` es `EXISTS` intra-schema, resuelto en SQL. No depende de Telemetria.
+ *  - `estado` es COMPUESTO desde Telemetria: el service trae candidatos, compone, filtra y recien
+ *    ahi pagina (asi `totalItems` no miente). Por eso NO es ordenable (convencion 3), y por eso
+ *    con Telemetria caida todo vale `sin_dato` y `estado=en_linea` devuelve LISTA VACIA. Es la
+ *    consecuencia honesta del partial-data, no un filtro roto: el badge de esas mismas filas
+ *    tambien dice "Sin dato".
+ *
+ * Un valor fuera del vocabulario devuelve lista vacia, nunca la lista entera.
  */
 export interface VehiculosPageQuery extends SortedPageQuery<VehiculoSortBy> {
   patente?: string // busqueda parcial, case-insensitive
+  /**
+   * ✅ implementado en slice-05 `f-03`. ⚠️ NO ofrecer `incompleto` en la UI: matchea 0 filas
+   * mientras B-31 siga abierta (ninguna capa lo emite). Ver `VALORES_FILTRO_CONEXION`.
+   */
+  estado?: EstadoConexion
+  /** ✅ implementado en slice-05 `f-02`, los 4 valores. */
+  situacion?: SituacionVehiculo
   tipo?: string // codigo de catalogo, match exacto
   soloActivos?: boolean // default true en el backend
 }
@@ -348,9 +434,6 @@ export interface VersionCaminoCompletoDto {
  * contra `Flota.Application/DTOs/DispositivoDtos.cs`, que es el codigo que corre.
  *
  * Lo que NO se espeja, y por que — ninguna de estas ausencias es un olvido:
- *  - `DispositivoTelemetriaSnapshotDto` (`GET .../telemetria`): la fila existe en `api.md` pero el
- *    endpoint NO esta implementado (`ESTADO.md` §"Superficie sin implementar": 12 filas, 11
- *    implementadas). Es de slice-05. Un tipo para una llamada que hoy da 404 de routing es ruido.
  *  - `ConfiguracionDispositivoDto` / `ActualizarConfiguracionDispositivoRequest`: sus 2 endpoints
  *    fueron DEROGADOS de `api.md` (D-S3-22). No son "todavia no implementados": no estan
  *    contratados, y `MatrizEndpointPermisoTests` ancla su ausencia.
@@ -398,12 +481,19 @@ export interface DispositivoListItemDto {
   modeloNombre: string | null
   estadoOperativo: EstadoStockDispositivo // el estado de STOCK (el nombre del campo es del contrato)
   vehiculoInstalado: DispositivoVehiculoInstaladoDto | null // null si no esta instalado
-  // Estado de CONEXION compuesto desde Telemetria. Partial-data (D-C1 a): `sin_dato` cuando
-  // Telemetria no responde, sin flag nuevo en el DTO. NO se persiste en Flota (DA-DL-02).
+  /**
+   * Estado de CONEXION del EQUIPO, ✅ compuesto desde slice-05 `f-03` indexando la fuente batch por
+   * DISPOSITIVO canonico (D-S3-27) — por eso un GPS `en_stock` tambien recibe badge, y ese badge es
+   * `sin_dato` POR AUSENCIA (nunca aparecio en la fuente), no porque este apagado. Partial-data
+   * (D-C1 a): `sin_dato` tambien cuando Telemetria no responde. NO se persiste en Flota (DA-DL-02).
+   */
   conexion: EstadoConexion
-  // D-S3-27: NO se persiste (la columna se borro con migracion porque no tenia ningun escritor).
-  // Se compone al LEER desde Telemetria, que llega en slice-05: hasta entonces viaja SIEMPRE `null`
-  // y eso ES el comportamiento contratado (200 partial-data), no un bug.
+  /**
+   * D-S3-27: NO se persiste (la columna se borro con migracion porque no tenia ningun escritor).
+   * ✅ Se compone al LEER desde Telemetria desde slice-05 `f-03`, en la MISMA llamada que
+   * `conexion` (costo cero adicional). `null` = sin fila upstream o Telemetria caida: 200
+   * partial-data, no un bug. ISO 8601.
+   */
   ultimaSenal: string | null
   // `fechaAltaOperativa` NO esta aca a proposito (D-S3-26): en el listado seria un join por pagina.
   // Vive solo en `DispositivoDetalleDto`.
@@ -540,24 +630,62 @@ export interface TransicionStockDto {
 }
 
 /**
+ * `GET /api/flota/dispositivos/{dispositivoId}/telemetria` -> 200 `DispositivoTelemetriaSnapshotDto`.
+ * Permiso `flota.dispositivos.leer`. ✅ IMPLEMENTADO en slice-05 `f-04` (2026-08-12). Son los datos
+ * tecnicos en vivo de la ficha del equipo; el detalle y el snapshot son 2 llamadas distintas a
+ * proposito (`api.md`), y el snapshot se sirve por polling igual que el mapa.
+ *
+ * ⚠️ Es PARTIAL-DATA (convencion 8a), NO una superficie degradada: responde **200 con los campos
+ * sin fuente en `null`**, nunca 500. La lista de superficies que dan 500
+ * `flota.telemetria.no_disponible` es cerrada y esta NO esta en ella. Una pantalla que trate este
+ * endpoint como "sin fuente" y no lo llame se pierde el unico dato tecnico que hoy existe.
+ *
+ * Que puede venir `null`, y por que — ninguna de las 3 razones es un fallo:
+ *  - `uptime`: SIEMPRE `null` (D-S3-28). El % de disponibilidad en 30 dias exige historico de
+ *    posiciones, que Telemetria NO persiste (B-9). Deja de ser `null` sin cambiar el contrato.
+ *  - `bateriaInterna` / `bateriaVehiculo`: salen de `resumen-tecnico`, que es POR VEHICULO. Un GPS
+ *    `en_stock` no tiene de donde sacarlos — y en ese caso el backend ni siquiera pide el resumen.
+ *  - `velocidadKmh` / `ultimaSenalUtc`: salen del estado por organizacion indexado por dispositivo,
+ *    asi que los tiene incluso un equipo sin vehiculo. `null` = no hay fila upstream.
+ *
+ * B-6: `senalGsm`, `redMovil`, `satelites` y `hdop` NO EXISTEN en ninguna capa de Telemetria y por
+ * eso no estan en este DTO, aunque el mockup los dibuje. No agregarlos "para completar la ficha".
+ */
+export interface DispositivoTelemetriaSnapshotDto {
+  dispositivoFlotaId: string
+  uptime: number | null // ⚠️ SIEMPRE null en v1 (D-S3-28)
+  bateriaInterna: number | null // % del equipo GPS (0-100)
+  bateriaVehiculo: number | null // voltaje/nivel de la bateria del vehiculo
+  velocidadKmh: number | null
+  ultimaSenalUtc: string | null // ISO 8601
+  fechaSnapshotUtc: string // momento de la COMPOSICION en Flota, no el del reporte
+}
+
+/**
  * Campos ordenables de `GET /api/flota/dispositivos`. Default: `FechaCreacion` desc.
  * `conexion` es compuesto desde Telemetria: filtrable, NO ordenable server-side.
  */
 export type DispositivoSortBy = 'Imei' | 'FechaCreacion'
 
 /**
- * Query del listado.
- *
- * DRIFT DECLARADO (D-S3-33): `api.md` documenta 5 filtros y el server solo DECLARA 4. `conexion`
- * NO se espeja: es compuesto de Telemetria, no tiene fuente (B-9) y `DispositivosPageQuery` del
- * backend no lo declara — un query param que el server no declara lo descarta el binder SIN ERROR,
- * asi que el cliente lo manda y recibe 200 con la lista ENTERA sin filtrar. Es el modo de falla que
- * este mismo listado ya sufrio con `modelo`. El chip de Conexion no se dibuja hasta slice-05.
+ * Query del listado. Los **5** filtros de `api.md` §Dispositivos GPS estan declarados por el server
+ * y filtran: `conexion` se sumo en slice-05 `f-03` (2026-08-12) y con eso la tabla de estado de
+ * `api.md` queda entera en ✅.
  */
 export interface DispositivosPageQuery extends SortedPageQuery<DispositivoSortBy> {
   /** ✅ implementado (D-S3-33). `EXISTS` sobre la asignacion con periodo abierto; NO es `stock=instalado`. */
   asignacion?: FiltroAsignacionDispositivo
   stock?: EstadoStockDispositivo
+  /**
+   * ✅ implementado en slice-05 `f-03`: compuesto desde la misma llamada que alimenta `ultimaSenal`,
+   * filtrado ANTES de paginar. Filtrable, NO ordenable.
+   *
+   * ⚠️ `incompleto` es INALCANZABLE para un dispositivo (B-32): por D-C8 ese codigo significa
+   * "vehiculo sin dispositivo", y "dispositivo sin vehiculo" se mudo al filtro `asignacion`. El
+   * server lo acepta y devuelve LISTA VACIA. La UI ofrece los otros 3 valores
+   * (`VALORES_FILTRO_CONEXION`), no este.
+   */
+  conexion?: EstadoConexion
   /** El VALOR es el uuid del catalogo growable (B-18), no el nombre del modelo. */
   modelo?: string
   soloActivos?: boolean
@@ -1156,4 +1284,116 @@ export interface SubirDocumentoRequest {
   numero?: string
   fechaEmision?: string // ISO date
   fechaVencimiento?: string // ISO date
+}
+
+/* ============================================================================
+ * 9. MAPA EN VIVO — slice-05 `f-04` (`MapaController`, 2 endpoints)
+ *
+ * Espejo de `Flota.Application/DTOs/MapaDtos.cs`, que es el codigo que corre. El browser llama
+ * SIEMPRE a `Flota.Api`: nunca a Telemetria, nunca a Traccar, nunca a RabbitMQ.
+ *
+ * ── LO QUE ESTA SECCION NO DECLARA, Y POR QUE ────────────────────────────────────────────────
+ *  - **Query params del mapa** (`bbox`, `estado`, `conductorId`): el controller NO ACEPTA NINGUNO
+ *    (P6 abierta). `api.md` §Mapa en vivo no los declara, y un param no declarado lo descarta el
+ *    binder sin error. Filtrar el mapa es filtrado LOCAL sobre lo que llego.
+ *  - **SSE / WebSocket**: fase 2 por contrato. El refresco es polling (10-15 s, C-9).
+ *  - **Geozonas sobre el mapa**: DIFERIDO (DA-08).
+ *  - **Historico / recorridos / viajes**: sin fuente (B-9) — esos endpoints dan 500
+ *    `flota.telemetria.no_disponible` y NO se piden.
+ * ========================================================================== */
+
+/**
+ * `GET /api/flota/mapa/vehiculos` -> 200 `MapaResponseDto`. Permiso `flota.vehiculos.leer`.
+ *
+ * NO es `PagedResult<T>` y es deliberado: el mapa no pagina (dibujar media flota es peor que no
+ * dibujarla). El backend resuelve todo con **2 llamadas por-organizacion fijas**, no N por vehiculo.
+ *
+ * ⚠️ **Un vehiculo sin coordenadas NO viene en `items`** — sale del array en vez de dibujarse en
+ * `0,0`, que es un punto real en el golfo de Guinea. O sea: `items.length` puede ser MENOR que la
+ * cantidad de vehiculos de la flota, y esa diferencia es informacion que la pantalla debe decir
+ * ("N sin ubicacion"), no un error.
+ */
+export interface MapaResponseDto {
+  items: MapaItemDto[]
+  fechaActualizacion: string // ISO 8601 — cuando Flota COMPUSO la respuesta, no el reporte GPS
+}
+
+/**
+ * Marcador del mapa.
+ *
+ * ⚠️ 2 campos del contrato viajan SIEMPRE `null` (B-33, abierta) y por eso se tipan nullable acá
+ * aunque `dtos.ts` los declare `number`:
+ *  - `ubicacion.direccionGrados` (rumbo): la unica fuente batch no lo trae; el rumbo existe solo
+ *    per-vehiculo y traerlo para una lista seria el fan-out que C-17 PROHIBE. **No hay flecha de
+ *    orientacion en el mapa.**
+ *  - `alertasActivasCount`: no hay endpoint batch de alertas. **No hay burbuja de conteo.**
+ * Rellenarlos con `0` seria afirmar "apunta al norte" y "no tiene alertas". El mapa se dibuja sin
+ * los dos.
+ */
+export interface MapaItemDto {
+  vehiculoFlotaId: string // id LOCAL (A-4): es el que usa el deep-link mapa -> detalle
+  patente: string | null // proyeccion canonica; puede no estar vigente
+  modelo: string | null
+  ubicacion: UbicacionMapaDto
+  velocidadKmH: number
+  // DRIFT 3 del encabezado: nullable, `null` != "motor apagado".
+  ignicion: boolean | null
+  estado: EstadoConexion // ya mapeado a snake_case; ver §2
+  conductorAsignado: ConductorMapaDto | null // dato PROPIO de Flota, no de Telemetria
+  alertasActivasCount: number | null // ⚠️ SIEMPRE null (B-33)
+}
+
+export interface UbicacionMapaDto {
+  latitud: number
+  longitud: number
+  direccionGrados: number | null // ⚠️ SIEMPRE null (B-33)
+  fechaUtc: string // instante del reporte EN EL DISPOSITIVO
+}
+
+export interface ConductorMapaDto {
+  conductorFlotaId: string
+  nombreCompleto: string | null // proyeccion canonica gateada por PII; puede venir null
+}
+
+/**
+ * Vocabulario del campo `motor` de `VehiculoEnVivoDto`.
+ *
+ * ⚠️ `ralenti` NO SE EMITE en v1 y el tipo lo declara solo para que el vocabulario este completo en
+ * un lugar: su umbral es una PENDIENTE del PO (`fronteras/telemetria.md` §4 — los mockups usan 5,
+ * 22 y 42 minutos, mutuamente inconsistentes). Un vehiculo detenido con la ignicion puesta se
+ * informa `encendido`, que es cierto. **No inventar el estado intermedio.**
+ */
+export type EstadoMotor = 'encendido' | 'apagado' | 'ralenti'
+
+/**
+ * `GET /api/flota/mapa/vehiculos/{vehiculoFlotaId}/en-vivo` -> 200 `VehiculoEnVivoDto`.
+ * Permiso `flota.vehiculos.leer`.
+ *
+ * Superficie de UN recurso: aca los endpoints per-vehiculo de Telemetria SI son el camino correcto
+ * (3 llamadas para 1 vehiculo no es fan-out), asi que `rumbo` y `altitud` **si tienen dato** — a
+ * diferencia del listado del mapa.
+ *
+ * Fuera del DTO por contrato: senal GSM, satelites, `hdop` y red movil (B-6, no existen upstream);
+ * "km de hoy" (sin historico, B-9); telefono del conductor y direccion textual/barrio (DA-MV-04).
+ * El mockup los dibuja y no tienen fuente.
+ */
+export interface VehiculoEnVivoDto {
+  vehiculoFlotaId: string
+  patente: string | null
+  posicion: PosicionEnVivoDto | null // null = Telemetria no tiene posicion (partial-data)
+  rumbo: number | null // grados 0..359; aca SI hay fuente
+  velocidadKmh: number | null
+  ignicion: boolean | null
+  motor: EstadoMotor | null // nunca `ralenti` en v1
+  odometroKm: number | null // en KM: el backend ya dividio por 1000 (upstream viene en metros)
+  altitud: number | null
+  conductorAsignado: ConductorMapaDto | null
+  estado: EstadoConexion
+  fechaSnapshotUtc: string // momento de la composicion en Flota
+}
+
+export interface PosicionEnVivoDto {
+  latitud: number
+  longitud: number
+  fechaUtc: string
 }

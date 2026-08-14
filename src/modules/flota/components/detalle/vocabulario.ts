@@ -1,5 +1,5 @@
 import type { VarianteBadge } from '@/shared/ui/Badge'
-import type { EstadoConexion, EstadoOperativoVehiculo } from '@/services/contracts/flota'
+import type { EstadoOperativoVehiculo } from '@/services/contracts/flota'
 
 /**
  * Mapeo `código de catálogo → variante de badge + clave i18n`. Es la CAPA 2 que la primitiva
@@ -8,31 +8,23 @@ import type { EstadoConexion, EstadoOperativoVehiculo } from '@/services/contrac
  *
  * Los códigos son `snake_case` y son EXACTAMENTE los strings que expone el DTO. Acá solo se elige
  * cómo se pinta y qué clave traduce; el valor nunca se reescribe.
+ *
+ * ⚠️ El vocabulario de CONEXIÓN no vive acá: vive en `modules/flota/vocabulario-conexion.ts`
+ * (slice-05), que lo comparte con los 3 listados, las fichas y el mapa, y que distingue `sin_dato`
+ * de `desconectado`.
+ *
+ * Este archivo lo re-exportaba (`claveDeConexion` / `varianteDeConexion`) como puente para el
+ * `Badge` suelto del hero. Ese re-export **se quitó al quedar sin consumidores**, y no por prolijidad:
+ * era el atajo por el que se armaba un badge de conexión "a mano" —variante + etiqueta— **sin la
+ * línea de ayuda**, que es justamente lo que hace que `sin_dato` no se lea como "desconectado". Para
+ * pintar conexión hay UNA sola forma: el componente `BadgeConexion`, que trae etiqueta + variante +
+ * ayuda juntas.
  */
-
-const VARIANTE_POR_CONEXION: Record<EstadoConexion, VarianteBadge> = {
-  en_linea: 'exito',
-  desconectado: 'peligro',
-  // "sin dispositivo asignado": no es una falla, es una configuración incompleta.
-  incompleto: 'advertencia',
-  // Telemetría no respondió o nunca hubo dato. Neutro a propósito: pintarlo de rojo diría que el
-  // vehículo está mal, cuando lo que falta es la fuente. Hoy el backend sirve SIEMPRE este valor
-  // (Telemetría se compone en slice-05), así que es el estado partial-data por defecto.
-  sin_dato: 'neutro',
-}
 
 const VARIANTE_POR_ESTADO_OPERATIVO: Record<EstadoOperativoVehiculo, VarianteBadge> = {
   operativo: 'exito',
   fuera_de_servicio: 'advertencia',
   baja_operativa: 'peligro',
-}
-
-export function varianteDeConexion(estado: EstadoConexion): VarianteBadge {
-  return VARIANTE_POR_CONEXION[estado]
-}
-
-export function claveDeConexion(estado: EstadoConexion): string {
-  return `estadoConexion.${estado}`
 }
 
 export function varianteDeEstadoOperativo(estado: EstadoOperativoVehiculo): VarianteBadge {

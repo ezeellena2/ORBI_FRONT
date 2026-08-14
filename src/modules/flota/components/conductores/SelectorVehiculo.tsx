@@ -11,21 +11,38 @@ import type { VehiculoListItemDto, VehiculosPageQuery } from '@/services/contrac
 import { useVehiculos } from '../../hooks/useVehiculos'
 
 /**
- * Lista de seleccion (radio) de los vehiculos de la organizacion, para asignarle uno a un conductor.
- * Es el gemelo de `SelectorDispositivoEnStock` en el sentido INVERSO al de `f-07`: acá el conductor
- * ya esta elegido y falta el vehiculo.
+ * Lista de seleccion (radio) de los vehiculos de la organizacion. Es el UNICO componente que elige
+ * vehiculo en el modulo, y lo comparten los DOS sentidos de asignacion:
+ *  - **conductor → vehiculo** (`ModalAsignarVehiculo`, `f-06`): el conductor ya esta elegido;
+ *  - **dispositivo → vehiculo** (`ModalAsociarAVehiculo`, `f-07`): el GPS ya esta elegido.
  *
- * ── ⚠️ LA LISTA NO SE PUEDE PRE-FILTRAR POR "SIN CONDUCTOR", Y SE DICE ────────────────────────
- * `GET /vehiculos` contrata un filtro `situacion` (`con_conductor` | `sin_conductor`) que el server
- * **NO DECLARA**: mandarlo devuelve **200 con la lista entera sin filtrar**, en silencio. Y tampoco
- * se puede marcar fila por fila: `VehiculoListItemDto.conductorPrincipal` y `.conductoresCount`
- * vienen `null` / `0` en el **100%** de las respuestas (composicion faltante, slice-05), asi que un
- * "sin conductor" calculado localmente seria una **afirmacion falsa** sobre cada vehiculo de la
- * lista.
+ * Vive en `components/conductores/` porque fue su primer consumidor, igual que
+ * `SelectorDispositivoEnStock` vive en `components/dispositivos/` y lo importan conductores y el
+ * wizard. Un segundo selector propio por pantalla es como se desincronizan los estados de vacio.
  *
- * Se resuelve mostrando **todos los vehiculos activos** y diciendo lo que no sabemos, en vez de
- * fingir un filtro. La operacion en si **funciona**: si el vehiculo elegido ya tiene principal, el
- * backend responde 409 `flota.vehiculo.ya_tiene_principal` y el modal lo muestra traducido — el
+ * ── ⚠️ EL PRE-FILTRADO NO ES EL MISMO EN LOS DOS SENTIDOS ─────────────────────────────────────
+ * `situacion` **existe y filtra de verdad** desde el 2026-08-12 (slice-05 `f-02`: los 4 valores,
+ * `EXISTS`/`NOT EXISTS` intra-schema, sin depender de Telemetria). Pero solo **uno** de sus valores
+ * describe exactamente a los candidatos de una de las dos operaciones:
+ *
+ *  - **Dispositivo → vehiculo** (`soloSinDispositivoGps`): el vinculo vehiculo↔GPS es **1:1**, asi
+ *    que "vehiculos sin dispositivo" ES el conjunto de candidatos, sin recorte ni sobra. Se filtra
+ *    server-side y la lista lo dice.
+ *  - **Conductor → vehiculo** (default): **no se filtra**, y no es un olvido. `sin_conductor` es "sin
+ *    **ninguna** asignacion vigente", y ese modal tambien asigna rol **secundario**: un vehiculo que
+ *    hoy tiene solo un secundario admite perfectamente un principal —el indice unico es por
+ *    (vehiculo, principal, abierta)— y quedaria **fuera de la lista sin que el usuario sepa por que**.
+ *    El filtro que haria falta es "sin conductor PRINCIPAL", y ese valor **no existe** en el
+ *    vocabulario de `situacion`. PENDIENTE del PO + `api.md`; hasta entonces, no se filtra.
+ *
+ * Tampoco se puede marcar fila por fila: `VehiculoListItemDto.dispositivo`, `.conductorPrincipal` y
+ * `.conductoresCount` **siguen** viniendo `null` / `0` en el 100% de las respuestas (composicion
+ * intra-schema que ningun slice tomo — su dueno declarado es el PO), asi que cualquier "sin GPS" o
+ * "sin conductor" calculado localmente seria una **afirmacion falsa** sobre cada fila. El filtro SI
+ * es confiable, porque el `EXISTS` corre del lado del server sobre la asignacion real.
+ *
+ * En los dos casos la operacion **decide el backend**: si el vehiculo elegido ya tiene principal
+ * responde 409 `flota.vehiculo.ya_tiene_principal`, y si ya tiene GPS el `POST` lo reasigna. El
  * indice unico parcial es la fuente de verdad, no un `SELECT` previo que igual correria una carrera.
  *
  * ── EL BUSCADOR ES LOCAL, Y ESO NO ES UNA SIMPLIFICACION ──────────────────────────────────────
@@ -56,10 +73,21 @@ const QUERY_VEHICULOS_ASIGNABLES: VehiculosPageQuery = {
   sortDirection: 'Asc',
 }
 
+/**
+ * La variante para instalar un GPS: los candidatos son EXACTAMENTE los vehiculos sin dispositivo
+ * (el vinculo es 1:1). Es otra constante de modulo y no un spread dentro del render, por lo mismo:
+ * las 2 keys quedan fijas y no dependen de cuantas veces se renderice el selector.
+ */
+const QUERY_VEHICULOS_SIN_DISPOSITIVO: VehiculosPageQuery = {
+  ...QUERY_VEHICULOS_ASIGNABLES,
+  situacion: 'sin_dispositivo_gps',
+}
+
 export function SelectorVehiculo({
   valor,
   onCambio,
   deshabilitado = false,
+  soloSinDispositivoGps = false,
   accionSinVehiculos,
   control,
 }: {
@@ -67,6 +95,13 @@ export function SelectorVehiculo({
   valor: string
   onCambio: (vehiculoFlotaId: string) => void
   deshabilitado?: boolean
+  /**
+   * `true` = pide al server solo los vehiculos **sin GPS instalado** (`situacion=sin_dispositivo_gps`).
+   * Lo usa el sentido dispositivo→vehiculo, donde ese conjunto es exactamente el de candidatos.
+   * Ver el bloque del encabezado: en el sentido conductor→vehiculo filtrar esconderia candidatos
+   * validos, asi que el default es **no** filtrar.
+   */
+  soloSinDispositivoGps?: boolean
   /** CTA del vacio sin-datos (ir a vehiculos, dar de alta). Lo pone cada superficie. */
   accionSinVehiculos?: ReactNode
   /** Cableado `label` ↔ control ↔ error que entrega `Campo`. Va al grupo de radios. */
@@ -74,7 +109,9 @@ export function SelectorVehiculo({
 }) {
   const { t } = useTranslation(['flota', 'common'])
   const [busqueda, setBusqueda] = useState('')
-  const consulta = useVehiculos(QUERY_VEHICULOS_ASIGNABLES)
+  const consulta = useVehiculos(
+    soloSinDispositivoGps ? QUERY_VEHICULOS_SIN_DISPOSITIVO : QUERY_VEHICULOS_ASIGNABLES,
+  )
 
   if (consulta.isPending) {
     return (
@@ -115,7 +152,16 @@ export function SelectorVehiculo({
   const total = consulta.data.pagination.totalItems
 
   if (items.length === 0) {
-    return <Bloque accion={accionSinVehiculos}>{t('flota:asignacionVehiculo.sinDisponibles')}</Bloque>
+    // Los 2 vacios llevan a acciones OPUESTAS: "no tenes vehiculos" se resuelve dando de alta uno;
+    // "todos ya tienen GPS" se resuelve desasociando uno o dando de alta el vehiculo que falta. Un
+    // solo mensaje para los dos deja al usuario buscando el problema en el lugar equivocado.
+    return (
+      <Bloque accion={accionSinVehiculos}>
+        {soloSinDispositivoGps
+          ? t('flota:asignacionVehiculo.sinDisponiblesSinDispositivo')
+          : t('flota:asignacionVehiculo.sinDisponibles')}
+      </Bloque>
+    )
   }
 
   const termino = busqueda.trim().toLowerCase()
@@ -133,11 +179,16 @@ export function SelectorVehiculo({
   return (
     <div className="flex flex-col gap-3">
       {/*
-        Acá es donde el componente **dice** lo que el docblock promete. Sin esta línea, el bloque de
-        arriba afirmaba "se resuelve … diciendo lo que no sabemos" y ningún texto renderizado lo
-        decía: la lista se veía como si estuviera filtrada por "sin conductor" y no lo está.
+        Acá es donde el componente **dice** en que estado esta la lista. Sin esta linea, las dos
+        variantes se ven identicas: una filtrada por el server y otra sin filtrar, y el usuario no
+        tiene forma de saber cual esta mirando — que es exactamente lo que hace que "no aparece el
+        que busco" se lea como un bug en vez de como un vehiculo que ya tiene GPS.
       */}
-      <p className="text-xs text-fg-terciario">{t('flota:asignacionVehiculo.listaSinFiltrar')}</p>
+      <p className="text-xs text-fg-terciario">
+        {soloSinDispositivoGps
+          ? t('flota:asignacionVehiculo.listaFiltradaSinDispositivo')
+          : t('flota:asignacionVehiculo.listaSinFiltrar')}
+      </p>
 
       <Input
         value={busqueda}

@@ -19,6 +19,12 @@ import type {
  * render, y React Query dispara una query nueva por render. La forma correcta es hacer el DATO
  * estable (truncar el rango al dia, leer el store con selectores por campo), NUNCA memoizarlo a
  * mano: `useMemo` esta prohibido en este repo.
+ *
+ * ⚠️ LOS FILTROS NUEVOS NO LLEVAN KEY PROPIA. Los 3 que slice-05 destrabo (`estado` y `situacion`
+ * de vehiculos, `conexion` de dispositivos) viajan DENTRO del objeto `query` que ya recibe cada
+ * key de listado, asi que cambiarlos ya produce una key distinta y un refetch. Agregar un segmento
+ * aparte por filtro partiria el prefijo (`['flota','vehiculos']`) que las mutations invalidan, y la
+ * mitad de las invalidaciones dejarian de alcanzar al listado.
  */
 export const flotaKeys = {
   /** Raiz del modulo. Invalidarla tira toda la cache de Flota. */
@@ -49,6 +55,41 @@ export const flotaKeys = {
    */
   dispositivoHistorialStock: (dispositivoId: string, query: HistorialStockQuery) =>
     ['flota', 'dispositivos', dispositivoId, 'historial-stock', query] as const,
+
+  /**
+   * Snapshot tecnico en vivo de UN dispositivo. Cuelga del prefijo del detalle igual que el
+   * historial, pero su `staleTime` es mucho mas corto: es dato de Telemetria, no dato propio.
+   *
+   * Que caiga dentro del prefijo tiene una consecuencia buena y una neutra: una edicion del
+   * dispositivo lo invalida de mas (cuesta un request barato) y nunca lo deja viejo.
+   */
+  dispositivoTelemetria: (dispositivoId: string) =>
+    ['flota', 'dispositivos', dispositivoId, 'telemetria'] as const,
+
+  /**
+   * Prefijo del MAPA EN VIVO. Es un recurso propio y NO cuelga de `['flota','vehiculos']` a
+   * proposito: el mapa se refresca por **polling** (10-15 s), asi que ya llega solo al dia. Si
+   * colgara del prefijo de vehiculos, cada alta/edicion/baja lo invalidaria de mas — y la
+   * invalidacion de un listado paginado no tiene por que arrastrar una respuesta que trae la flota
+   * entera.
+   */
+  mapa: () => ['flota', 'mapa'] as const,
+
+  /**
+   * Marcadores de toda la flota. SIN `query`: `GET /api/flota/mapa/vehiculos` **no acepta ningun
+   * parametro** (P6 abierta) y no pagina, asi que la key no tiene nada variable que llevar. Meterle
+   * los filtros de pantalla seria mentir sobre lo que distingue una respuesta de otra: el filtrado
+   * del mapa es LOCAL, sobre los mismos datos.
+   */
+  mapaVehiculos: () => ['flota', 'mapa', 'vehiculos'] as const,
+
+  /**
+   * Detalle en vivo de UN vehiculo (el panel que se abre al tocar un marcador). Cuelga del prefijo
+   * del mapa, no del de vehiculos: es dato de Telemetria con su propia cadencia, y una edicion de
+   * los datos operativos del vehiculo no cambia su posicion.
+   */
+  mapaVehiculoEnVivo: (vehiculoFlotaId: string) =>
+    ['flota', 'mapa', 'vehiculos', vehiculoFlotaId, 'en-vivo'] as const,
 
   /** Prefijo del recurso conductor: listado + detalle + sus 3 sub-recursos. */
   conductores: () => ['flota', 'conductores'] as const,
@@ -133,7 +174,9 @@ export const flotaKeysAfectadasPorAsignacion = () =>
  *
  * ⚠️ Las 2 superficies del VEHICULO **hoy no cambian visiblemente**: `conductorPrincipal`,
  * `conductoresCount` y `conductoresAsignados` vienen `null`/`0`/`[]` en el 100% de las respuestas
- * (composicion faltante, ver el contrato §3). Se invalidan igual: cuando slice-05 componga esos
+ * (composicion faltante, ver el contrato §3). ⚠️ **Ya no es "hasta slice-05"**: slice-05 cerro el
+ * 2026-08-12 sin tomarla, porque es composicion **intra-schema** (no depende de Telemetria) y su
+ * dueno declarado en `ESTADO.md` es el PO. Se invalidan igual: el dia que alguien componga esos
  * campos, la invalidacion ya va a estar puesta y no hay que acordarse. Invalidar de mas cuesta un
  * refetch; invalidar de menos deja la pantalla mintiendo hasta un F5.
  *

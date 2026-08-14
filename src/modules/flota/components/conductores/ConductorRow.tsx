@@ -40,7 +40,13 @@ import { SIN_DATO } from '../detalle/formato'
  *  - **Checkbox de seleccion**: la bulk bar no tiene endpoints bulk en el contrato (ficha §6, sin
  *    soporte). Un checkbox que no habilita nada es ruido.
  *  - **Categoria de licencia**: `licencia.categoria` viene SIEMPRE `null` (B-21, no tiene columna).
- *  - **Badge "En linea"**: composicion con Telemetria, slice-05.
+ *  - **Badge de conexion ("En linea")**: ⚠️ **no llega con slice-05, y este comentario decia que si**.
+ *    Slice-05 compuso Telemetria en los listados de VEHICULOS y de DISPOSITIVOS —los dos DTOs
+ *    ganaron `estado`/`conexion` y `ultimaSenal`— y `ConductorListItemDto` **no tiene ningun campo
+ *    de conexion**: un conductor no reporta, reporta el vehiculo que conduce (D1). Componerlo acá
+ *    exigiria resolver el vehiculo vigente por fila y pedir su estado, o sea N+1 sobre la pagina.
+ *    Que este listado sea 100% dato propio de Flota es lo que hace que **NO degrade**: con
+ *    Telemetria caida esta tabla se ve exactamente igual (ficha §9).
  */
 
 /** Fallback unico de dato ausente en esta tabla. Se resuelve por i18n para no hardcodear el guion. */

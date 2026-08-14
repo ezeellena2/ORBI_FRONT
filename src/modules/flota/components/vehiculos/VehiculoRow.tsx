@@ -1,6 +1,7 @@
 import { Eye, MoreVertical, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { VehiculoBadgeEstado } from './VehiculoBadgeEstado'
+import { lecturaDeUltimaSenal } from '../../vocabulario-conexion'
 import type { VehiculoListItemDto } from '@/services/contracts/flota'
 import { BotonIcono } from '@/shared/ui/BotonIcono'
 import { MenuAcciones, type ItemMenuAcciones } from '@/shared/ui/MenuAcciones'
@@ -91,15 +92,19 @@ export function CeldaVehiculo({ vehiculo }: CeldaVehiculoProps) {
 }
 
 /**
- * El alias del dispositivo va en mono y como TEXTO, no como enlace: la pantalla de detalle de
- * dispositivo llega en su propio slice y un enlace al 404 interno de Flota es peor que texto plano.
- * Cuando exista `/app/flota/dispositivos/:id`, esta celda pasa a enlace (ficha §8).
- *
- * 🔴 `dispositivo` viene `null` en el 100% de las respuestas, también con un GPS instalado
- * (`MapearItem` lo hardcodea; componerlo es alcance de slice-05). Por eso el vacío NO dice "Sin
- * dispositivo", que era una afirmación falsa en toda fila de toda organización: dice que no hay dato
- * y manda —en el título— al inventario, que es donde el join SÍ está hecho
+ * 🔴 `dispositivo` viene `null` en el 100% de las respuestas, tambien con un GPS instalado:
+ * `VehiculoFlotaService.MapearItem` escribe `Dispositivo = null` literal. Por eso el vacio NO dice
+ * "Sin dispositivo", que seria una afirmacion falsa en toda fila de toda organizacion: dice que no
+ * hay dato y manda —en el titulo— al inventario, que es donde el join SI esta hecho
  * (`DispositivoListItemDto.vehiculoInstalado`).
+ *
+ * ⚠️ DUENIO ACTUALIZADO: este comentario decia "componerlo es alcance de slice-05". **Ya no**: el
+ * backend de slice-05 cerro el 2026-08-12 y NO lo compuso, porque es composicion intra-schema y no
+ * depende de Telemetria. `ESTADO.md` deja el dueño en "PO / `f-05` de slice-04". Mientras tanto la
+ * rama `dispositivo !== null` es INALCANZABLE, y por eso no se le agrega el enlace al detalle del
+ * equipo que pide la ficha §8: la pantalla existe desde slice-03, pero el enlace se escribiria
+ * dentro de una rama que ningun response puede producir, o sea sin forma de verificarlo. Lo agrega
+ * quien componga el campo, que si va a poder verlo.
  */
 export function CeldaDispositivo({ vehiculo }: CeldaVehiculoProps) {
   const { t } = useTranslation('flota')
@@ -121,10 +126,12 @@ export function CeldaDispositivo({ vehiculo }: CeldaVehiculoProps) {
 /**
  * 🔴 Mismo caso que la celda de arriba: `conductorPrincipal` viene `null` y `conductoresCount` viene
  * `0` en el 100% de las respuestas. Decir "Sin conductor" era afirmar algo que Flota no puede saber
- * — la asignación existe y se ve desde la ficha del conductor. Se pinta el marcador de dato ausente.
+ * — la asignacion existe y se ve desde la ficha del conductor. Se pinta el marcador de dato ausente.
  *
- * Las 2 ramas de abajo NO son código muerto por elección: son lo que se ve apenas slice-05 componga
- * los campos, y borrarlas obliga a reescribirlas entonces.
+ * ⚠️ Las 2 ramas de abajo son INALCANZABLES hoy, y el comentario anterior decia que se veian
+ * "apenas slice-05 componga los campos": el backend de slice-05 cerro sin componerlos. Se conservan
+ * porque el dia que la composicion llegue son exactamente lo que hay que renderizar, pero hasta
+ * entonces ningun response las produce.
  */
 export function CeldaConductores({ vehiculo }: CeldaVehiculoProps) {
   const { t } = useTranslation('flota')
@@ -164,17 +171,28 @@ export function CeldaEstado({ vehiculo }: CeldaVehiculoProps) {
   )
 }
 
+/**
+ * ⚠️ ESTA CELDA ES LA SEGUNDA CARA DE LA TRAMPA DEL SLICE, y por eso NO afirma nada cuando falta el
+ * dato: dice **"Sin dato"** —el literal que pide `f-05` §"Los 5 estados" para partial-data— con la
+ * explicacion de las 3 causas en el `title`, y el texto sale del MISMO vocabulario que el badge,
+ * asi que las 2 celdas de la fila cuentan la misma historia. El porque esta en
+ * `lecturaDeUltimaSenal`, que es donde vive la regla y donde esta anclada por test.
+ */
 export function CeldaUltimaSenal({ vehiculo }: CeldaVehiculoProps) {
   const { t, i18n } = useTranslation('flota')
   const sinDato = useSinDato()
 
-  // `null` = el vehiculo nunca emitio. Distinto de "Telemetria no responde", que se lee en el
-  // badge de estado (`sin_dato`): por eso son dos copys diferentes y no uno solo.
-  if (vehiculo.ultimaSenal === null) {
-    return <span className="text-fg-terciario">{t('vehiculosListado.celda.sinSenal')}</span>
+  const lectura = lecturaDeUltimaSenal(vehiculo.ultimaSenal?.fechaUtc ?? null)
+
+  if (lectura.tipo === 'sin_dato') {
+    return (
+      <span className="text-fg-terciario" title={t(lectura.claveAyuda)}>
+        {t(lectura.clave)}
+      </span>
+    )
   }
 
-  const relativo = formatearRelativo(vehiculo.ultimaSenal.fechaUtc, i18n.language)
+  const relativo = formatearRelativo(lectura.fechaUtc, i18n.language)
   return <span className="text-fg-secundario">{relativo ?? sinDato}</span>
 }
 

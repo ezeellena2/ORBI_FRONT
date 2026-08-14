@@ -39,9 +39,16 @@ import { formatearFecha } from '../../detalle/formato'
  * habilitado "a ver si anda".
  *
  * ── EL BADGE "EN LINEA" NO SE PINTA ───────────────────────────────────────────────────────────
- * Es composicion con Telemetria (slice-05). El fallback de la ficha es explicito y **no se dibuja un
- * badge gris permanente**: un badge que siempre dice lo mismo entrena al usuario a ignorar el lugar
- * donde despues va a aparecer el dato real.
+ * ⚠️ **Tampoco llega con slice-05, y este comentario lo daba por venir** ("es composicion con
+ * Telemetria (slice-05)"). Slice-05 compuso la conexion en los listados de VEHICULOS y de
+ * DISPOSITIVOS, donde el DTO tiene el campo; acá el sujeto es una **asignacion**, y ni
+ * `VehiculoAsignadoConductorDto` ni `AsignacionConductorHistorialDto` declaran conexion. Pintarlo
+ * exigiria pedir el estado del vehiculo de cada fila (N+1 sobre la pagina) y encima con `sin_dato`
+ * como resultado mas probable.
+ *
+ * Por eso **no se dibuja un badge gris permanente**: un badge que siempre dice lo mismo entrena al
+ * usuario a ignorar el lugar donde despues va a aparecer el dato real. El estado de conexion del
+ * vehiculo esta a un clic, en su ficha, donde si tiene fuente.
  */
 
 export const PAGE_SIZE_HISTORIAL_CONDUCTOR = 10

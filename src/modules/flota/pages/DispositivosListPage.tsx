@@ -3,15 +3,21 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Cpu, Plus, SearchX } from 'lucide-react'
 import { FiltrosDispositivos } from '../components/dispositivos/FiltrosDispositivos'
+import { ModalAsociarAVehiculo } from '../components/dispositivos/ModalAsociarAVehiculo'
 import { ModalCambiarEstadoStock } from '../components/dispositivos/ModalCambiarEstadoStock'
 import { ModalEditarDispositivoPorId } from '../components/dispositivos/ModalEditarDispositivo'
 import { ModalRegistrarDispositivo } from '../components/dispositivos/ModalRegistrarDispositivo'
 import { TablaDispositivos } from '../components/dispositivos/TablaDispositivos'
 import { AccionConMotivo } from '../components/AccionConMotivo'
+import { AvisoDatosDeConexion } from '../components/AvisoDatosDeConexion'
 import { AvisoOperacion } from '../components/AvisoOperacion'
 import { useDispositivos } from '../hooks/useDispositivos'
 import { useEliminarDispositivo } from '../hooks/useEliminarDispositivo'
 import { usePermisos } from '../hooks/usePermisos'
+import {
+  claveDeVacioPorFiltroDeConexionDeEquipo,
+  coberturaDeConexion,
+} from '../vocabulario-conexion'
 import type { DispositivoListItemDto } from '@/services/contracts/flota'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
 import { Boton } from '@/shared/ui/Boton'
@@ -29,22 +35,45 @@ import {
 } from '@/stores/flota-dispositivos-filters-store'
 
 /**
- * `/app/flota/dispositivos` — inventario de dispositivos GPS de la organizacion activa (`f-05`).
+ * `/app/flota/dispositivos` — inventario de dispositivos GPS de la organizacion activa.
  *
- * ALCANCE: tabla, los 4 filtros que el server declara, paginacion, alta (Modo A), kebab con ver
- * detalle / asignar a vehiculo / editar / cambiar estado de stock / eliminar, y los 5 estados
- * obligatorios.
+ * ALCANCE tras `f-07` de slice-05 (paridad, no reescritura): tabla con la **columna Conexion**, los
+ * **5** filtros que el server declara —incluido el de conexion, que es el que este slice destraba—,
+ * paginacion, alta (Modo A), kebab con ver detalle / asignar a vehiculo / editar / cambiar estado de
+ * stock / eliminar, y los 5 estados — incluido **partial-data**, que es el que define este slice.
  *
- * Lo que NO entra, y por que — ninguna de estas ausencias es un olvido:
- *  - **Contadores del header** (total / en linea / desconectados / disponibles): no hay endpoint de
- *    contadores en `api.md` y el universo de "Total" es PENDIENTE (ficha §12). Slice-05.
- *  - **Columna y filtro de Conexion**: compone Telemetria y NO TIENE FUENTE (B-9). Ademas el server
- *    NI SIQUIERA DECLARA el parametro `conexion` (D-S3-33): mandarlo devuelve 200 con la lista
- *    entera SIN FILTRAR, en silencio. El chip no se dibuja hasta que la fila de `api.md` diga ✅.
+ * ── LA SEGUNDA COSA QUE ESTE SLICE DESTRABO ───────────────────────────────────────────────────
+ * "Asignar a vehiculo" estaba **deshabilitado** desde slice-03, y su motivo era que el filtro
+ * `situacion` de `GET /vehiculos` no existia: sin el no habia forma de listar los vehiculos sin GPS
+ * (`VehiculoListItemDto.dispositivo` viene `null` en el 100% de las respuestas, y sigue viniendo).
+ * slice-05 `f-02` lo implemento con sus 4 valores, y `sin_dispositivo_gps` describe **exacto** a los
+ * candidatos porque el vinculo es 1:1. La accion pasa a estar viva: `ModalAsociarAVehiculo`.
+ *
+ * ── LA TRAMPA DE ESTA PANTALLA ────────────────────────────────────────────────────────────────
+ * En un inventario, `sin_dato` es el caso NORMAL: un GPS `en_stock` nunca aparece en la fuente batch
+ * de Telemetria, asi que no tiene senal **porque no esta instalado**, no porque falle. Y cuando
+ * Telemetria no responde, TODAS las filas caen en `sin_dato` (partial-data D-C1 a: 200 con los
+ * campos tecnicos en `null` y todo lo propio servido igual). Los dos casos se pintan **neutros** y
+ * cada uno tiene su explicacion; el unico rojo es `desconectado`, que si es una afirmacion del
+ * upstream sobre un equipo que venia reportando.
+ *
+ * ── LO QUE NO ENTRA, Y NO ES UN OLVIDO ────────────────────────────────────────────────────────
+ *  - **Contadores del header** (total / en linea / desconectados / disponibles en stock): **B-35**.
+ *    No hay endpoint agregado ni campos de conteo, y derivarlos de la pagina actual daria un numero
+ *    que cambia al paginar. Lo unico afirmable es la cobertura DE LA PAGINA, y se dibuja diciendo
+ *    que es eso (`AvisoDatosDeConexion`). ⚠️ La ficha §9 los da por existentes y dice que degradan a
+ *    "—" con Telemetria caida: no degradan, **no existen**.
+ *  - **`conexion = incompleto`**: inalcanzable para un equipo (B-32). Ver `FiltrosDispositivos`.
  *  - **Busqueda libre**: `GET /dispositivos` no tiene param de busqueda en el contrato. El input no
  *    se pinta "por las dudas".
- *  - **Bulk bar, Importar, Exportar, Hacer ping, Compartir**: sin contrato, bloqueados (B-12) o de
- *    otro slice. **QR de instalacion y Configuracion**: DEROGADOS del contrato (D-S3-22/23), no van.
+ *  - **Exportar**: **B-34**. `GET /dispositivos/exportar` **no esta construido** —su unico camino de
+ *    error (400 por >10.000 filas) no tiene `code` y el backend paro en vez de inventarlo—, asi que
+ *    hoy es un 404 de routing. Un boton para una operacion que el backend no puede completar no se
+ *    dibuja, aunque `f-07` paso 7 lo pida: manda el contrato.
+ *  - **Importar**: no existe endpoint de importacion de dispositivos en `api.md` (PENDIENTE ficha
+ *    §12). **Bulk bar**: sin endpoints masivos. **Hacer ping**: BLOQUEADO (B-12), y un stub jamas
+ *    simula exito. **Compartir**: permiso sin endpoint.
+ *  - **QR de instalacion y Configuracion**: DEROGADOS del contrato (D-S3-22/23), no van.
  *
  * La pagina no tiene logica de negocio: lee filtros del store, llama al hook y ensambla.
  */
@@ -62,6 +91,7 @@ export default function DispositivosListPage() {
   const stock = useFlotaDispositivosFiltersStore((s) => s.stock)
   const modelo = useFlotaDispositivosFiltersStore((s) => s.modelo)
   const asignacion = useFlotaDispositivosFiltersStore((s) => s.asignacion)
+  const conexion = useFlotaDispositivosFiltersStore((s) => s.conexion)
   const soloActivos = useFlotaDispositivosFiltersStore((s) => s.soloActivos)
   const page = useFlotaDispositivosFiltersStore((s) => s.page)
   const pageSize = useFlotaDispositivosFiltersStore((s) => s.pageSize)
@@ -70,6 +100,7 @@ export default function DispositivosListPage() {
   const setStock = useFlotaDispositivosFiltersStore((s) => s.setStock)
   const setModelo = useFlotaDispositivosFiltersStore((s) => s.setModelo)
   const setAsignacion = useFlotaDispositivosFiltersStore((s) => s.setAsignacion)
+  const setConexion = useFlotaDispositivosFiltersStore((s) => s.setConexion)
   const setSoloActivos = useFlotaDispositivosFiltersStore((s) => s.setSoloActivos)
   const setPage = useFlotaDispositivosFiltersStore((s) => s.setPage)
   const setPageSize = useFlotaDispositivosFiltersStore((s) => s.setPageSize)
@@ -87,9 +118,20 @@ export default function DispositivosListPage() {
   const [registrando, setRegistrando] = useState(false)
   const [aEditar, setAEditar] = useState<DispositivoListItemDto | null>(null)
   const [aCambiarStock, setACambiarStock] = useState<DispositivoListItemDto | null>(null)
+  const [aAsignarVehiculo, setAAsignarVehiculo] = useState<DispositivoListItemDto | null>(null)
   const [aEliminar, setAEliminar] = useState<DispositivoListItemDto | null>(null)
 
-  const filtros = { stock, modelo, asignacion, soloActivos, page, pageSize, sortBy, sortDirection }
+  const filtros = {
+    stock,
+    modelo,
+    asignacion,
+    conexion,
+    soloActivos,
+    page,
+    pageSize,
+    sortBy,
+    sortDirection,
+  }
   const consulta = useDispositivos(aQueryDispositivos(filtros))
   const eliminar = useEliminarDispositivo()
 
@@ -151,12 +193,36 @@ export default function DispositivosListPage() {
     eliminar.mutate(aEliminar.id, { onSuccess: () => setAEliminar(null) })
   }
 
+  const dispositivos = consulta.data?.items ?? []
+  const cobertura = coberturaDeConexion(dispositivos.map((dispositivo) => dispositivo.conexion))
+
+  /*
+    Filtrar por "En linea" cuando ninguna fila tiene fuente devuelve vacio, y "Ningun dispositivo
+    coincide con tus filtros" es literalmente cierto y completamente enganoso: los equipos estan, lo
+    que falta es la senal que decide si estan en linea. La explicacion REEMPLAZA a la generica
+    ("proba cambiar el estado de stock"), que ahi manda a hacer lo que no va a servir.
+
+    El segundo argumento evita el error opuesto: con un stock, un modelo o una asignacion puestos
+    ademas del chip, el vacio puede ser de ESOS filtros, y una lista vacia no trae filas que mirar
+    para saber cual fue. Ahi vuelve el copy generico, que no afirma ninguna causa. (`soloActivos` no
+    entra: solo puede AGRANDAR el resultado al apagarse, nunca vaciarlo.)
+  */
+  const hayOtroFiltroAdemasDeConexion = stock !== '' || modelo !== '' || asignacion !== ''
+  const claveVacioConexion = claveDeVacioPorFiltroDeConexionDeEquipo(
+    conexion,
+    hayOtroFiltroAdemasDeConexion,
+  )
+
   const vacio = hayFiltros ? (
     <EstadoVacio
       variante="sin-resultados"
       icono={SearchX}
       titulo={t('dispositivosListado.vacioSinResultados.titulo')}
-      descripcion={t('dispositivosListado.vacioSinResultados.descripcion')}
+      descripcion={
+        claveVacioConexion === null
+          ? t('dispositivosListado.vacioSinResultados.descripcion')
+          : t(claveVacioConexion)
+      }
       acciones={
         <Boton variante="secundaria" onClick={resetFiltros}>
           {t('dispositivosListado.vacioSinResultados.cta')}
@@ -221,11 +287,13 @@ export default function DispositivosListPage() {
         stock={stock}
         modelo={modelo}
         asignacion={asignacion}
+        conexion={conexion}
         soloActivos={soloActivos}
         hayFiltros={hayFiltros}
         onStock={setStock}
         onModelo={setModelo}
         onAsignacion={setAsignacion}
+        onConexion={setConexion}
         onSoloActivos={setSoloActivos}
         onLimpiar={resetFiltros}
       />
@@ -243,8 +311,15 @@ export default function DispositivosListPage() {
         />
       ) : null}
 
+      {/*
+        PARTIAL-DATA. Va ARRIBA de la tabla cuando ninguna fila tiene fuente, que es el caso que se
+        confunde con "se me cayeron todos los equipos". No es un error y no reemplaza a la tabla: el
+        resto de la fila (alias, IMEI, modelo, vehiculo, stock) esta completo y actualizado.
+      */}
+      <AvisoDatosDeConexion cobertura={cobertura} />
+
       <TablaDispositivos
-        dispositivos={consulta.data?.items ?? []}
+        dispositivos={dispositivos}
         cargando={consulta.isPending}
         orden={{ clave: sortBy, direccion: sortDirection === 'Asc' ? 'asc' : 'desc' }}
         onOrden={cambiarOrden}
@@ -257,6 +332,7 @@ export default function DispositivosListPage() {
         onVerDetalle={(dispositivo) => navigate(`/app/flota/dispositivos/${dispositivo.id}`)}
         onEditar={setAEditar}
         onCambiarEstadoStock={setACambiarStock}
+        onAsignarVehiculo={setAAsignarVehiculo}
         onEliminar={setAEliminar}
       />
 
@@ -278,8 +354,10 @@ export default function DispositivosListPage() {
             anterior: t('dispositivosListado.paginacion.anterior'),
             siguiente: t('dispositivosListado.paginacion.siguiente'),
             porPagina: t('dispositivosListado.paginacion.porPagina'),
+            // `count` ademas de `total`: es el nombre que i18next usa para elegir la forma plural.
+            // Sin el, la primera pagina de un inventario de uno decia "de 1 dispositivos".
             rango: (desde, hasta, total) =>
-              t('dispositivosListado.paginacion.rango', { desde, hasta, total }),
+              t('dispositivosListado.paginacion.rango', { desde, hasta, total, count: total }),
           }}
         />
       ) : null}
@@ -302,6 +380,17 @@ export default function DispositivosListPage() {
         dispositivo={aCambiarStock}
         abierto={aCambiarStock !== null}
         onCerrar={() => setACambiarStock(null)}
+      />
+
+      {/*
+        Al instalar, el modal cierra y el usuario se queda acá: la fila cambia su badge de stock a
+        "Instalado" y estrena patente en la columna Vehiculo (el hook invalida los 2 prefijos, porque
+        la operacion mueve inventario Y vehiculos). Ver la fila cambiar ES el resultado de la accion.
+      */}
+      <ModalAsociarAVehiculo
+        dispositivo={aAsignarVehiculo}
+        abierto={aAsignarVehiculo !== null}
+        onCerrar={() => setAAsignarVehiculo(null)}
       />
 
       <DialogoConfirmacion

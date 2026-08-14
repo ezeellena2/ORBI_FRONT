@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Activity, ArrowLeft, Radio, Smartphone } from 'lucide-react'
+import { ArrowLeft, Radio, Smartphone } from 'lucide-react'
 import { Boton } from '@/shared/ui/Boton'
 import { EstadoError } from '@/shared/ui/EstadoError'
 import { EstadoVacio } from '@/shared/ui/EstadoVacio'
@@ -22,6 +22,7 @@ import {
   TabHistorialStock,
 } from '../components/dispositivos/detalle/TabHistorialStock'
 import { TabInfoDispositivo } from '../components/dispositivos/detalle/TabInfoDispositivo'
+import { TabTelemetriaDispositivo } from '../components/dispositivos/detalle/TabTelemetriaDispositivo'
 
 /**
  * `/app/flota/dispositivos/:dispositivoId` — la ficha del dispositivo GPS.
@@ -37,9 +38,13 @@ import { TabInfoDispositivo } from '../components/dispositivos/detalle/TabInfoDi
  *    descartaba en silencio).
  *
  * Los 3 campos de identidad siguen siendo read-only despues del alta, pero por contrato del PATCH,
- * no porque Flota no los posea. La capa de Telemetria (snapshot tecnico, conexion, posicion,
- * eventos) todavia no tiene fuente, y esta pantalla lo DICE en vez de dibujar un placeholder que
- * parezca dato.
+ * no porque Flota no los posea.
+ *
+ * ⚠️ **La capa de Telemetria ya NO esta toda sin fuente**, y este comentario decia que si: desde
+ * slice-05 (2026-08-12) el **snapshot tecnico** y la **conexion** traen dato real y el tab
+ * Telemetria los muestra (200 partial-data: lo que falta viaja `null`, no rompe la ficha). Lo que
+ * sigue sin fuente son los **eventos historicos** (B-9, Telemetria no los persiste), y eso el tab lo
+ * DICE en vez de dibujar un placeholder que parezca dato.
  *
  * LOS 5 ESTADOS OBLIGATORIOS viven acá arriba, antes de cualquier render de contenido:
  *  - loading      → esqueleto de hero + panel (`DispositivoCargando`).
@@ -172,13 +177,15 @@ function FichaDispositivo({ dispositivo }: { dispositivo: DispositivoDetalleDto 
           <TabInfoDispositivo dispositivo={dispositivo} />
         </TabsContent>
 
-        {/* Snapshot técnico en vivo: se compone desde Telemetría y llega en slice-05. */}
+        {/*
+          Snapshot técnico en vivo: DATO REAL desde slice-05 `f-04`. Este tab dibujaba un "sin
+          fuente" que afirmaba que "esa integración todavía no está conectada" — quedó falso el
+          2026-08-12. El endpoint responde **200 partial-data** (lo que no tiene fuente viaja `null`,
+          nunca un 500), así que el tab SÍ emite su request: tratarlo como degradado escondía el
+          único dato técnico que hoy existe del equipo.
+        */}
         <TabsContent value="telemetria" className="pt-4">
-          <PanelSinFuente
-            icono={Activity}
-            titulo={t('flota:dispositivoDetalle.telemetria.sinFuenteTitulo')}
-            descripcion={t('flota:dispositivoDetalle.telemetria.sinFuenteDescripcion')}
-          />
+          <TabTelemetriaDispositivo dispositivo={dispositivo} />
         </TabsContent>
 
         {/*

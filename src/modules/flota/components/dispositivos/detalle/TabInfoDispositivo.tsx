@@ -19,14 +19,18 @@ import { claveDeStock, varianteDeStock } from './vocabulario-stock'
  * columna propia desde **D-S3-24** y `fabricante` se deriva del catalogo de modelos (**D-S3-25**).
  * Son read-only porque el PATCH no los expone, no porque Flota no los posea.
  *
- * La ficha pide tambien "Ultima posicion" en un mini-mapa Leaflet: NO se renderiza en este slice.
- * La posicion es del vehiculo correlacionado y sale de la composicion con Telemetria, que llega en
- * slice-05; un mapa centrado en una coordenada inventada es peor que ningun mapa.
+ * La ficha pide tambien "Ultima posicion" en un mini-mapa Leaflet: **NO se renderiza**. ⚠️ El motivo
+ * escrito ("la composicion con Telemetria llega en slice-05") quedo vencido el 2026-08-12; el que
+ * sigue vivo es otro: la posicion sale de `GET /mapa/vehiculos/{id}/en-vivo`, cuya superficie
+ * contratada es **el mapa** (`f-08`, todavia sin pantalla montada), y es del VEHICULO correlacionado
+ * — no del equipo. Pedirla desde acá para dibujar un mini-mapa es inventarle una pantalla al dato.
  *
- * `ultimaSenal` tampoco se renderiza aunque el DTO lo exponga: **D-S3-27** lo saco de la proyeccion
- * persistida (la columna no tenia escritor) y lo movio a la composicion con Telemetria al leer, que
- * llega en slice-05. Hasta entonces viaja `null` por contrato — un par de dato que muestra su
- * fallback para siempre no informa, informa la ausencia de la integracion.
+ * `ultimaSenal` tampoco se renderiza en ESTE tab, y el motivo tambien cambio: **D-S3-27** lo saco de
+ * la proyeccion persistida (la columna no tenia escritor) y lo movio a la composicion con Telemetria
+ * al leer — **que ya ocurre** (`DispositivoDetalleDto.ultimaSenal` trae dato real desde slice-05
+ * `f-04`). Vive en el tab **Telemetria**, junto al badge de conexion que lo explica: un `null` ahi
+ * se lee como "sin dato de conexion" con sus 3 causas, y suelto en esta grilla de campos propios de
+ * Flota se leeria como "el equipo no reporto nunca", que es una de las 3 y no se puede distinguir.
  */
 export function TabInfoDispositivo({ dispositivo }: { dispositivo: DispositivoDetalleDto }) {
   const { t, i18n } = useTranslation(['flota', 'common'])

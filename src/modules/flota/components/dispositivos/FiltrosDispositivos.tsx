@@ -7,18 +7,20 @@ import type {
   FiltroAsignacionDispositivo,
 } from '@/services/contracts/flota'
 import { useModelosDispositivo } from '../../hooks/useModelosDispositivo'
+import { claveDeConexion, VALORES_FILTRO_CONEXION } from '../../vocabulario-conexion'
 import { claveDeStock } from './detalle/vocabulario-stock'
 import type {
   FiltroAsignacion,
+  FiltroConexionDispositivo,
   FiltroModelo,
   FiltroStock,
 } from '@/stores/flota-dispositivos-filters-store'
 
 /**
- * Barra de filtros del listado de dispositivos GPS (`f-05` §6).
+ * Barra de filtros del listado de dispositivos GPS (`f-07` §2).
  *
- * Los CUATRO controles corresponden uno a uno con los 4 filtros que el server DECLARA
- * (`api.md`, tabla de estado de **D-S3-33**). Ni uno mas:
+ * Los CINCO controles corresponden uno a uno con los 5 filtros que el server DECLARA
+ * (`api.md`, tabla de estado de **D-S3-33** + slice-05). Ni uno mas:
  *
  *  - **Estado de stock** → `stock`, los 4 codigos del catalogo.
  *  - **Modelo** → `modelo`. Sus opciones salen del catalogo growable, **nada hardcodeado**
@@ -28,13 +30,17 @@ import type {
  *    `EXISTS` sobre la asignacion con periodo abierto, asi que mira el vinculo vigente y no el
  *    badge. Es el resto vivo del viejo select de conexion, del que **D-C8** separo `sin_asignar`
  *    porque nunca fue un estado de conexion.
+ *  - **Conexión** → `conexion`. ✅ **Es el filtro que slice-05 `f-03` destrabo**: compuesto desde la
+ *    misma llamada a Telemetria que alimenta `ultimaSenal` y filtrado ANTES de paginar, asi que
+ *    `totalItems` no miente. Es ORTOGONAL a los otros dos y se combina con ellos.
  *  - **Solo activos** → `soloActivos`, default **on**.
  *
  * ── LO QUE NO SE DIBUJA, Y NO ES UN OLVIDO ────────────────────────────────────────────────────
- *  - **Conexión**: el server NO DECLARA el parametro (D-S3-33). Un query param que el binder no
- *    conoce se descarta SIN ERROR: el usuario elegiria "Desconectado" y recibiria la lista entera,
- *    en silencio. Ademas no tiene fuente hasta slice-05 (B-9). El chip entra cuando la fila de
- *    `api.md` diga ✅.
+ *  - **`conexion = incompleto`**: `VALORES_FILTRO_CONEXION` lo deja afuera. Para un dispositivo ese
+ *    valor es **inalcanzable por construccion** (B-32): significa "vehiculo sin dispositivo", y
+ *    "dispositivo sin vehiculo" se mudo al filtro `asignacion`. El server lo acepta y devuelve
+ *    **lista vacia** — un chip que siempre da cero es peor que un chip ausente. Para eso esta
+ *    Asignacion, que si los encuentra.
  *  - **Búsqueda libre**: `GET /dispositivos` no tiene param de busqueda en el contrato. El input no
  *    se pinta "por las dudas".
  */
@@ -53,11 +59,13 @@ export interface FiltrosDispositivosProps {
   stock: FiltroStock
   modelo: FiltroModelo
   asignacion: FiltroAsignacion
+  conexion: FiltroConexionDispositivo
   soloActivos: boolean
   hayFiltros: boolean
   onStock: (stock: FiltroStock) => void
   onModelo: (modelo: FiltroModelo) => void
   onAsignacion: (asignacion: FiltroAsignacion) => void
+  onConexion: (conexion: FiltroConexionDispositivo) => void
   onSoloActivos: (soloActivos: boolean) => void
   onLimpiar: () => void
 }
@@ -66,11 +74,13 @@ export function FiltrosDispositivos({
   stock,
   modelo,
   asignacion,
+  conexion,
   soloActivos,
   hayFiltros,
   onStock,
   onModelo,
   onAsignacion,
+  onConexion,
   onSoloActivos,
   onLimpiar,
 }: FiltrosDispositivosProps) {
@@ -104,6 +114,15 @@ export function FiltrosDispositivos({
     ...ASIGNACIONES.map((valor) => ({ valor, etiqueta: t(`filtroAsignacion.${valor}`) })),
   ]
 
+  // 3 valores, no los 4 del vocabulario: `incompleto` es inalcanzable para un equipo (B-32).
+  const opcionesConexion = [
+    { valor: '', etiqueta: t('conexion.filtro.todos') },
+    ...VALORES_FILTRO_CONEXION.map((valor) => ({
+      valor,
+      etiqueta: t(claveDeConexion(valor), { defaultValue: valor }),
+    })),
+  ]
+
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-borde bg-superficie-1 p-3">
       <FiltroSelect
@@ -125,9 +144,22 @@ export function FiltrosDispositivos({
 
       <FiltroSelect
         etiqueta={t('dispositivosListado.filtros.asignacion')}
+        // El titulo separa los dos ejes que mas se confunden en esta barra: la asignacion es dato
+        // propio de Flota y la conexion depende de Telemetria.
+        ayuda={t('dispositivosListado.filtros.asignacionAyuda')}
         opciones={opcionesAsignacion}
         valor={asignacion}
         onCambio={(valor) => onAsignacion(valor as FiltroAsignacion)}
+      />
+
+      <FiltroSelect
+        etiqueta={t('conexion.filtro.etiqueta')}
+        // Sin esta ayuda, "En linea" devolviendo vacio con Telemetria caida se lee como "no tengo
+        // ningun equipo en linea", que es una conclusion sobre el inventario y no sobre la fuente.
+        ayuda={t('dispositivosListado.filtros.conexionAyuda')}
+        opciones={opcionesConexion}
+        valor={conexion}
+        onCambio={(valor) => onConexion(valor as FiltroConexionDispositivo)}
       />
 
       <Toggle
@@ -145,6 +177,7 @@ export function FiltrosDispositivos({
 
 function FiltroSelect({
   etiqueta,
+  ayuda,
   opciones,
   valor,
   cargando,
@@ -152,13 +185,14 @@ function FiltroSelect({
 }: {
   /** Ya resuelto por i18n. */
   etiqueta: string
+  ayuda?: string
   opciones: Array<{ valor: string; etiqueta: string }>
   valor: string
   cargando?: boolean
   onCambio: (valor: string) => void
 }) {
   return (
-    <label className="flex min-w-52 flex-col gap-1 text-xs text-fg-secundario">
+    <label className="flex min-w-52 flex-col gap-1 text-xs text-fg-secundario" title={ayuda}>
       {etiqueta}
       <Select opciones={opciones} valor={valor} cargando={cargando} onCambio={onCambio} />
     </label>

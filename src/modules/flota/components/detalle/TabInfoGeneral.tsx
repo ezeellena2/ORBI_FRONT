@@ -5,6 +5,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Boton } from '@/shared/ui/Boton'
 import { Card } from '@/shared/ui/Card'
 import type { VehiculoDetalleDto } from '@/services/contracts/flota'
+import { BadgeConexion } from '../BadgeConexion'
 import { ParDato } from './ParDato'
 import { formatearFecha, formatearFechaHora, formatearNumero } from './formato'
 import { claveDeEstadoOperativo, claveDeTipoVehiculo, varianteDeEstadoOperativo } from './vocabulario'
@@ -94,40 +95,60 @@ export function TabInfoGeneral({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
         )}
       </Card>
 
-      <TarjetaUbicacion vehiculoFlotaId={vehiculo.id} desde={vehiculo.fechaCreacion} />
+      <TarjetaUbicacion vehiculo={vehiculo} />
     </div>
   )
 }
 
 /**
- * PARTIAL-DATA declarado. El mini-mapa Leaflet y la dirección salen de la composición con
- * Telemetría, que entra en slice-05: hoy la tarjeta muestra su placeholder "Sin señal" con el motivo
- * y el deep-link al mapa completo. No se dibuja un mapa vacío centrado en una coordenada inventada.
+ * Lo que la ficha PUEDE afirmar sobre la ubicación, y nada más.
+ *
+ * ⚠️ CORRECCIÓN DE MENTIRA (verificación final de slice-05). Esta tarjeta dibujaba, para TODOS los
+ * vehículos de TODAS las organizaciones y sin emitir un solo request, el literal *"Sin señal —
+ * Todavía no hay datos de telemetría para este vehículo"*. Era cierto cuando se escribió (slice-02)
+ * y dejó de serlo el 2026-08-12: `estado` y `ultimaSenal` **son campos del propio
+ * `VehiculoDetalleDto`** y se componen desde Telemetría desde `f-03`. O sea que un vehículo que el
+ * listado muestra "En línea · 45 km/h" abría su ficha y leía, en esta tarjeta, que no tenía datos de
+ * telemetría. Es exactamente la mentira que `f-05` corrigió en la columna "Última señal" del
+ * listado, cometida en la pantalla de al lado.
+ *
+ * Ahora la tarjeta se rinde con los campos que YA vienen en la respuesta del detalle —cero requests
+ * nuevos, cero endpoints nuevos— y con el MISMO vocabulario que el badge del listado
+ * (`BadgeConexion`), así que `sin_dato` sigue sin leerse como "desconectado" y arrastra su línea de
+ * ayuda con las tres causas.
+ *
+ * ── LO QUE SIGUE SIN DIBUJARSE, Y NO ES UN OLVIDO ─────────────────────────────────────────────
+ * El **mini-mapa** y la **dirección textual**. La posición sale de
+ * `GET /api/flota/mapa/vehiculos/{id}/en-vivo` —que existe desde slice-05 `f-04`— y su superficie
+ * contratada es el **mapa en vivo**, que es `f-08` y todavía no está montada (`/app/flota/mapa` cae
+ * hoy en el placeholder "Próximamente" del `AppRouter`). Pedir el en-vivo acá para imprimir dos
+ * coordenadas en texto sería inventarle una pantalla al dato. La dirección/barrio no tiene fuente en
+ * ninguna capa (DA-MV-04).
  */
-function TarjetaUbicacion({
-  vehiculoFlotaId,
-  desde,
-}: {
-  vehiculoFlotaId: string
-  desde: string
-}) {
+function TarjetaUbicacion({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
   const { t, i18n } = useTranslation(['flota', 'common'])
 
   return (
     <Card titulo={t('flota:detalle.ubicacion.titulo')}>
-      <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-borde bg-superficie-2 px-4 py-10 text-center">
-        <MapPin className="size-6 text-fg-terciario" aria-hidden />
-        <p className="text-sm font-medium text-fg-primario">
-          {t('flota:detalle.ubicacion.sinSenal')}
-        </p>
-        <p className="text-xs text-fg-secundario">
-          {t('flota:detalle.ubicacion.sinSenalDescripcion')}
+      <div className="flex flex-col gap-3 rounded-lg border border-dashed border-borde bg-superficie-2 px-4 py-4">
+        <BadgeConexion estado={vehiculo.estado} />
+
+        <dl className="grid">
+          <ParDato
+            etiqueta={t('flota:detalle.ubicacion.ultimaSenal')}
+            valor={formatearFechaHora(vehiculo.ultimaSenal?.fechaUtc, i18n.language)}
+          />
+        </dl>
+
+        <p className="flex items-start gap-2 text-xs text-fg-terciario">
+          <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden />
+          {t('flota:detalle.ubicacion.mapaPendiente')}
         </p>
       </div>
 
       <p className="mt-3 text-xs text-fg-terciario">
         {t('flota:detalle.ubicacion.enFlotaDesde', {
-          fecha: formatearFecha(desde, i18n.language),
+          fecha: formatearFecha(vehiculo.fechaCreacion, i18n.language),
         })}
       </p>
 
@@ -136,7 +157,7 @@ function TarjetaUbicacion({
         tamano="sm"
         anchoCompleto
         className="mt-3"
-        render={<Link to={`/app/flota/mapa?vehicle=${vehiculoFlotaId}`} />}
+        render={<Link to={`/app/flota/mapa?vehicle=${vehiculo.id}`} />}
       >
         {t('flota:detalle.ubicacion.abrirMapa')}
       </Boton>

@@ -1,44 +1,42 @@
 import { useTranslation } from 'react-i18next'
+import { BadgeConexion } from '../BadgeConexion'
 import type { EstadoConexion } from '@/services/contracts/flota'
-import { Badge, type VarianteBadge } from '@/shared/ui/Badge'
 
 /**
  * Badge del estado de CONEXION del vehiculo (`EstadoConexion` del contrato).
  *
- * Esta es la "capa 2" que la primitiva `Badge` deja a proposito afuera: el mapeo
- * `codigo de catalogo -> variante + etiqueta` vive en el modulo, no en la primitiva.
+ * Es un envoltorio fino de `BadgeConexion`, que es el badge del modulo: variante, etiqueta y ayuda
+ * salen del mismo lugar que en dispositivos y en el mapa, asi que las 3 superficies pintan el mismo
+ * codigo igual. Lo unico propio del vehiculo es la regla de la velocidad.
  *
- * El codigo viaja SIEMPRE en snake_case (D-7) y solo se traduce para mostrarlo: nada de lo que
- * se ve aca cambia el valor que el front le manda al backend.
- *
- * `sin_dato` es el fallback de partial-data (D-C1 a): Telemetria no respondio o el vehiculo aun
- * no tiene fuente. No es un error de pantalla — el resto de la fila se sigue viendo.
+ * Antes este componente tenia su propia copia del `Record<EstadoConexion, VarianteBadge>` y su
+ * propia composicion del `title`: asi es como se desincronizan dos verdades — el vocabulario cambia
+ * de criterio y `sin_dato` vuelve a pintarse de rojo en un solo lugar de la pantalla.
  */
-
-const variantePorEstado: Record<EstadoConexion, VarianteBadge> = {
-  en_linea: 'exito',
-  desconectado: 'peligro',
-  incompleto: 'advertencia',
-  sin_dato: 'neutro',
-}
 
 export interface VehiculoBadgeEstadoProps {
   estado: EstadoConexion
-  /** De `ultimaSenal.velocidadKmH`. Solo se muestra con el vehiculo en linea. */
+  /**
+   * De `ultimaSenal.velocidadKmH`. Solo se muestra con el vehiculo en linea: una velocidad al lado
+   * de "Desconectado" o "Sin dato" seria un dato viejo presentado como actual.
+   */
   velocidadKmH?: number | null
 }
 
 export function VehiculoBadgeEstado({ estado, velocidadKmH }: VehiculoBadgeEstadoProps) {
   const { t } = useTranslation('flota')
 
-  const etiqueta = t(`estadoConexion.${estado}`, { defaultValue: estado })
-  const muestraVelocidad = estado === 'en_linea' && velocidadKmH !== null && velocidadKmH !== undefined
+  const muestraVelocidad =
+    estado === 'en_linea' && velocidadKmH !== null && velocidadKmH !== undefined
 
   return (
-    <Badge variante={variantePorEstado[estado]} punto>
-      {muestraVelocidad
-        ? `${etiqueta} · ${t('vehiculosListado.celda.velocidad', { velocidad: velocidadKmH })}`
-        : etiqueta}
-    </Badge>
+    <BadgeConexion
+      estado={estado}
+      sufijo={
+        muestraVelocidad
+          ? t('vehiculosListado.celda.velocidad', { velocidad: velocidadKmH })
+          : null
+      }
+    />
   )
 }

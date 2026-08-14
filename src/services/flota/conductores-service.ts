@@ -42,7 +42,13 @@ import type {
  *    `flota.telemetria.no_disponible` (convencion 8b). El stub existe para que el cliente reciba un
  *    `code` en vez de un 404 de routing — no para que se lo llame. Un metodo que solo puede fallar
  *    invita a cablearlo a una pantalla que despues muestra un error permanente.
- *  - `POST /conductores/importar` y `GET /conductores/exportar`: sin implementar (slice-05).
+ *  - `GET /conductores/exportar`: **B-34**, y ya no es "llega en slice-05" — slice-05 CERRO sin
+ *    construirlo. La spec esta entera en `api.md` (CSV `;`, respeta filtros, permiso `.leer`), pero
+ *    su UNICO camino de error —400 por mas de 10.000 filas— **no tiene `code`**, y el backend paro en
+ *    vez de inventarlo. Hoy la ruta es un 404 de routing: por eso el listado no dibuja el boton
+ *    Exportar aunque `f-06` paso 7 lo pida.
+ *  - `POST /conductores/importar`: **P4** abierta (shape del resultado, `code` por fila y transporte
+ *    del CSV, que en v1 no puede ser binario por D-C2). Tampoco lo tomo slice-05.
  *  - Infracciones: fuera de alcance v1, cero endpoints.
  *
  * La asignacion vehiculo<->conductor NO esta aca: cuelga del VEHICULO (`api.md` §Asignaciones) y

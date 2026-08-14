@@ -12,7 +12,43 @@
     "en_linea": "En línea",
     "desconectado": "Desconectado",
     "incompleto": "Incompleto",
-    "sin_dato": "Sin datos"
+    "sin_dato": "Sin dato"
+  },
+  "conexion": {
+    "ayuda": {
+      "en_linea": "El GPS está reportando ahora.",
+      "desconectado": "El GPS venía reportando y dejó de hacerlo hace más de 5 minutos.",
+      "incompleto": "Falta terminar de configurar el vehículo para que pueda reportar.",
+      "sin_dato": "No llegó ninguna señal para este vehículo. No quiere decir que esté desconectado: puede no tener GPS instalado, o el servicio de posición no estar respondiendo."
+    },
+    "ayudaEquipo": {
+      "sinDato": "No llegó ninguna señal de este equipo. No quiere decir que esté desconectado: puede que todavía no haya reportado, o que el servicio de posición no esté respondiendo.",
+      "sinDatoNoInstalado": "Este equipo no está instalado en ningún vehículo, así que no tiene desde dónde reportar. No tener señal es lo esperable: no es una falla."
+    },
+    "filtro": {
+      "etiqueta": "Conexión",
+      "todos": "Cualquier conexión"
+    },
+    "vacio": {
+      "sinFuente": "Ningún vehículo está en ese estado de conexión ahora mismo. Puede que ninguno lo esté, o que no esté llegando la señal: los vehículos siguen estando.",
+      "incompleto": "Este filtro todavía no devuelve resultados: Flota aún no marca vehículos como «Incompleto»."
+    },
+    "vacioEquipo": {
+      "sinFuente": "Ningún equipo está en ese estado de conexión ahora mismo. Puede que ninguno lo esté, o que no esté llegando la señal: los equipos siguen en tu inventario.",
+      "incompleto": "Este filtro no aplica a los equipos: «Incompleto» describe a un vehículo sin dispositivo. Para buscar equipos sin vehículo, usá Asignación."
+    },
+    "datosParciales": {
+      "titulo": "Sin datos de conexión",
+      "descripcion_one": "No hay señal para la única fila de esta página. Puede ser que no tenga GPS instalado, o que el servicio de posición no esté respondiendo. Todo lo demás está actualizado.",
+      "descripcion_other": "No hay señal para ninguna de las {{count}} filas de esta página. Puede ser que no tengan GPS instalado, o que el servicio de posición no esté respondiendo. Todo lo demás está actualizado.",
+      "parcial": "{{sinFuente}} de {{total}} sin datos de conexión"
+    }
+  },
+  "situacionVehiculo": {
+    "con_dispositivo_gps": "Con dispositivo GPS",
+    "sin_dispositivo_gps": "Sin dispositivo GPS",
+    "con_conductor": "Con conductor",
+    "sin_conductor": "Sin conductor"
   },
   "tipoVehiculo": {
     "auto": "Auto",
@@ -37,6 +73,11 @@
     },
     "soloActivos": "Solo activos",
     "limpiar": "Limpiar filtros",
+    "filtros": {
+      "situacion": "Situación",
+      "situacionTodos": "Toda la flota",
+      "situacionAyuda": "Sale de las asignaciones vigentes de Flota, no de la señal del GPS: sigue siendo exacto aunque no haya datos de conexión."
+    },
     "columnas": {
       "patente": "Patente",
       "vehiculo": "Vehículo",
@@ -52,7 +93,6 @@
       "conductoresAsignados_one": "{{count}} asignado",
       "conductoresAsignados_other": "{{count}} asignados",
       "conductoresExtra": "+{{count}}",
-      "sinSenal": "Sin señal aún",
       "velocidad": "{{velocidad}} km/h",
       "dispositivoSinComponer": "Flota todavía no muestra el GPS desde el vehículo. El equipo instalado se ve en el inventario de dispositivos.",
       "conductorSinComponer": "Flota todavía no muestra el conductor desde el vehículo. La asignación vigente se ve en la ficha del conductor."
@@ -63,14 +103,15 @@
       "eliminar": "Eliminar"
     },
     "paginacion": {
-      "rango": "Mostrando {{desde}}–{{hasta}} de {{total}} vehículos",
+      "rango_one": "Mostrando {{desde}}–{{hasta}} de {{total}} vehículo",
+      "rango_other": "Mostrando {{desde}}–{{hasta}} de {{total}} vehículos",
       "porPagina": "Por página",
       "anterior": "Página anterior",
       "siguiente": "Página siguiente"
     },
     "vacioSinDatos": {
       "titulo": "Aún no cargaste vehículos",
-      "descripcion": "Empezá agregando tu primer vehículo. Podés hacerlo manualmente o importar un CSV con tu flota actual.",
+      "descripcion": "Empezá agregando tu primer vehículo desde el asistente de alta.",
       "cta": "Agregar primer vehículo"
     },
     "vacioSinResultados": {
@@ -80,7 +121,8 @@
     },
     "error": {
       "titulo": "No se pudieron cargar los vehículos",
-      "reintentar": "Reintentar"
+      "reintentar": "Reintentar",
+      "tituloRefresco": "No se pudo actualizar la lista. Estás viendo el último resultado que cargó bien."
     },
     "sinAcceso": {
       "titulo": "Sin acceso",
@@ -184,8 +226,8 @@
     },
     "ubicacion": {
       "titulo": "Ubicación actual",
-      "sinSenal": "Sin señal",
-      "sinSenalDescripcion": "Todavía no hay datos de telemetría para este vehículo.",
+      "ultimaSenal": "Última señal",
+      "mapaPendiente": "Esta tarjeta no dibuja el mapa: muestra cuándo llegó la última señal.",
       "enFlotaDesde": "En la flota desde el {{fecha}}",
       "abrirMapa": "Abrir en mapa completo"
     },
@@ -212,7 +254,7 @@
       "titulo": "Dispositivo GPS asociado",
       "alias": "Alias",
       "imei": "IMEI",
-      "snapshotPendiente": "El estado técnico en vivo (conexión, batería, última posición) todavía no tiene fuente disponible.",
+      "snapshotPendiente": "El estado técnico en vivo (conexión, batería, última señal) se muestra en la ficha del equipo, no acá.",
       "asociar": "Asociar dispositivo",
       "desasociar": "Desasociar",
       "desasociarSinId": "Para desasociar hace falta el identificador de la asociación, y hoy solo llega en la respuesta de asociar: se puede usar si la asociaste en esta sesión. Mientras tanto, usá Cambiar dispositivo.",
@@ -475,12 +517,15 @@
       "modelo": "Modelo",
       "modeloTodos": "Todos los modelos",
       "asignacion": "Asignación",
-      "asignacionTodos": "Asignados y sin asignar"
+      "asignacionTodos": "Asignados y sin asignar",
+      "asignacionAyuda": "Sale de las asignaciones vigentes de Flota, no de la señal del GPS: sigue siendo exacto aunque no haya datos de conexión.",
+      "conexionAyuda": "Depende del servicio de posición. Si no está respondiendo, todos los equipos figuran como «Sin dato» y filtrar por «En línea» no devuelve resultados."
     },
     "columnas": {
       "aliasImei": "Alias / IMEI",
       "modelo": "Modelo",
       "vehiculo": "Vehículo",
+      "conexion": "Conexión",
       "stock": "Stock",
       "ultimaSenal": "Última señal",
       "acciones": "Acciones"
@@ -502,7 +547,8 @@
       "sinPermiso": "Necesitás el permiso {{permiso}}"
     },
     "paginacion": {
-      "rango": "Mostrando {{desde}}–{{hasta}} de {{total}} dispositivos",
+      "rango_one": "Mostrando {{desde}}–{{hasta}} de {{total}} dispositivo",
+      "rango_other": "Mostrando {{desde}}–{{hasta}} de {{total}} dispositivos",
       "porPagina": "Por página",
       "anterior": "Página anterior",
       "siguiente": "Página siguiente"
@@ -628,8 +674,17 @@
       "asociar": "Elegir vehículo"
     },
     "telemetria": {
-      "sinFuenteTitulo": "Telemetría en vivo no disponible todavía",
-      "sinFuenteDescripcion": "La posición, la velocidad, la ignición y las baterías se componen desde Telemetría, y esa integración todavía no está conectada. No es que este dispositivo no esté transmitiendo."
+      "errorTitulo": "No se pudo leer la telemetría del equipo",
+      "actualizar": "Actualizar",
+      "ultimaSenal": "Última señal",
+      "velocidad": "Velocidad",
+      "velocidadValor": "{{velocidad}} km/h",
+      "bateriaInterna": "Batería del equipo",
+      "bateriaVehiculo": "Batería del vehículo",
+      "porcentaje": "{{valor}}%",
+      "notaInstalado": "Los datos que figuran vacíos son los que el equipo todavía no reportó, o los que el servicio de posición no está devolviendo ahora.",
+      "notaSinVehiculo": "Las baterías se leen a través del vehículo. Este equipo no está instalado en ninguno, así que no hay de dónde tomarlas: no es una falla del equipo.",
+      "compuestoEn": "Compuesto el {{fecha}}"
     },
     "eventos": {
       "sinFuenteTitulo": "Historial de eventos no disponible",
@@ -660,7 +715,8 @@
       "vacioDescripcion": "Todavía no hay transiciones de estado de stock para este dispositivo.",
       "errorTitulo": "No se pudo cargar el historial",
       "transicion": "Cambio de estado",
-      "rango": "Mostrando {{desde}}–{{hasta}} de {{total}} movimientos"
+      "rango_one": "Mostrando {{desde}}–{{hasta}} de {{total}} movimiento",
+      "rango_other": "Mostrando {{desde}}–{{hasta}} de {{total}} movimientos"
     }
   },
   "filtroAsignacion": {
@@ -1190,6 +1246,16 @@
     "sinPermisoLectura": "Necesitás el permiso {{permiso}} para ver la lista de vehículos.",
     "asignar": "Asignar vehículo",
     "noLiberaElActual": "Esto NO libera el vehículo que ya conduce: se suma una asignación. Para cerrar la anterior, usá \"Quitar\" en el tab Asignaciones.",
-    "listaSinFiltrar": "Se listan todos los vehículos activos: todavía no podemos saber cuáles ya tienen conductor. Si el elegido ya tiene principal, la asignación se rechaza al guardar."
+    "listaSinFiltrar": "Se listan todos los vehículos activos, incluidos los que ya tienen conductor: uno con un secundario igual puede recibir un principal. Si el elegido ya tiene principal, la asignación se rechaza al guardar.",
+    "sinDisponiblesSinDispositivo": "Todos tus vehículos activos ya tienen un GPS instalado. Podés desasociar el de alguno, o dar de alta el vehículo que falta.",
+    "listaFiltradaSinDispositivo": "Se listan solo los vehículos activos sin GPS instalado. El filtro lo resuelve el servidor sobre las asociaciones vigentes: si el que buscás no aparece, es porque ya tiene un equipo."
+  },
+  "asignacionAVehiculo": {
+    "titulo": "Asignar a un vehículo",
+    "descripcion": "Elegí el vehículo en el que se va a instalar este equipo. Pasa a estado «Instalado» y sus posiciones empiezan a contar para ese vehículo.",
+    "vehiculo": "Vehículo",
+    "asignar": "Instalar en el vehículo",
+    "asignando": "Instalando…",
+    "cancelar": "Cancelar"
   }
 }

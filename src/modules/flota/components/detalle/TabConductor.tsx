@@ -21,10 +21,13 @@ import { formatearFecha } from './formato'
  *
  * ── ⚠️ EL VACÍO DE ACÁ ES PARTIAL-DATA, NO "NO TIENE CONDUCTOR" ───────────────────────────────
  * `VehiculoDetalleDto.conductoresAsignados` viene **`[]` en el 100% de las respuestas, también con
- * conductores asignados**: `VehiculoFlotaService.MapearDetalle` lo escribe vacío y la composición del
- * lado del vehículo es alcance de slice-05 (misma fila 🔴 que `dispositivo = null`). La tabla
- * `asignaciones_vehiculo_conductor_flota` **existe** desde la migración `Conductores`, así que es
- * composición faltante, no dato faltante.
+ * conductores asignados**: `VehiculoFlotaService.MapearDetalle` lo escribe vacío (misma fila 🔴 que
+ * `dispositivo = null`). La tabla `asignaciones_vehiculo_conductor_flota` **existe** desde la
+ * migración `Conductores`, así que es composición faltante, no dato faltante.
+ *
+ * ⚠️ **DUEÑO ACTUALIZADO**: esto decía "es alcance de slice-05". Slice-05 **cerró el 2026-08-12 sin
+ * tomarlo** — es composición **intra-schema**, no depende de Telemetría —, así que no tiene slice
+ * dueño y su dueño declarado en `ESTADO.md` es el **PO**.
  *
  * Por eso el copy **no dice "sin conductor asignado"**, que sería una afirmación falsa: dice que Flota
  * no puede mostrarlo desde acá y manda al lugar donde el dato SÍ está (la ficha del conductor, que

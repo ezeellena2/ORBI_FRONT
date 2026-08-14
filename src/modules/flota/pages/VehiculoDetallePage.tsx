@@ -182,7 +182,8 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
    * ── SE GUARDA EL DTO ENTERO, NO SOLO EL `asignacionId` ────────────────────────────────────────
    * Antes se guardaba el id suelto Y ADEMÁS se lo anulaba con
    * `vehiculo.dispositivo === null ? null : asignacionId`. Como el backend hardcodea
-   * `Dispositivo = null` hasta slice-05 (ver `TabDispositivo`), esa guarda daba `null` SIEMPRE: el
+   * `Dispositivo = null` (ver `TabDispositivo`: no lo compone nadie todavía, y ⚠️ **no es de
+   * slice-05**, que cerró sin tomarlo), esa guarda daba `null` SIEMPRE: el
    * `ModalDesasociarDispositivo` era código muerto —no había ninguna forma de llegar a renderizarlo,
    * o sea que el `DELETE` no tenía un solo camino en la UI— y el aviso "vas a desinstalar el equipo
    * actual" (`reasigna`) nunca se mostraba, ni siquiera reasignando.
@@ -221,7 +222,8 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
     identidadConductorDeState(location.state),
   )
 
-  // El vehículo tiene GPS si el DTO lo dice (slice-05 en adelante) o si lo asociamos recién.
+  // El vehículo tiene GPS si el DTO lo dice (hoy nunca: el campo no se compone) o si lo asociamos
+  // recién. La segunda rama es la única viva.
   const tieneDispositivo = vehiculo.dispositivo !== null || asignacionDeSesion !== null
 
   const identificacionVehiculo = vehiculo.patente ?? vehiculo.alias ?? vehiculo.id
@@ -286,12 +288,14 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
           />
         </TabsContent>
         {/*
-          El panel del Historial se monta solo cuando el tab está activo: su request es la superficie
-          DEGRADADA (500 `flota.telemetria.no_disponible`), y dispararlo al abrir la ficha metería un
-          error en la consola de todos los usuarios que nunca miran ese tab.
+          El Historial (recorridos) es la superficie DEGRADADA de este vehículo: 500
+          `flota.telemetria.no_disponible` por contrato (B-9). El tab **ya no emite ese request** —
+          lo declara, como el tab Eventos del dispositivo y el tab Actividad del conductor. El
+          `keepMounted={false}` se conserva igual: no hay request que gatear, pero desmontar el panel
+          inactivo sigue siendo lo correcto para los otros 3 tabs de esta misma lista.
         */}
         <TabsContent value="historial" className="pt-4" keepMounted={false}>
-          <TabHistorial vehiculoFlotaId={vehiculo.id} />
+          <TabHistorial />
         </TabsContent>
       </Tabs>
 

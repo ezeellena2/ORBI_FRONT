@@ -13,7 +13,8 @@ import type { EstadoDocumento, LicenciaConductorDto } from '@/services/contracts
  * 2. **`LicenciaConductorDto` del listado**: trae `diasParaVencer`, NO trae `estadoDerivado`.
  *
  * ── ⚠️ DRIFT: EL BADGE DE 4 ESTADOS NO SE PUEDE PINTAR EN EL LISTADO ──────────────────────────
- * `f-05` §2 pide el badge de 4 estados por fila **y a la vez** prohibe recalcular el umbral
+ * **slice-04** `f-05` §2 (el paso del listado; slice-05 tiene otro `f-05`, el de vehiculos) pide el
+ * badge de 4 estados por fila **y a la vez** prohibe recalcular el umbral
  * ("el estado llega calculado del backend; el front **no recalcula el umbral**"). Las dos cosas no
  * pueden ser ciertas juntas: `ConductorListItemDto.licencia` **no tiene** `estadoDerivado`, asi que
  * distinguir `vigente` de `por_vencer` exige que el front decida que son 30 dias — que es

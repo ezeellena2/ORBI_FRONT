@@ -184,7 +184,7 @@ describe('pill del tab Conductor', () => {
     expect(pillDeConductores(0, true)).toEqual({ tipo: 'al_menos', valor: 1 })
   })
 
-  it('cuando el conteo llega (slice-05) manda el conteo, aunque haya asignación de sesión', () => {
+  it('cuando el conteo llegue a componerse manda el conteo, aunque haya asignación de sesión', () => {
     expect(pillDeConductores(3, true)).toEqual({ tipo: 'conteo', valor: 3 })
     expect(pillDeConductores(2, false)).toEqual({ tipo: 'conteo', valor: 2 })
   })

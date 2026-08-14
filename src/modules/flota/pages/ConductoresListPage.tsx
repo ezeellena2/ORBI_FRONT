@@ -34,21 +34,36 @@ import {
 } from '@/stores/flota-conductores-filters-store'
 
 /**
- * `/app/flota/conductores` — los conductores operativos de la organizacion activa (`f-05`).
+ * `/app/flota/conductores` — los conductores operativos de la organizacion activa.
  *
  * ALCANCE: tabla, los 3 filtros que el server declara, paginacion, alta (Modo A y Modo B), kebab con
  * ver detalle / editar / cambiar estado / asignar vehiculo / vincular dispositivo / documentos /
  * desactivar / reactivar / eliminar, y los 5 estados obligatorios.
  *
+ * ── ESTE ES EL LISTADO QUE **NO** DEPENDE DE TELEMETRIA (`f-06`) ───────────────────────────────
+ * Y esa es su paridad con los otros dos: sus hermanos ganaron columna de conexion en slice-05 y este
+ * no, porque `ConductorListItemDto` **no tiene ningun campo de conexion** — un conductor no reporta,
+ * reporta el vehiculo que conduce (D1). Consecuencia contratada (ficha §9): **con Telemetria caida
+ * esta pantalla se ve exactamente igual**. No lleva aviso de datos parciales, y no llevarlo es la
+ * decision correcta: un cartel que diga "todo bien" en cada carga es ruido.
+ *
  * Lo que NO entra, y por que — ninguna de estas ausencias es un olvido:
- *  - **Los 4 contadores del header** (total / activos / con vehiculo / licencias por vencer): no hay
- *    endpoint de contadores en `api.md` (`PagedResult` solo trae `total`). Slice-05.
+ *  - **Los 4 contadores del header** (total / activos / con vehiculo / licencias por vencer):
+ *    **B-35**. No hay endpoint agregado ni campos de conteo en el response, y derivarlos de la
+ *    pagina actual daria un numero que cambia al paginar. El bloqueante sigue abierto: era el unico
+ *    pendiente de slice-05 sin dueno, y se elevo justamente para que no se re-descubra acá.
  *  - **Chip de filtro Licencia**: el server **no declara el parametro** — la categoria no tiene
  *    columna (**B-21**). Mandarlo devuelve 200 con la lista ENTERA sin filtrar, en silencio.
  *  - **Busqueda libre**: `GET /conductores` no declara `search`.
- *  - **Bulk bar, Importar, Exportar, "Invitar por email", "Compartir"**: sin endpoint, sin soporte
- *    de contrato o de otro slice. El `flota.conductores.invitar` que usa el mockup **no existe** en
- *    el catalogo de 44 permisos.
+ *  - **`GET .../stats` y `GET .../recorridos`**: responden **500 `flota.telemetria.no_disponible`**
+ *    por contrato (convencion 8b, B-9: Telemetria no modela conductores ni persiste historico). El
+ *    request **no se emite** desde ninguna superficie — `conductores-service` ni siquiera expone los
+ *    metodos, que es lo que impide cablearlos por accidente.
+ *  - **Exportar**: **B-34**. `GET /conductores/exportar` no esta construido (su unico camino de
+ *    error no tiene `code`), asi que hoy es un 404 de routing. `f-06` paso 7 lo pide igual: manda el
+ *    contrato. **Importar**: P4 abierta.
+ *  - **Bulk bar, "Invitar por email", "Compartir"**: sin endpoint ni soporte de contrato. El
+ *    `flota.conductores.invitar` que usa el mockup **no existe** en el catalogo de 44 permisos.
  *
  * La pagina no tiene logica de negocio: lee filtros del store, llama al hook y ensambla.
  */

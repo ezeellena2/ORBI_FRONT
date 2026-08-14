@@ -13,14 +13,23 @@ import { claveDeStock, varianteDeStock } from './vocabulario-stock'
  * meta-linea tecnica, y las acciones.
  *
  * ── LO QUE NO SE PINTA ACA, Y NO ES UN OLVIDO ─────────────────────────────────────────────────
- * **No hay badge de CONEXION.** El estado de conexion se deriva de Telemetria y esa composicion
- * llega en slice-05. `f-06` es explicito: no se pinta un badge gris "Sin dato" que insinue una
- * composicion que todavia no existe — el elemento simplemente no esta. Un badge permanentemente
- * gris no informa, entrena al usuario a ignorar el lugar donde despues va a aparecer el dato real.
+ * **No hay badge de CONEXION**, y ⚠️ **el motivo escrito quedo VENCIDO el 2026-08-12**: decia que
+ * "esa composicion llega en slice-05" y llego. `DispositivoDetalleDto.conexion` es `required` y se
+ * compone de verdad (`DispositivoGpsService.ArmarDetalle` → `ObtenerEstadoDeLaFlota`), asi que el
+ * argumento de `f-06` —no pintar un badge gris que insinue una composicion inexistente— ya no
+ * aplica: el dato existe y no es gris permanente.
  *
- * **No hay mini-stats tecnicas** (uptime, bateria interna, ultima senal): son
- * `DispositivoTelemetriaSnapshotDto`, tambien slice-05. Y la 4.a tarjeta del mockup, "Senal GSM",
- * no se porta NUNCA: Telemetria no captura intensidad de senal (B-6).
+ * **La decision de no dibujarlo en el HERO sigue en pie igual, pero ahora es una decision de
+ * diseno, no una consecuencia**: el hero tiene un solo badge y es el de STOCK, que es el eje del
+ * que dependen todas las acciones de esta pantalla; la conexion se muestra en el tab **Telemetria**,
+ * con su linea de ayuda de las 3 causas. Ponerlos juntos en el hero pide decidir cual manda cuando
+ * dicen cosas distintas (`instalado` + `desconectado` es un caso normal). **Decide el PO.**
+ *
+ * **No hay mini-stats tecnicas** (uptime, bateria interna, ultima senal). El snapshot
+ * (`DispositivoTelemetriaSnapshotDto`) **existe desde slice-05 `f-04`** —este comentario tambien
+ * decia que estaba por venir— y lo pinta el tab Telemetria, que es donde se puede mostrar con su
+ * estado de partial-data en vez de como 3 numeros sueltos arriba. Y la 4.a tarjeta del mockup,
+ * "Senal GSM", no se porta NUNCA: Telemetria no captura intensidad de senal (B-6).
  *
  * ── STOCK != CONEXION ─────────────────────────────────────────────────────────────────────────
  * El unico badge del hero es el de stock (`en_stock` / `instalado` / `en_reparacion` /

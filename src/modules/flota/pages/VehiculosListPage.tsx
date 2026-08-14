@@ -1,23 +1,29 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, SearchX, Truck } from 'lucide-react'
+import { Plus, SearchX, Truck } from 'lucide-react'
 import { TablaVehiculos } from '../components/vehiculos/TablaVehiculos'
+import { VehiculoFiltros } from '../components/vehiculos/VehiculoFiltros'
+import { AvisoDatosDeConexion } from '../components/AvisoDatosDeConexion'
+import { AvisoOperacion } from '../components/AvisoOperacion'
 import { useEliminarVehiculo } from '../hooks/useEliminarVehiculo'
 import { useVehiculos } from '../hooks/useVehiculos'
+import {
+  claveDeVacioPorFiltroDeConexion,
+  coberturaDeConexion,
+} from '../vocabulario-conexion'
 import type { VehiculoListItemDto } from '@/services/contracts/flota'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
 import { Boton } from '@/shared/ui/Boton'
 import { DialogoConfirmacion } from '@/shared/ui/DialogoConfirmacion'
 import { EstadoError } from '@/shared/ui/EstadoError'
 import { EstadoVacio } from '@/shared/ui/EstadoVacio'
-import { Input } from '@/shared/ui/Input'
 import { Paginacion } from '@/shared/ui/Paginacion'
 import { SinAccesoOverlay } from '@/shared/ui/SinAccesoOverlay'
-import { Toggle } from '@/shared/ui/Toggle'
 import type { EstadoOrden } from '@/shared/ui/Columna'
 import {
   aQueryVehiculos,
+  hayFiltrosVehiculosActivos,
   PAGE_SIZE_DEFAULT,
   useFlotaFiltersStore,
 } from '@/stores/flota-filters-store'
@@ -26,13 +32,29 @@ import { useSessionStore } from '@/stores/session-store'
 /**
  * `/app/flota/vehiculos` — listado de vehiculos de la organizacion activa.
  *
- * ALCANCE (f-05): tabla, busqueda parcial por patente, `soloActivos`, paginacion, menu de fila con
- * "Ver detalle" y "Eliminar" (baja logica) y los 2 empty-states. NO entran —y no se aproximan—
- * los contadores del header (no hay endpoint agregado), los filtros de estado/situacion/tipo (sin
- * fuente hasta los slices 03/04/05), la bulk bar, import/export y los modales de alta rapida,
- * asignacion y compartir.
+ * ALCANCE tras `f-05` de slice-05 (paridad, no reescritura): tabla, busqueda parcial por patente,
+ * los filtros `estado` (conexion) y `situacion` que este slice destrabo, `soloActivos`, orden,
+ * paginacion, menu de fila con "Ver detalle" y "Eliminar" (baja logica) y los 5 estados —
+ * incluido **partial-data**, que es el que define este slice.
  *
- * La pagina no tiene logica de negocio: lee filtros del store, llama el hook y ensambla.
+ * ── LO QUE NO ENTRA, Y NO ES UN OLVIDO ────────────────────────────────────────────────────────
+ *  - **Contadores del header** (total, con GPS, sin GPS, sin conductor): **B-35**. No hay endpoint
+ *    agregado ni campos de conteo en el response, y derivarlos de la pagina actual daria un numero
+ *    que cambia al paginar. Lo unico que si se puede afirmar es la cobertura DE LA PAGINA, y se
+ *    dibuja diciendo que es eso (`AvisoDatosDeConexion`).
+ *  - **Exportar**: **B-34**. `GET /vehiculos/exportar` **no esta construido** —su unico camino de
+ *    error (400 por >10.000 filas) no tiene `code` y el backend paro en vez de inventarlo—, asi que
+ *    hoy es un 404 de routing. Un boton para una operacion que el backend no puede completar no se
+ *    dibuja, aunque `f-05` paso 7 lo pida: manda el contrato.
+ *  - **Importar**: P4 abierta (shape del resultado, `code` por fila y transporte del CSV).
+ *  - **Filtro `tipo`**: el server lo declara, pero `GET /catalogos/tipos-vehiculo` no existe.
+ *  - **Bulk bar y "Exportar seleccion"**: sin soporte de contrato (no hay endpoints masivos ni
+ *    export por ids). Por eso la tabla tampoco tiene columna de seleccion.
+ *  - **Modales de alta rapida, asociar dispositivo, conductores y compartir**: alta rapida vs
+ *    wizard sigue abierta (DA-VL-03) y compartir no tiene diseno canonico. Las asignaciones se
+ *    hacen desde la ficha del vehiculo, que si las tiene.
+ *
+ * La pagina no tiene logica de negocio: lee filtros del store, llama al hook y ensambla.
  */
 
 const OPCIONES_TAMANO_PAGINA = [PAGE_SIZE_DEFAULT, 50, 100]
@@ -48,12 +70,16 @@ export default function VehiculosListPage() {
   // Lectura POR CAMPO: un selector que devuelva un objeto nuevo dispara un bucle de re-render en
   // zustand 5 (compara por identidad).
   const patente = useFlotaFiltersStore((s) => s.patente)
+  const estado = useFlotaFiltersStore((s) => s.estado)
+  const situacion = useFlotaFiltersStore((s) => s.situacion)
   const soloActivos = useFlotaFiltersStore((s) => s.soloActivos)
   const page = useFlotaFiltersStore((s) => s.page)
   const pageSize = useFlotaFiltersStore((s) => s.pageSize)
   const sortBy = useFlotaFiltersStore((s) => s.sortBy)
   const sortDirection = useFlotaFiltersStore((s) => s.sortDirection)
   const setPatente = useFlotaFiltersStore((s) => s.setPatente)
+  const setEstado = useFlotaFiltersStore((s) => s.setEstado)
+  const setSituacion = useFlotaFiltersStore((s) => s.setSituacion)
   const setSoloActivos = useFlotaFiltersStore((s) => s.setSoloActivos)
   const setPage = useFlotaFiltersStore((s) => s.setPage)
   const setPageSize = useFlotaFiltersStore((s) => s.setPageSize)
@@ -77,9 +103,8 @@ export default function VehiculosListPage() {
     [busqueda, patente, setPatente],
   )
 
-  const consulta = useVehiculos(
-    aQueryVehiculos({ patente, soloActivos, page, pageSize, sortBy, sortDirection }),
-  )
+  const filtros = { patente, estado, situacion, soloActivos, page, pageSize, sortBy, sortDirection }
+  const consulta = useVehiculos(aQueryVehiculos(filtros))
   const eliminar = useEliminarVehiculo()
 
   // La pagina quedo fuera de rango: pasa al borrar la ultima fila de la ultima pagina. El backend
@@ -122,8 +147,8 @@ export default function VehiculosListPage() {
 
   // Los 2 vacios son problemas DISTINTOS y el CTA equivocado deja al usuario trabado. El criterio
   // es "¿hay algo que limpiar?": si los filtros estan en su default, no hay filtro que culpar y el
-  // vacio es de datos. Sin endpoint de conteo no hay forma mas precisa (PENDIENTE de ficha §3).
-  const hayFiltrosActivos = patente.trim().length > 0 || soloActivos !== true
+  // vacio es de datos.
+  const hayFiltros = hayFiltrosVehiculosActivos(filtros)
 
   function limpiarFiltros() {
     setBusqueda('')
@@ -143,12 +168,32 @@ export default function VehiculosListPage() {
     eliminar.mutate(aEliminar.id, { onSuccess: () => setAEliminar(null) })
   }
 
-  const vacio = hayFiltrosActivos ? (
+  const vehiculos = consulta.data?.items ?? []
+  const cobertura = coberturaDeConexion(vehiculos.map((vehiculo) => vehiculo.estado))
+
+  /*
+    Filtrar por "En linea" cuando ninguna fila tiene fuente devuelve vacio, y "Ningun vehiculo
+    coincide con tus filtros" es literalmente cierto y completamente enganoso: los vehiculos estan,
+    lo que falta es la senal que decide si estan en linea. La explicacion REEMPLAZA a la generica
+    ("proba ajustar la busqueda"), que ahi manda a hacer lo que no va a servir.
+
+    El segundo argumento evita el error opuesto: con una patente o una situacion puestas ademas del
+    chip, el vacio puede ser de ESOS filtros, y una lista vacia no trae filas que mirar para saber
+    cual fue. Ahi vuelve el copy generico, que no afirma ninguna causa.
+  */
+  const hayOtroFiltroAdemasDeConexion = patente.trim() !== '' || situacion !== ''
+  const claveVacioConexion = claveDeVacioPorFiltroDeConexion(estado, hayOtroFiltroAdemasDeConexion)
+
+  const vacio = hayFiltros ? (
     <EstadoVacio
       variante="sin-resultados"
       icono={SearchX}
       titulo={t('vehiculosListado.vacioSinResultados.titulo')}
-      descripcion={t('vehiculosListado.vacioSinResultados.descripcion')}
+      descripcion={
+        claveVacioConexion === null
+          ? t('vehiculosListado.vacioSinResultados.descripcion')
+          : t(claveVacioConexion)
+      }
       acciones={
         <Boton variante="secundaria" onClick={limpiarFiltros}>
           {t('vehiculosListado.vacioSinResultados.cta')}
@@ -171,16 +216,30 @@ export default function VehiculosListPage() {
     />
   )
 
-  const error = errorApi ? (
-    <EstadoError
-      variante="recuperable"
-      titulo={t('vehiculosListado.error.titulo')}
-      mensaje={resolveApiErrorMessage(errorApi, tComun)}
-      trazaId={errorApi.traceId ?? undefined}
-      textoReintentar={t('vehiculosListado.error.reintentar')}
-      onReintentar={() => void consulta.refetch()}
-    />
-  ) : undefined
+  /*
+    ── UN REFETCH QUE FALLA NO BORRA LA TABLA QUE YA ESTABA LLENA ────────────────────────────────
+    `useVehiculos` usa `keepPreviousData` justamente para no perder la pagina bajo el cursor del
+    usuario, pero `Tabla` le da precedencia a `error` sobre `filas`: con `data` presente y un refetch
+    en background fallado (red intermitente, 500 esporadico), la lista ENTERA se reemplazaba por el
+    panel de error y el usuario perdia lo que estaba mirando.
+
+    Un error CON datos en mano es partial-data, no una pantalla de error: la tabla se queda y el
+    fallo se avisa arriba, con su reintento. Sin datos en mano si corresponde el panel entero, porque
+    no hay nada que preservar. Es la misma correccion que ya tienen dispositivos y conductores.
+  */
+  const hayDatosEnMano = consulta.data !== undefined
+
+  const error =
+    errorApi && !hayDatosEnMano ? (
+      <EstadoError
+        variante="recuperable"
+        titulo={t('vehiculosListado.error.titulo')}
+        mensaje={resolveApiErrorMessage(errorApi, tComun)}
+        trazaId={errorApi.traceId ?? undefined}
+        textoReintentar={t('vehiculosListado.error.reintentar')}
+        onReintentar={() => void consulta.refetch()}
+      />
+    ) : undefined
 
   const paginacion = consulta.data?.pagination ?? null
 
@@ -217,38 +276,41 @@ export default function VehiculosListPage() {
         </span>
       </header>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-borde bg-superficie-1 p-3">
-        <label className="flex min-w-56 flex-1 flex-col gap-1 text-xs text-fg-secundario">
-          {t('vehiculosListado.buscar.etiqueta')}
-          <Input
-            type="search"
-            mono
-            iconoIzq={Search}
-            autoComplete="off"
-            placeholder={t('vehiculosListado.buscar.placeholder')}
-            value={busqueda}
-            onChange={(evento) => setBusqueda(evento.target.value)}
-          />
-        </label>
+      <VehiculoFiltros
+        busqueda={busqueda}
+        estado={estado}
+        situacion={situacion}
+        soloActivos={soloActivos}
+        hayFiltros={hayFiltros}
+        onBusqueda={setBusqueda}
+        onEstado={setEstado}
+        onSituacion={setSituacion}
+        onSoloActivos={setSoloActivos}
+        onLimpiar={limpiarFiltros}
+      />
 
-        <Toggle
-          etiqueta={t('vehiculosListado.soloActivos')}
-          activo={soloActivos}
-          onCambio={setSoloActivos}
+      {errorApi && hayDatosEnMano ? (
+        <AvisoOperacion
+          titulo={t('vehiculosListado.error.tituloRefresco')}
+          mensaje={resolveApiErrorMessage(errorApi, tComun)}
+          trazaId={errorApi.traceId ?? undefined}
+          accion={
+            <Boton variante="secundaria" tamano="sm" onClick={() => void consulta.refetch()}>
+              {t('vehiculosListado.error.reintentar')}
+            </Boton>
+          }
         />
+      ) : null}
 
-        <Boton
-          variante="fantasma"
-          tamano="sm"
-          deshabilitado={!hayFiltrosActivos}
-          onClick={limpiarFiltros}
-        >
-          {t('vehiculosListado.limpiar')}
-        </Boton>
-      </div>
+      {/*
+        PARTIAL-DATA. Va ARRIBA de la tabla cuando ninguna fila tiene fuente, que es el caso que se
+        confunde con "se me cayo la flota". No es un error y no reemplaza a la tabla: el resto de la
+        fila (patente, alias, marca, estado operativo, creado) esta completo y actualizado.
+      */}
+      <AvisoDatosDeConexion cobertura={cobertura} />
 
       <TablaVehiculos
-        vehiculos={consulta.data?.items ?? []}
+        vehiculos={vehiculos}
         cargando={consulta.isPending}
         orden={{ clave: sortBy, direccion: sortDirection === 'Asc' ? 'asc' : 'desc' }}
         onOrden={cambiarOrden}
@@ -277,8 +339,10 @@ export default function VehiculosListPage() {
             anterior: t('vehiculosListado.paginacion.anterior'),
             siguiente: t('vehiculosListado.paginacion.siguiente'),
             porPagina: t('vehiculosListado.paginacion.porPagina'),
+            // `count` ademas de `total`: es el nombre que i18next usa para elegir la forma plural.
+            // Sin el, una flota de uno decia "de 1 vehiculos".
             rango: (desde, hasta, total) =>
-              t('vehiculosListado.paginacion.rango', { desde, hasta, total }),
+              t('vehiculosListado.paginacion.rango', { desde, hasta, total, count: total }),
           }}
         />
       ) : null}

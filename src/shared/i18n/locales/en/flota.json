@@ -14,6 +14,42 @@
     "incompleto": "Incomplete",
     "sin_dato": "No data"
   },
+  "conexion": {
+    "ayuda": {
+      "en_linea": "The GPS unit is reporting right now.",
+      "desconectado": "The GPS unit was reporting and stopped more than 5 minutes ago.",
+      "incompleto": "This vehicle still needs setup before it can report.",
+      "sin_dato": "No signal has arrived for this vehicle. It does not mean it is disconnected: it may have no GPS installed, or the position service may not be responding."
+    },
+    "ayudaEquipo": {
+      "sinDato": "No signal has arrived from this unit. It does not mean it is disconnected: it may not have reported yet, or the position service may not be responding.",
+      "sinDatoNoInstalado": "This unit is not installed in any vehicle, so it has nothing to report from. Having no signal is expected: it is not a fault."
+    },
+    "filtro": {
+      "etiqueta": "Connection",
+      "todos": "Any connection"
+    },
+    "vacio": {
+      "sinFuente": "No vehicle is in that connection state right now. Either none is, or the signal is not arriving: the vehicles are still there.",
+      "incompleto": "This filter returns nothing yet: Fleet does not flag vehicles as “Incomplete” so far."
+    },
+    "vacioEquipo": {
+      "sinFuente": "No unit is in that connection state right now. Either none is, or the signal is not arriving: the units are still in your inventory.",
+      "incompleto": "This filter does not apply to units: “Incomplete” describes a vehicle without a device. To find units without a vehicle, use Assignment."
+    },
+    "datosParciales": {
+      "titulo": "No connection data",
+      "descripcion_one": "No signal for the only row on this page. It may have no GPS installed, or the position service may not be responding. Everything else is up to date.",
+      "descripcion_other": "No signal for any of the {{count}} rows on this page. They may have no GPS installed, or the position service may not be responding. Everything else is up to date.",
+      "parcial": "{{sinFuente}} of {{total}} without connection data"
+    }
+  },
+  "situacionVehiculo": {
+    "con_dispositivo_gps": "With GPS unit",
+    "sin_dispositivo_gps": "Without GPS unit",
+    "con_conductor": "With driver",
+    "sin_conductor": "Without driver"
+  },
   "tipoVehiculo": {
     "auto": "Car",
     "camioneta": "Pickup",
@@ -37,6 +73,11 @@
     },
     "soloActivos": "Active only",
     "limpiar": "Clear filters",
+    "filtros": {
+      "situacion": "Situation",
+      "situacionTodos": "Whole fleet",
+      "situacionAyuda": "It comes from the current Fleet assignments, not from the GPS signal: it stays accurate even with no connection data."
+    },
     "columnas": {
       "patente": "Plate",
       "vehiculo": "Vehicle",
@@ -52,7 +93,6 @@
       "conductoresAsignados_one": "{{count}} assigned",
       "conductoresAsignados_other": "{{count}} assigned",
       "conductoresExtra": "+{{count}}",
-      "sinSenal": "No signal yet",
       "velocidad": "{{velocidad}} km/h",
       "dispositivoSinComponer": "Fleet does not show the GPS from the vehicle yet. The installed device is visible in the device inventory.",
       "conductorSinComponer": "Fleet does not show the driver from the vehicle yet. The current assignment is visible on the driver profile."
@@ -63,14 +103,15 @@
       "eliminar": "Delete"
     },
     "paginacion": {
-      "rango": "Showing {{desde}}–{{hasta}} of {{total}} vehicles",
+      "rango_one": "Showing {{desde}}–{{hasta}} of {{total}} vehicle",
+      "rango_other": "Showing {{desde}}–{{hasta}} of {{total}} vehicles",
       "porPagina": "Per page",
       "anterior": "Previous page",
       "siguiente": "Next page"
     },
     "vacioSinDatos": {
       "titulo": "You have not added any vehicles yet",
-      "descripcion": "Start by adding your first vehicle. You can do it manually or import a CSV with your current fleet.",
+      "descripcion": "Start by adding your first vehicle from the setup wizard.",
       "cta": "Add first vehicle"
     },
     "vacioSinResultados": {
@@ -80,7 +121,8 @@
     },
     "error": {
       "titulo": "The vehicles could not be loaded",
-      "reintentar": "Retry"
+      "reintentar": "Retry",
+      "tituloRefresco": "The list could not be refreshed. You are seeing the last result that loaded correctly."
     },
     "sinAcceso": {
       "titulo": "No access",
@@ -184,8 +226,8 @@
     },
     "ubicacion": {
       "titulo": "Current location",
-      "sinSenal": "No signal",
-      "sinSenalDescripcion": "There is no telemetry data for this vehicle yet.",
+      "ultimaSenal": "Last signal",
+      "mapaPendiente": "This card does not draw the map: it shows when the last signal arrived.",
       "enFlotaDesde": "In the fleet since {{fecha}}",
       "abrirMapa": "Open in full map"
     },
@@ -212,7 +254,7 @@
       "titulo": "Linked GPS device",
       "alias": "Alias",
       "imei": "IMEI",
-      "snapshotPendiente": "Live technical status (connection, battery, last position) has no available source yet.",
+      "snapshotPendiente": "Live technical status (connection, battery, last signal) is shown on the device page, not here.",
       "asociar": "Link device",
       "desasociar": "Unlink",
       "desasociarSinId": "Unlinking needs the link identifier, and today it only arrives in the response of linking: it is available if you linked it in this session. In the meantime, use Change device.",
@@ -475,12 +517,15 @@
       "modelo": "Model",
       "modeloTodos": "All models",
       "asignacion": "Assignment",
-      "asignacionTodos": "Assigned and unassigned"
+      "asignacionTodos": "Assigned and unassigned",
+      "asignacionAyuda": "Comes from Fleet's current assignments, not from the GPS signal: it stays accurate even with no connection data.",
+      "conexionAyuda": "Depends on the position service. If it is not responding, every unit shows as “No data” and filtering by “Online” returns nothing."
     },
     "columnas": {
       "aliasImei": "Alias / IMEI",
       "modelo": "Model",
       "vehiculo": "Vehicle",
+      "conexion": "Connection",
       "stock": "Stock",
       "ultimaSenal": "Last signal",
       "acciones": "Actions"
@@ -502,7 +547,8 @@
       "sinPermiso": "You need the {{permiso}} permission"
     },
     "paginacion": {
-      "rango": "Showing {{desde}}–{{hasta}} of {{total}} devices",
+      "rango_one": "Showing {{desde}}–{{hasta}} of {{total}} device",
+      "rango_other": "Showing {{desde}}–{{hasta}} of {{total}} devices",
       "porPagina": "Per page",
       "anterior": "Previous page",
       "siguiente": "Next page"
@@ -628,8 +674,17 @@
       "asociar": "Choose a vehicle"
     },
     "telemetria": {
-      "sinFuenteTitulo": "Live telemetry not available yet",
-      "sinFuenteDescripcion": "Position, speed, ignition and battery levels are composed from Telemetry, and that integration is not connected yet. It does not mean this device is not transmitting."
+      "errorTitulo": "The unit's telemetry could not be read",
+      "actualizar": "Refresh",
+      "ultimaSenal": "Last signal",
+      "velocidad": "Speed",
+      "velocidadValor": "{{velocidad}} km/h",
+      "bateriaInterna": "Unit battery",
+      "bateriaVehiculo": "Vehicle battery",
+      "porcentaje": "{{valor}}%",
+      "notaInstalado": "Empty values are the ones the unit has not reported yet, or the ones the position service is not returning right now.",
+      "notaSinVehiculo": "Battery readings come through the vehicle. This unit is not installed in one, so there is nowhere to take them from: it is not a unit fault.",
+      "compuestoEn": "Composed on {{fecha}}"
     },
     "eventos": {
       "sinFuenteTitulo": "Event history not available",
@@ -660,7 +715,8 @@
       "vacioDescripcion": "There are no stock status transitions for this device yet.",
       "errorTitulo": "The history could not be loaded",
       "transicion": "State change",
-      "rango": "Showing {{desde}}–{{hasta}} of {{total}} movements"
+      "rango_one": "Showing {{desde}}–{{hasta}} of {{total}} movement",
+      "rango_other": "Showing {{desde}}–{{hasta}} of {{total}} movements"
     }
   },
   "filtroAsignacion": {
@@ -1190,6 +1246,16 @@
     "sinPermisoLectura": "You need the {{permiso}} permission to see the vehicle list.",
     "asignar": "Assign vehicle",
     "noLiberaElActual": "This does NOT release the vehicle they already drive: it adds an assignment. To close the previous one, use \"Remove\" on the Assignments tab.",
-    "listaSinFiltrar": "Every active vehicle is listed: we cannot tell yet which ones already have a driver. If the one you pick already has a primary driver, the assignment is rejected on save."
+    "listaSinFiltrar": "Every active vehicle is listed, including those that already have a driver: one with a secondary driver can still take a primary. If the one you pick already has a primary driver, the assignment is rejected on save.",
+    "sinDisponiblesSinDispositivo": "Every active vehicle already has a GPS unit installed. You can unlink one, or add the vehicle that is missing.",
+    "listaFiltradaSinDispositivo": "Only active vehicles with no GPS installed are listed. The server resolves that filter over the current links: if the one you want is missing, it already has a unit."
+  },
+  "asignacionAVehiculo": {
+    "titulo": "Assign to a vehicle",
+    "descripcion": "Pick the vehicle this unit will be installed in. It moves to «Installed» and its positions start counting for that vehicle.",
+    "vehiculo": "Vehicle",
+    "asignar": "Install in vehicle",
+    "asignando": "Installing…",
+    "cancelar": "Cancel"
   }
 }

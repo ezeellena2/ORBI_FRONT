@@ -9,7 +9,9 @@ import type {
 import type { FiltroAsignacion, FiltroEstado } from '@/stores/flota-conductores-filters-store'
 
 /**
- * Barra de filtros del listado de conductores (`f-05` §3).
+ * Barra de filtros del listado de conductores (**slice-04** `f-05` §3, revisada en **slice-05**
+ * `f-06`). El slice se nombra a proposito: los dos tienen un paso `f-05` y un `f-06`, y sin el
+ * prefijo la referencia manda al archivo equivocado.
  *
  * Los TRES controles corresponden uno a uno con los 3 filtros que el server DECLARA (`api.md`
  * §Conductores, tabla de estado de implementacion). Ni uno mas:
@@ -32,8 +34,12 @@ import type { FiltroAsignacion, FiltroEstado } from '@/stores/flota-conductores-
  *    dudas" (el placeholder del mockup promete buscar por nombre, DNI, email y telefono).
  *  - **Opcion "Pendiente documentacion"** del select Estado: no tiene valor de filtro en el
  *    contrato. La lista cierra en 4.
- *  - **Los 4 contadores del header**: no hay endpoint de contadores (`PagedResult` solo trae
- *    `total`) y ademas son metrica agregada — slice-05.
+ *  - **Los 4 contadores del header**: **B-35**, sigue abierta despues de slice-05. No hay endpoint
+ *    agregado ni campos de conteo en el response; el `total` de `PagedResult` cuenta lo FILTRADO, no
+ *    la flota, asi que ni siquiera sirve para el primero.
+ *  - **Chip de Conexion**: este listado **no compone Telemetria** (`ConductorListItemDto` no tiene
+ *    campo de conexion) y `ConductoresPageQuery` no declara el parametro. Es lo que hace que la
+ *    pantalla no degrade cuando Telemetria se cae.
  */
 
 /** Orden de lectura del select. Es el vocabulario completo del contrato, sin agregados. */

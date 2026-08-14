@@ -10,8 +10,6 @@ import type {
   DesasignarConductorRequest,
   DesasignarDispositivoRequest,
   PagedResult,
-  RecorridoDto,
-  RecorridosQuery,
   VehiculoDetalleDto,
   VehiculoListItemDto,
   VehiculosPageQuery,
@@ -24,6 +22,18 @@ import type {
  * `baseURL` va por request y apunta a Flota (7213), no a Access: se reusa el `httpClient` para
  * heredar el interceptor de sesion (Bearer, 401 -> refresh -> retry, Accept-Language) en vez de
  * duplicar esa logica en una instancia nueva de axios.
+ *
+ * ── LO QUE ESTE SERVICIO NO EXPONE, Y POR QUE ─────────────────────────────────────────────────
+ *  - `GET .../recorridos` (y su gemelo `GET /conductores/{id}/recorridos|stats`): superficie ⚠
+ *    DEGRADADA (A-1 / **B-9**). Telemetria no persiste historico de posiciones ni modela viajes, asi
+ *    que responde **SIEMPRE 500** `flota.telemetria.no_disponible`, y la lista de superficies
+ *    degradadas es **cerrada** por contrato. `ESTADO.md` lo dice literal: **"No pedirlos."**
+ *    Se saco el metodo, no solo su llamador: un metodo cuyo unico desenlace posible es un 500 invita
+ *    a cablearlo a un boton que despues simula exito — mismo criterio con el que `dispositivos-service`
+ *    nunca expuso `comandos` ni `eventos`. El tab Historial de la ficha DECLARA el estado sin pedirlo.
+ *  - `GET .../exportar`: **B-34**, su unico camino de error (400 por >10.000 filas) no tiene `code`.
+ *  - Import de CSV: **P4**, sin shape, sin `code` por fila y sin transporte definido.
+ * ─────────────────────────────────────────────────────────────────────────────────────────────
  */
 
 const BASE = '/api/flota/vehiculos'
@@ -53,17 +63,6 @@ export const vehiculosService = {
   /** DELETE /api/flota/vehiculos/{vehiculoFlotaId} -> 204 (baja logica) | 404 | 409 */
   eliminar: (vehiculoFlotaId: string) =>
     httpClient.delete<void>(`${BASE}/${vehiculoFlotaId}`, configFlota),
-
-  /**
-   * GET /api/flota/vehiculos/{vehiculoFlotaId}/recorridos -> ⚠ SIEMPRE 500 hoy, con
-   * `code: flota.telemetria.no_disponible`. El caller discrimina por el `code`, nunca por el
-   * status: en Flota no existe el 503 y un 500 generico no es lo mismo que esta degradacion.
-   */
-  listarRecorridos: (vehiculoFlotaId: string, query: RecorridosQuery = {}) =>
-    httpClient.get<PagedResult<RecorridoDto>>(`${BASE}/${vehiculoFlotaId}/recorridos`, {
-      ...configFlota,
-      params: query,
-    }),
 
   /**
    * POST /api/flota/vehiculos/{vehiculoFlotaId}/asignaciones/dispositivo -> 200

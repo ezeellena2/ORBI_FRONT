@@ -45,10 +45,23 @@ export function DialogoBajaConductor({
   conductor,
   abierto,
   onCerrar,
+  onHecho,
 }: {
   conductor: ConductorListItemDto | null
   abierto: boolean
   onCerrar: () => void
+  /**
+   * Se llama SOLO cuando la baja salio bien, despues de cerrar el dialogo.
+   *
+   * Existe por un motivo verificado contra el backend: `GET /conductores/{id}` sale por
+   * `ObtenerCompuesto`, que **no** levanta el query filter global (`x => x.Activo`), asi que
+   * responde **404** apenas `activo` pasa a false. Desde el LISTADO eso da igual (la fila
+   * desaparece, que es el resultado). Desde la FICHA, quedarse significa que el refetch del detalle
+   * vuelve 404 y el usuario que acaba de dar de baja bien —una baja **reversible**— se queda leyendo
+   * "este conductor no existe o no pertenece a tu organizacion". Es el mismo caso que el hard-delete
+   * ya resolvia con `navigate` (D-S4F-7); la baja logica lo tenia sin resolver.
+   */
+  onHecho?: () => void
 }) {
   const { t } = useTranslation(['flota', 'common'])
   const mutacion = useBajaConductor()
@@ -83,6 +96,7 @@ export function DialogoBajaConductor({
           onSuccess: () => {
             mutacion.reset()
             onCerrar()
+            onHecho?.()
           },
         })
       }}

@@ -8,8 +8,11 @@ import { Skeleton } from '@/shared/ui/Skeleton'
  * reserva el espacio real de cada bloque, asi que al llegar la respuesta el contenido no salta.
  *
  * La diferencia con `DetalleCargando` de vehiculos es deliberada: aca NO hay tira de 4 mini-stats.
- * Los 3 KPIs tecnicos del hero (uptime, bateria interna, ultima senal) son snapshot de Telemetria y
- * llegan en slice-05; dibujar su esqueleto prometeria una fila de datos que despues no aparece.
+ * Los 3 KPIs tecnicos (uptime, bateria interna, ultima senal) son snapshot de Telemetria y **el hero
+ * no los dibuja** — ver `HeroDispositivo`. ⚠️ El motivo que decia este comentario ("llegan en
+ * slice-05") quedo vencido el 2026-08-12: el snapshot existe y lo pinta el tab Telemetria, con su
+ * propio loading. Lo que sigue siendo cierto es la consecuencia: este esqueleto no reserva espacio
+ * para una fila que el hero no renderiza.
  */
 export function DispositivoCargando() {
   const { t } = useTranslation(['flota', 'common'])
