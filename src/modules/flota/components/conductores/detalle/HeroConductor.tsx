@@ -38,9 +38,14 @@ import { formatearFecha } from '../../detalle/formato'
  * nunca "esta persona no tiene nombre".
  *
  * ── LO QUE NO ESTA EN EL HERO, Y NO ES UN OLVIDO ──────────────────────────────────────────────
- *  - **"Ver en mapa"**: la posicion del conductor deriva del vehiculo que conduce, y el mapa vivo es
- *    de otro slice (la ruta `/app/flota/mapa` todavia no esta montada). Un boton que lleva a una
- *    pantalla "Proximamente" no es un destino.
+ *  - **"Ver en mapa"**: ⚠️ el motivo original de este renglon —"la ruta `/app/flota/mapa` todavia no
+ *    esta montada"— **VENCIO** el 2026-08-14 con `f-08`: el mapa existe y la ficha del **vehiculo**
+ *    si lleva su boton. Lo que sigue en pie es lo otro que decia: un conductor no tiene posicion
+ *    propia, la tiene el vehiculo que maneja, y puede tener mas de uno asignado a la vez (**B-30**),
+ *    asi que no hay un `?vehicle=` unico al que apuntar. El deep-link del mapa toma
+ *    `vehiculoFlotaId`, no `conductorId`. Hoy es una **decision de diseño**, no una consecuencia:
+ *    decide el PO si el hero elige el primer vehiculo vigente o si el boton vive en la tarjeta de
+ *    cada vehiculo asignado.
  *  - **Edad**: `fechaNacimiento` no se serializa (no tiene columna).
  *  - **Email**: viene SIEMPRE `null` — la proyeccion no tiene esa columna.
  *  - **"Invitar a app movil"**: no existe endpoint de re-invitacion (DA-CD2-17) y Flota no invoca

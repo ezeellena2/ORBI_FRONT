@@ -82,19 +82,20 @@ export function AppRouter() {
           {/*
             Flota — el splat es obligatorio (frontend.md §3.2): FlotaRoutes renderiza su propio
             <Routes> interno con rutas relativas. Cubre /app/flota (redirige a vehiculos), los
-            listados y detalles de vehiculos, DISPOSITIVOS y CONDUCTORES, y el wizard.
+            listados y detalles de vehiculos, DISPOSITIVOS y CONDUCTORES, el wizard y el MAPA EN
+            VIVO.
 
-            Las 2 rutas de abajo son de OTROS slices y siguen en el placeholder: al ser segmentos
-            estaticos, el router las rankea POR ENCIMA del splat y no las captura FlotaRoutes.
+            La ruta de abajo es de otro slice y sigue en el placeholder: al ser un segmento
+            estatico, el router la rankea POR ENCIMA del splat y no la captura FlotaRoutes.
 
             ⚠️ Esa misma precedencia es una trampa: mientras existio `flota/dispositivos` aca, el
             placeholder ganaba y las 2 pantallas de dispositivos —que ya existian en el modulo—
             eran INALCANZABLES, sin error ni warning. Al montar una ruta en FlotaRoutes hay que
-            BORRAR su linea de esta lista, no solo agregarla alla. `flota/conductores` se borro de
-            aca al montar sus 2 rutas en FlotaRoutes (slice-04), por esta misma razon.
+            BORRAR su linea de esta lista, no solo agregarla alla. Ya se borro `flota/conductores`
+            al montar sus 2 rutas (slice-04) y `flota/mapa` al montar el mapa en vivo (slice-05
+            f-08), por esta misma razon.
           */}
           <Route path="flota/*" element={<FlotaRoutes />} />
-          <Route path="flota/mapa" element={<AppComingSoonPage />} />
           <Route path="flota/geozonas" element={<AppComingSoonPage />} />
 
           {/* Configuracion */}

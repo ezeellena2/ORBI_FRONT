@@ -10,6 +10,7 @@ import {
   claveDeVacioPorFiltroDeConexionDeEquipo,
 } from './vocabulario-conexion'
 import { VALORES_SITUACION_VEHICULO, claveDeSituacion } from './vocabulario-situacion'
+import { ESTADOS_MOTOR, claveDeIgnicion, claveDeMotor } from './vocabulario-mapa'
 
 /**
  * REGRESION. `npm run lint` corre `verificar-i18n.mjs`, que compara **es-AR contra en** y falla si
@@ -119,5 +120,129 @@ describe('las claves del vocabulario de CONEXION existen en los 2 idiomas', () =
 describe('las claves del vocabulario de SITUACION existen en los 2 idiomas', () => {
   it('etiqueta de los 4 valores', () => {
     for (const situacion of VALORES_SITUACION_VEHICULO) esperarTexto(claveDeSituacion(situacion))
+  })
+})
+
+describe('las claves del MAPA EN VIVO existen en los 2 idiomas', () => {
+  it('las 2 familias que se arman por concatenacion (motor e ignicion)', () => {
+    // `claveDeMotor` y `claveDeIgnicion` construyen la clave con un template: ni el compilador ni
+    // `verificar-i18n.mjs` las ven, porque una clave ausente en LOS DOS idiomas esta parejamente
+    // ausente y pasa el linter. `t()` devolveria `mapa.motor.encendido` crudo en la pantalla.
+    for (const motor of ESTADOS_MOTOR) esperarTexto(claveDeMotor(motor))
+
+    for (const ignicion of [true, false]) {
+      const clave = claveDeIgnicion(ignicion)
+      expect(clave, 'ignicion booleana siempre tiene clave').not.toBeNull()
+      esperarTexto(clave as string)
+    }
+  })
+
+  it('`claveDeIgnicion(null)` NO devuelve clave: la pantalla imprime dato ausente', () => {
+    // Es la regla, no un hueco de traduccion: `null` no es "apagada".
+    expect(claveDeIgnicion(null)).toBeNull()
+  })
+
+  /**
+   * El resto del copy del mapa son claves LITERALES escritas en el JSX, asi que tampoco las alcanza
+   * el barrido de arriba. Se enumeran a mano por la misma razon que las de la tarjeta de ubicacion
+   * de la ficha: la pantalla es nueva y una clave inventada de este lado no la caza ningun gate.
+   */
+  it('el copy literal de la pantalla, panel por panel', () => {
+    const claves = [
+      'mapa.titulo',
+      'mapa.subtitulo',
+      'mapa.actualizando',
+      'mapa.sinPatente',
+
+      'mapa.sinAcceso.titulo',
+      'mapa.sinAcceso.descripcion',
+      'mapa.sinAcceso.volver',
+
+      'mapa.panel.titulo',
+      'mapa.panel.colapsar',
+      'mapa.panel.expandir',
+      'mapa.panel.buscarEtiqueta',
+      'mapa.panel.buscar',
+      // Se piden con `count`, asi que i18next resuelve `_one`/`_other`: verificar la clave a secas
+      // daria un falso verde porque esa clave no existe ni tiene que existir.
+      'mapa.panel.enElMapa_one',
+      'mapa.panel.enElMapa_other',
+      // Lo que el filtro recorta se dice APARTE del "en el mapa", para que el contador de arriba y
+      // el aviso de "fuera del mapa" compartan denominador y la resta cierre.
+      'mapa.panel.coinciden_one',
+      'mapa.panel.coinciden_other',
+      // La linea que ata la busqueda vacia con los vehiculos sin posicion: sin ella, buscar una
+      // patente que existe pero no reporta contesta "ningun vehiculo coincide", que se lee como
+      // "esa patente no existe".
+      'mapa.panel.quizaFueraDelMapa_one',
+      'mapa.panel.quizaFueraDelMapa_other',
+      'mapa.panel.vacioSinResultados',
+      'mapa.panel.limpiar',
+
+      'mapa.chip.sinConductor',
+      'mapa.chip.conductorSinNombre',
+
+      'mapa.fueraDelMapa.siempre',
+      'mapa.fueraDelMapa.titulo_one',
+      'mapa.fueraDelMapa.titulo_other',
+      'mapa.fueraDelMapa.descripcion',
+      'mapa.fueraDelMapa.cta',
+
+      'mapa.vacioSinDatos.titulo',
+      'mapa.vacioSinDatos.descripcion',
+      'mapa.vacioSinDatos.ctaVehiculos',
+      'mapa.vacioSinDatos.ctaAlta',
+
+      'mapa.vacioSinPosicion.titulo_one',
+      'mapa.vacioSinPosicion.titulo_other',
+      'mapa.vacioSinPosicion.descripcion',
+      'mapa.vacioSinPosicion.cta',
+
+      // El TERCER vacio: no se cuantos vehiculos hay. Su ausencia era lo que hacia que un conteo
+      // fallado cayera en "Aun no hay vehiculos para mostrar en el mapa" + "Agregar primer
+      // vehiculo", sobre una organizacion que ya tiene flota.
+      'mapa.vacioTotalDesconocido.titulo',
+      'mapa.vacioTotalDesconocido.descripcion',
+      'mapa.vacioTotalDesconocido.cta',
+
+      'mapa.error.titulo',
+      'mapa.error.tituloRefresco',
+      'mapa.error.reintentar',
+
+      'mapa.enlace.titulo',
+      'mapa.enlace.descripcion',
+      'mapa.enlace.entendido',
+
+      'mapa.detalle.cerrar',
+      'mapa.detalle.abrirFicha',
+      'mapa.detalle.snapshot',
+      'mapa.detalle.tabs.actual',
+      'mapa.detalle.tabs.recorrido',
+      'mapa.detalle.ubicacion.titulo',
+      'mapa.detalle.ubicacion.coordenadas',
+      'mapa.detalle.ubicacion.altitud',
+      'mapa.detalle.ubicacion.reportada',
+      'mapa.detalle.telemetria.titulo',
+      'mapa.detalle.telemetria.velocidad',
+      'mapa.detalle.telemetria.rumbo',
+      'mapa.detalle.telemetria.motor',
+      'mapa.detalle.telemetria.ignicion',
+      'mapa.detalle.telemetria.odometro',
+      'mapa.detalle.conductor.titulo',
+      'mapa.detalle.error.titulo',
+      'mapa.detalle.error.reintentar',
+
+      // La pestaña "Recorrido" DECLARA que no tiene fuente y no emite ningun request (B-9): su copy
+      // es lo unico que el usuario recibe, asi que faltar de un idioma lo deja sin explicacion.
+      'mapa.recorrido.titulo',
+      'mapa.recorrido.descripcion',
+
+      'mapa.unidades.kmh',
+      'mapa.unidades.km',
+      'mapa.unidades.grados',
+      'mapa.unidades.metros',
+    ]
+
+    for (const clave of claves) esperarTexto(clave)
   })
 })

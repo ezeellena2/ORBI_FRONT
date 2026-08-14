@@ -1257,5 +1257,118 @@
     "asignar": "Instalar en el vehículo",
     "asignando": "Instalando…",
     "cancelar": "Cancelar"
+  },
+  "mapa": {
+    "titulo": "Mapa en vivo",
+    "subtitulo": "Dónde está cada vehículo que está reportando su posición.",
+    "actualizando": "Actualizando…",
+    "sinPatente": "Sin patente",
+    "sinAcceso": {
+      "titulo": "No podés ver el mapa de esta organización",
+      "descripcion": "Te falta el permiso {{permiso}}. Pedíselo a quien administra los accesos de la organización.",
+      "volver": "Volver al inicio"
+    },
+    "panel": {
+      "titulo": "Vehículos en el mapa",
+      "colapsar": "Plegar el panel",
+      "expandir": "Mostrar el panel",
+      "buscarEtiqueta": "Buscar",
+      "buscar": "Patente o conductor",
+      "enElMapa_one": "{{count}} vehículo en el mapa",
+      "enElMapa_other": "{{count}} vehículos en el mapa",
+      "vacioSinResultados": "Ningún vehículo coincide con tus filtros.",
+      "limpiar": "Limpiar filtros",
+      "coinciden_one": "{{visibles}} de {{total}} coincide con tus filtros",
+      "coinciden_other": "{{visibles}} de {{total}} coinciden con tus filtros",
+      "quizaFueraDelMapa_one": "Puede estar entre el vehículo que no aparece en el mapa. En el listado de vehículos se lo encuentra igual.",
+      "quizaFueraDelMapa_other": "Puede estar entre los {{count}} vehículos que no aparecen en el mapa. En el listado de vehículos se los encuentra igual."
+    },
+    "chip": {
+      "sinConductor": "Sin conductor",
+      "conductorSinNombre": "Conductor asignado"
+    },
+    "fueraDelMapa": {
+      "siempre": "El mapa dibuja solamente los vehículos con posición conocida.",
+      "titulo_one": "1 vehículo de {{total}} no aparece en el mapa",
+      "titulo_other": "{{fuera}} vehículos de {{total}} no aparecen en el mapa",
+      "descripcion": "Puede ser que no tengan GPS instalado, que el equipo todavía no haya reportado, o que el servicio de posición no esté respondiendo. Los vehículos siguen estando.",
+      "cta": "Ver todos los vehículos"
+    },
+    "vacioSinDatos": {
+      "titulo": "Aún no hay vehículos para mostrar en el mapa",
+      "descripcion": "Cuando registres vehículos con dispositivos GPS asignados, los vas a ver en tiempo real acá.",
+      "ctaVehiculos": "Ir a vehículos",
+      "ctaAlta": "Agregar primer vehículo"
+    },
+    "vacioSinPosicion": {
+      "titulo_one": "Tu único vehículo no tiene posición conocida",
+      "titulo_other": "Ninguno de tus {{count}} vehículos tiene posición conocida",
+      "descripcion": "Puede ser que no tengan GPS instalado, que los equipos todavía no hayan reportado, o que el servicio de posición no esté respondiendo. Los vehículos siguen estando: el mapa es lo único que no los puede ubicar.",
+      "cta": "Ver todos los vehículos"
+    },
+    "error": {
+      "titulo": "No pudimos cargar el mapa",
+      "tituloRefresco": "No pudimos actualizar el mapa",
+      "reintentar": "Reintentar"
+    },
+    "enlace": {
+      "titulo": "El vehículo del enlace no está en el mapa",
+      "descripcion": "No tiene posición conocida, o ya no pertenece a esta organización. El resto de la flota se ve normalmente.",
+      "entendido": "Entendido"
+    },
+    "detalle": {
+      "cerrar": "Cerrar el panel",
+      "abrirFicha": "Abrir ficha completa",
+      "snapshot": "Datos compuestos el {{momento}}",
+      "tabs": {
+        "actual": "Actual",
+        "recorrido": "Recorrido"
+      },
+      "ubicacion": {
+        "titulo": "Ubicación actual",
+        "coordenadas": "Coordenadas",
+        "altitud": "Altitud",
+        "reportada": "Posición reportada"
+      },
+      "telemetria": {
+        "titulo": "Telemetría",
+        "velocidad": "Velocidad",
+        "rumbo": "Rumbo",
+        "motor": "Motor",
+        "ignicion": "Ignición",
+        "odometro": "Odómetro"
+      },
+      "conductor": {
+        "titulo": "Conductor"
+      },
+      "error": {
+        "titulo": "No pudimos cargar este vehículo",
+        "reintentar": "Reintentar"
+      }
+    },
+    "recorrido": {
+      "titulo": "El recorrido histórico todavía no está disponible",
+      "descripcion": "Las posiciones anteriores de un vehículo no se guardan todavía, así que no hay recorrido que reproducir. Cuando exista esa información, el recorrido del día se va a ver acá."
+    },
+    "motor": {
+      "encendido": "Encendido",
+      "apagado": "Apagado",
+      "ralenti": "En ralentí"
+    },
+    "ignicion": {
+      "si": "Puesta",
+      "no": "Cortada"
+    },
+    "unidades": {
+      "kmh": "{{valor}} km/h",
+      "km": "{{valor}} km",
+      "grados": "{{valor}}°",
+      "metros": "{{valor}} m"
+    },
+    "vacioTotalDesconocido": {
+      "titulo": "Ningún vehículo tiene posición conocida ahora",
+      "descripcion": "Puede ser que no tengan GPS instalado, que los equipos todavía no hayan reportado, o que el servicio de posición no esté respondiendo. Todavía no pudimos contar cuántos vehículos tiene la organización, así que este número no lo sabemos.",
+      "cta": "Ver todos los vehículos"
+    }
   }
 }

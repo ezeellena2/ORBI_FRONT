@@ -1257,5 +1257,118 @@
     "asignar": "Install in vehicle",
     "asignando": "Installing…",
     "cancelar": "Cancel"
+  },
+  "mapa": {
+    "titulo": "Live map",
+    "subtitulo": "Where each vehicle that is reporting its position is.",
+    "actualizando": "Refreshing…",
+    "sinPatente": "No plate",
+    "sinAcceso": {
+      "titulo": "You can't see this organization's map",
+      "descripcion": "You are missing the {{permiso}} permission. Ask whoever manages access for this organization.",
+      "volver": "Back to home"
+    },
+    "panel": {
+      "titulo": "Vehicles on the map",
+      "colapsar": "Collapse panel",
+      "expandir": "Show panel",
+      "buscarEtiqueta": "Search",
+      "buscar": "Plate or driver",
+      "enElMapa_one": "{{count}} vehicle on the map",
+      "enElMapa_other": "{{count}} vehicles on the map",
+      "vacioSinResultados": "No vehicle matches your filters.",
+      "limpiar": "Clear filters",
+      "coinciden_one": "{{visibles}} of {{total}} matches your filters",
+      "coinciden_other": "{{visibles}} of {{total}} match your filters",
+      "quizaFueraDelMapa_one": "It may be the vehicle that is not on the map. You can still find it in the vehicle list.",
+      "quizaFueraDelMapa_other": "It may be among the {{count}} vehicles that are not on the map. You can still find them in the vehicle list."
+    },
+    "chip": {
+      "sinConductor": "No driver",
+      "conductorSinNombre": "Driver assigned"
+    },
+    "fueraDelMapa": {
+      "siempre": "The map only draws vehicles with a known position.",
+      "titulo_one": "1 vehicle of {{total}} is not on the map",
+      "titulo_other": "{{fuera}} vehicles of {{total}} are not on the map",
+      "descripcion": "They may have no GPS installed, the device may not have reported yet, or the position service may not be responding. The vehicles are still there.",
+      "cta": "See all vehicles"
+    },
+    "vacioSinDatos": {
+      "titulo": "No vehicles to show on the map yet",
+      "descripcion": "Once you register vehicles with GPS devices assigned, you will see them here in real time.",
+      "ctaVehiculos": "Go to vehicles",
+      "ctaAlta": "Add first vehicle"
+    },
+    "vacioSinPosicion": {
+      "titulo_one": "Your only vehicle has no known position",
+      "titulo_other": "None of your {{count}} vehicles has a known position",
+      "descripcion": "They may have no GPS installed, the devices may not have reported yet, or the position service may not be responding. The vehicles are still there: it is the map that cannot place them.",
+      "cta": "See all vehicles"
+    },
+    "error": {
+      "titulo": "We could not load the map",
+      "tituloRefresco": "We could not refresh the map",
+      "reintentar": "Retry"
+    },
+    "enlace": {
+      "titulo": "The linked vehicle is not on the map",
+      "descripcion": "It has no known position, or it no longer belongs to this organization. The rest of the fleet shows normally.",
+      "entendido": "Got it"
+    },
+    "detalle": {
+      "cerrar": "Close panel",
+      "abrirFicha": "Open full record",
+      "snapshot": "Data composed on {{momento}}",
+      "tabs": {
+        "actual": "Current",
+        "recorrido": "Route"
+      },
+      "ubicacion": {
+        "titulo": "Current location",
+        "coordenadas": "Coordinates",
+        "altitud": "Altitude",
+        "reportada": "Position reported"
+      },
+      "telemetria": {
+        "titulo": "Telemetry",
+        "velocidad": "Speed",
+        "rumbo": "Heading",
+        "motor": "Engine",
+        "ignicion": "Ignition",
+        "odometro": "Odometer"
+      },
+      "conductor": {
+        "titulo": "Driver"
+      },
+      "error": {
+        "titulo": "We could not load this vehicle",
+        "reintentar": "Retry"
+      }
+    },
+    "recorrido": {
+      "titulo": "Route history is not available yet",
+      "descripcion": "A vehicle’s past positions are not stored yet, so there is no route to replay. Once that information exists, the day’s route will show up here."
+    },
+    "motor": {
+      "encendido": "Running",
+      "apagado": "Off",
+      "ralenti": "Idling"
+    },
+    "ignicion": {
+      "si": "On",
+      "no": "Off"
+    },
+    "unidades": {
+      "kmh": "{{valor}} km/h",
+      "km": "{{valor}} km",
+      "grados": "{{valor}}°",
+      "metros": "{{valor}} m"
+    },
+    "vacioTotalDesconocido": {
+      "titulo": "No vehicle has a known position right now",
+      "descripcion": "They may have no GPS installed, the devices may not have reported yet, or the position service may not be responding. We could not count how many vehicles the organization has yet, so we do not know that number.",
+      "cta": "See all vehicles"
+    }
   }
 }

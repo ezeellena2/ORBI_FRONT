@@ -119,11 +119,13 @@ export function TabInfoGeneral({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
  *
  * ── LO QUE SIGUE SIN DIBUJARSE, Y NO ES UN OLVIDO ─────────────────────────────────────────────
  * El **mini-mapa** y la **dirección textual**. La posición sale de
- * `GET /api/flota/mapa/vehiculos/{id}/en-vivo` —que existe desde slice-05 `f-04`— y su superficie
- * contratada es el **mapa en vivo**, que es `f-08` y todavía no está montada (`/app/flota/mapa` cae
- * hoy en el placeholder "Próximamente" del `AppRouter`). Pedir el en-vivo acá para imprimir dos
- * coordenadas en texto sería inventarle una pantalla al dato. La dirección/barrio no tiene fuente en
- * ninguna capa (DA-MV-04).
+ * `GET /api/flota/mapa/vehiculos/{id}/en-vivo`, y su superficie contratada es el **mapa en vivo**,
+ * que desde el 2026-08-14 **ya está montado** en `/app/flota/mapa` (`f-08`): el botón de abajo lleva
+ * ahí con `?vehicle=<vehiculoFlotaId>` y el vehículo aparece preseleccionado, con su posición, rumbo,
+ * odómetro y conductor. Por eso este panel **sigue sin pedir el en-vivo**: duplicar acá dos
+ * coordenadas en texto sería un segundo request por cada apertura de la ficha para mostrar peor lo
+ * que la pantalla de al lado muestra bien. La dirección/barrio no tiene fuente en ninguna capa
+ * (DA-MV-04), ni acá ni en el mapa.
  */
 function TarjetaUbicacion({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
   const { t, i18n } = useTranslation(['flota', 'common'])

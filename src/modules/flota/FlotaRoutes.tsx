@@ -24,9 +24,9 @@ import { Spinner } from '@/shared/ui/Spinner'
  * pantalla montada aca queda inalcanzable — sin error, sin warning, sin nada que lo delate salvo
  * abrir la URL. Es lo que paso con dispositivos: las 2 paginas existian y no las montaba nadie.
  *
- * Rutas de otros slices (mapa, geozonas, problemas, integraciones) todavia NO estan aca: siguen
- * resueltas por el `AppRouter` con su placeholder. Se mudan a este archivo cuando su slice las
- * construya, con el mismo par de pasos.
+ * Rutas de otros slices (geozonas, problemas, integraciones) todavia NO estan aca: siguen resueltas
+ * por el `AppRouter` con su placeholder. Se mudan a este archivo cuando su slice las construya, con
+ * el mismo par de pasos.
  */
 
 const VehiculosListPage = lazy(() => import('./pages/VehiculosListPage'))
@@ -36,6 +36,7 @@ const DispositivosListPage = lazy(() => import('./pages/DispositivosListPage'))
 const DispositivoDetallePage = lazy(() => import('./pages/DispositivoDetallePage'))
 const ConductoresListPage = lazy(() => import('./pages/ConductoresListPage'))
 const ConductorDetallePage = lazy(() => import('./pages/ConductorDetallePage'))
+const MapaEnVivoPage = lazy(() => import('./pages/MapaEnVivoPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 function FlotaCargando() {
@@ -132,6 +133,24 @@ export default function FlotaRoutes() {
             element={
               <RequierePermiso permiso="flota.conductores.leer">
                 <ConductorDetallePage />
+              </RequierePermiso>
+            }
+          />
+
+          {/*
+            Mapa en vivo (slice-05 f-08). El permiso de pagina es el MISMO del listado de vehiculos:
+            **no existe `flota.mapa.*`** en el catalogo de 44 permisos, y no se inventa.
+
+            ⚠️ Al montar esto se BORRO `<Route path="flota/mapa" ...>` de `AppRouter`: ese segmento
+            estatico rankeaba por encima del splat `flota/*` y habria dejado esta ruta inalcanzable,
+            sin error ni warning — con el agravante de que ya habia 2 botones de la ficha del
+            vehiculo y la entrada del menu lateral apuntando aca.
+          */}
+          <Route
+            path="mapa"
+            element={
+              <RequierePermiso permiso="flota.vehiculos.leer">
+                <MapaEnVivoPage />
               </RequierePermiso>
             }
           />
