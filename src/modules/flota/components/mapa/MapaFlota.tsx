@@ -11,7 +11,8 @@ import {
   posicionEstable,
 } from '../../vocabulario-mapa'
 import type { LimitesDelMapa } from '../../vocabulario-mapa'
-import type { EstadoConexion, MapaItemDto } from '@/services/contracts/flota'
+import { claseDeAnilloDeSeveridad } from '../../vocabulario-senales'
+import type { EstadoConexion, MapaItemDto, SeveridadAlerta } from '@/services/contracts/flota'
 import { appConfig } from '@/config/env'
 
 // El CSS de la DEPENDENCIA. Importarlo es obligatorio (sin el, Leaflet dibuja los tiles apilados en
@@ -34,7 +35,16 @@ import './mapa.css'
  *  - **Geocercas**: DIFERIDO (DA-08).
  *  - **Capas de trafico / POIs / talleres / estaciones**: sin fuente (DA-MV-03).
  *  - **Vista satelital / hibrida**: los tiles ratificados (OSM/CARTO, sin API key) no las tienen.
- *  - **Severidad de señales sobre el marcador**: es slice-06.
+ *
+ * ── SEVERIDAD DE SEÑALES: SE SUPERPONE, NO REEMPLAZA (`f-12` paso 5, agregado en slice-06) ─────
+ * El **punto** sigue siendo el estado de CONEXION que dejo slice-05 (verde / rojo / gris) y la
+ * severidad entra como **anillo** alrededor. Pisar el relleno borraria la unica lectura de conexion
+ * que el mapa tiene, y son dos preguntas distintas: "¿reporta?" y "¿tiene algo abierto?".
+ *
+ * ⚠️ **Hoy ningun marcador puede tener anillo**, y no es un olvido: no existe ni un escritor de
+ * alertas en el backend (**B-38 / GATE 2**). Por eso el panel izquierdo declara que la deteccion no
+ * esta conectada — sin esa linea, 20 pines sin anillo se leen como "20 vehiculos sin problemas".
+ * La severidad NO se deriva de que la lista este vacia: la decide `severidadDelMarcador`.
  *
  * ── ACCESIBILIDAD ─────────────────────────────────────────────────────────────────────────────
  * Los marcadores son focusables por teclado (Leaflet los crea con `tabindex` cuando `keyboard` esta
@@ -58,9 +68,20 @@ export interface MapaFlotaProps {
   onSeleccionar: (vehiculoFlotaId: string) => void
   /** Texto para el `title` del marcador; lo resuelve la pagina (i18n + fallback sin patente). */
   etiquetaDe: (item: MapaItemDto) => string
+  /**
+   * Severidad maxima de las señales ABIERTAS del vehiculo, o `null` si no tiene (o si la deteccion
+   * no esta conectada, que es el caso de hoy). La resuelve la pagina con `severidadDelMarcador`.
+   */
+  severidadDe: (item: MapaItemDto) => SeveridadAlerta | null
 }
 
-export function MapaFlota({ items, seleccionadoId, onSeleccionar, etiquetaDe }: MapaFlotaProps) {
+export function MapaFlota({
+  items,
+  seleccionadoId,
+  onSeleccionar,
+  etiquetaDe,
+  severidadDe,
+}: MapaFlotaProps) {
   const seleccionado = items.find((item) => item.vehiculoFlotaId === seleccionadoId) ?? null
 
   return (
@@ -94,7 +115,11 @@ export function MapaFlota({ items, seleccionadoId, onSeleccionar, etiquetaDe }: 
                 item.ubicacion.longitud,
               ) as unknown as LatLngExpression
             }
-            icon={iconoDeVehiculo(item.estado, item.vehiculoFlotaId === seleccionadoId)}
+            icon={iconoDeVehiculo(
+              item.estado,
+              item.vehiculoFlotaId === seleccionadoId,
+              severidadDe(item),
+            )}
             title={etiquetaDe(item)}
             // El seleccionado se dibuja por encima: sin esto, dos vehiculos en la misma cuadra dejan
             // el elegido debajo del otro y el anillo de seleccion no se ve.
@@ -112,7 +137,7 @@ export function MapaFlota({ items, seleccionadoId, onSeleccionar, etiquetaDe }: 
  * ------------------------------------------------------------------------- */
 
 /**
- * Cache de los 8 iconos posibles (4 estados x seleccionado/no).
+ * Cache de los **32** iconos posibles (4 estados x seleccionado/no x 4 severidades contando `null`).
  *
  * No es micro-optimizacion: `react-leaflet` llama a `setIcon` cada vez que la prop `icon` cambia de
  * IDENTIDAD, y `setIcon` **recrea el nodo del DOM** del marcador. Construir el icono en cada render
@@ -121,16 +146,29 @@ export function MapaFlota({ items, seleccionadoId, onSeleccionar, etiquetaDe }: 
  *
  * Por eso tampoco entra la patente en el HTML del icono: haria una entrada de cache por vehiculo.
  * La patente viaja en el `title` del marcador, que si es una prop barata.
+ *
+ * ⚠️ La severidad entra en la CLAVE, no en el HTML: es lo que mantiene la cache acotada por
+ * combinacion de estados (32) y no por vehiculo. Hoy solo 8 de las 32 son alcanzables (severidad
+ * siempre `null`), y las otras 24 no se pre-crean: la cache es perezosa.
  */
 const iconos = new Map<string, DivIcon>()
 
-function iconoDeVehiculo(estado: EstadoConexion, seleccionado: boolean): DivIcon {
-  const clave = `${estado}|${seleccionado}`
+function iconoDeVehiculo(
+  estado: EstadoConexion,
+  seleccionado: boolean,
+  severidad: SeveridadAlerta | null,
+): DivIcon {
+  const clave = `${estado}|${seleccionado}|${severidad ?? 'sin_senales'}`
   const cacheado = iconos.get(clave)
   if (cacheado) return cacheado
 
   const clases = ['marcador-vehiculo', claseDelMarcador(estado)]
   if (seleccionado) clases.push('marcador-vehiculo--seleccionado')
+
+  // El anillo de severidad se SUMA al color de conexion; con `null` no se agrega nada y el marcador
+  // queda byte a byte como lo dejo slice-05.
+  const anillo = claseDeAnilloDeSeveridad(severidad)
+  if (anillo !== null) clases.push(anillo)
 
   const icono = divIcon({
     // `className` REEMPLAZA a `leaflet-div-icon` (el cuadrado blanco con borde del default).

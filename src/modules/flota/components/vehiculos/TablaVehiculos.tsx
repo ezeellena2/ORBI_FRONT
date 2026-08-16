@@ -7,9 +7,11 @@ import {
   CeldaDispositivo,
   CeldaEstado,
   CeldaPatente,
+  CeldaSenales,
   CeldaUltimaSenal,
   CeldaVehiculo,
 } from './VehiculoRow'
+import type { IndiceDeSenales } from '../../vocabulario-senales'
 import type { VehiculoListItemDto } from '@/services/contracts/flota'
 import type { Columna, EstadoOrden } from '@/shared/ui/Columna'
 import { Tabla } from '@/shared/ui/Tabla'
@@ -41,6 +43,12 @@ export interface TablaVehiculosProps {
   /** `EstadoError` recuperable. La tabla conserva el encabezado y no desaparece. */
   error?: ReactNode
   puedeEliminar: boolean
+  /**
+   * Señales de la pagina, ya indexadas por vehiculo. Lo arma la pagina de **una sola** respuesta de
+   * `GET /alertas` (`f-12` paso 3: "una sola llamada por pagina, no una por fila"). El endpoint no
+   * acepta `?vehiculoId=`, asi que una request por fila serian N requests sin filtro.
+   */
+  indiceDeSenales: IndiceDeSenales
   onVerDetalle: (vehiculo: VehiculoListItemDto) => void
   onEliminar: (vehiculo: VehiculoListItemDto) => void
 }
@@ -53,6 +61,7 @@ export function TablaVehiculos({
   vacio,
   error,
   puedeEliminar,
+  indiceDeSenales,
   onVerDetalle,
   onEliminar,
 }: TablaVehiculosProps) {
@@ -100,6 +109,24 @@ export function TablaVehiculos({
       tipo: 'nodo',
       ancho: 136,
       render: (vehiculo) => <CeldaUltimaSenal vehiculo={vehiculo} />,
+    },
+    /*
+      SEÑALES — columna nueva de `f-12`.
+
+      ⚠️ NO la declara la ficha (`01-spec/pantallas/vehiculos-listado.md` §Columnas lista 8 y esta no
+      esta): la agrega `f-12` paso 3, que es 03-build. Queda reportado como drift ficha × paso.
+
+      No es ordenable, por el mismo motivo que "Estado": se compone en cliente desde OTRA respuesta,
+      asi que no existe como columna en la base y `sortBy` no la acepta (`api.md` §Convenciones).
+    */
+    {
+      clave: 'senales',
+      titulo: t('vehiculosListado.columnas.senales'),
+      tipo: 'nodo',
+      ancho: 132,
+      render: (vehiculo) => (
+        <CeldaSenales vehiculo={vehiculo} indiceDeSenales={indiceDeSenales} />
+      ),
     },
     {
       clave: 'FechaCreacion',

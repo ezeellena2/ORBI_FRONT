@@ -6,10 +6,19 @@ import { MapaFlota } from '../components/mapa/MapaFlota'
 import { MapaPanelDetalle } from '../components/mapa/MapaPanelDetalle'
 import { MapaPanelLateral } from '../components/mapa/MapaPanelLateral'
 import { PistaDeFueraDelMapa } from '../components/mapa/PistaDeFueraDelMapa'
+import { AvisoDatosDeConexion } from '../components/AvisoDatosDeConexion'
+import { AvisoDeSenales } from '../components/senales/AvisoDeSenales'
 import { AvisoOperacion } from '../components/AvisoOperacion'
 import { useMapaEnVivo } from '../hooks/useMapaEnVivo'
+import { useSenales } from '../hooks/useSenales'
 import { useTotalDeLaFlota } from '../hooks/useTotalDeLaFlota'
 import { useVehiculoEnVivo } from '../hooks/useVehiculoEnVivo'
+import {
+  QUERY_DE_SENALES,
+  avisoDeSenales,
+  indiceDeSenales,
+  severidadDelMarcador,
+} from '../vocabulario-senales'
 import {
   contarFueraDelMapa,
   filtrarItemsDelMapa,
@@ -17,8 +26,8 @@ import {
   instanteDeReferencia,
   vacioDelMapa,
 } from '../vocabulario-mapa'
-import { claveDeVacioPorFiltroDeConexion } from '../vocabulario-conexion'
-import type { EstadoConexion, MapaItemDto } from '@/services/contracts/flota'
+import { claveDeVacioPorFiltroDeConexion, coberturaDeConexion } from '../vocabulario-conexion'
+import type { EstadoConexion, MapaItemDto, SeveridadAlerta } from '@/services/contracts/flota'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
 import { Boton } from '@/shared/ui/Boton'
 import { EstadoError } from '@/shared/ui/EstadoError'
@@ -83,6 +92,21 @@ export default function MapaEnVivoPage() {
   const mapa = useMapaEnVivo()
   const flota = useTotalDeLaFlota()
   const enVivo = useVehiculoEnVivo(seleccionadoId)
+
+  /*
+    ── SEÑALES EMBEBIDAS (`f-12` paso 5) ─────────────────────────────────────────────────────────
+    UNA request para toda la pantalla (`GET /alertas` no acepta filtros: es `PageQuery` pelado), que
+    se indexa por vehiculo y alimenta el anillo de severidad del marcador y el badge del chip.
+
+    ⚠️ La severidad **no se deriva de que la lista este vacia**: la decide `severidadDelMarcador`,
+    que devuelve `null` mientras la deteccion no este conectada. Sin eso, "no hay señales" y "no
+    sabemos si hay señales" se pintarian igual — que es justo lo que el panel declara aparte.
+  */
+  const senales = useSenales(QUERY_DE_SENALES)
+  const indiceSenales = indiceDeSenales(senales.data)
+  const avisoSenales = avisoDeSenales(indiceSenales, senales.isError)
+  const severidadDe = (item: MapaItemDto): SeveridadAlerta | null =>
+    severidadDelMarcador(indiceSenales, item.vehiculoFlotaId)
 
   const items: readonly MapaItemDto[] = mapa.data?.items ?? []
   const filtros = { busqueda, estado }
@@ -238,6 +262,18 @@ export default function MapaEnVivoPage() {
         />
       ) : null}
 
+      {/*
+        ⚠️ ESTOS 2 AVISOS VIVEN SOBRE EL LIENZO, NO DENTRO DEL PANEL, Y ESA ES LA CORRECCION.
+        Hasta el cierre de slice-06 estaban dentro de `MapaPanelLateral`, en su rama expandida — y
+        colapsar el panel (que es lo primero que uno hace en un mapa, para ganar superficie) se
+        llevaba puesta la unica linea que explica que los pines sin anillo NO significan "todo bien"
+        (senales, B-38) y que los pines grises NO significan "el vehiculo esta apagado" (conexion).
+        Un click dejaba la pantalla afirmando por omision exactamente lo que estos avisos existen
+        para desmentir. Aca se ven siempre, y siguen siendo UNO solo (no se duplican en el panel).
+      */}
+      <AvisoDatosDeConexion cobertura={coberturaDeConexion(visibles.map((item) => item.estado))} />
+      <AvisoDeSenales cual={avisoSenales} />
+
       <div className="flex min-h-0 flex-1 flex-col gap-3 lg:flex-row">
         <MapaPanelLateral
           items={items}
@@ -257,6 +293,7 @@ export default function MapaEnVivoPage() {
           onSeleccionar={seleccionarVehiculo}
           onVerVehiculos={() => navigate(RUTA_VEHICULOS)}
           ahoraMs={ahoraMs}
+          severidadDe={severidadDe}
         />
 
         <div className="relative min-h-96 flex-1">
@@ -279,6 +316,7 @@ export default function MapaEnVivoPage() {
             onIrAlAlta={() => navigate(RUTA_ONBOARDING)}
             estadoDelFiltro={estado}
             busqueda={busqueda}
+            severidadDe={severidadDe}
           />
         </div>
 
@@ -331,6 +369,7 @@ interface LienzoProps {
   onIrAlAlta: () => void
   estadoDelFiltro: EstadoConexion | ''
   busqueda: string
+  severidadDe: (item: MapaItemDto) => SeveridadAlerta | null
 }
 
 /**
@@ -386,6 +425,7 @@ function LienzoDelMapa(props: LienzoProps) {
         seleccionadoId={props.seleccionadoId}
         onSeleccionar={props.onSeleccionar}
         etiquetaDe={(item) => item.patente ?? t('mapa.sinPatente')}
+        severidadDe={props.severidadDe}
       />
 
       {props.items.length === 0 ? (

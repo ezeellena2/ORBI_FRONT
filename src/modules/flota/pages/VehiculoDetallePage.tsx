@@ -14,7 +14,10 @@ import type {
   AsignacionVehiculoDispositivoDto,
   VehiculoDetalleDto,
 } from '@/services/contracts/flota'
+import { useSenales } from '../hooks/useSenales'
 import { useVehiculo } from '../hooks/useVehiculo'
+import { QUERY_DE_SENALES, indiceDeSenales } from '../vocabulario-senales'
+import { SenalesIndicador } from '../components/senales/SenalesIndicador'
 import { ModalAsignarConductor } from '../components/conductores/ModalAsignarConductor'
 import { ModalDesasignarVehiculo } from '../components/conductores/ModalesCierreConductor'
 import { pillDeConductores } from '../components/conductores/vocabulario-conductor-asignacion'
@@ -235,6 +238,18 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
    */
   const pill = pillDeConductores(vehiculo.conductoresCount, asignacionConductorDeSesion !== null)
 
+  /*
+    ── SEÑALES EMBEBIDAS (`f-12` paso 4) ─────────────────────────────────────────────────────────
+    Es un PANEL, no una tab nueva: la ficha declara 4 tabs y ninguna es de señales. Va después de la
+    tira de mini-stats y antes de los tabs, que es donde el operador ya está mirando el estado del
+    vehículo.
+
+    Se lee del MISMO endpoint que el listado (`GET /alertas`, sin filtros: no acepta `?vehiculoId=`)
+    y se indexa en cliente. Un fallo acá **no rompe la ficha**: el panel se degrada a su aviso.
+  */
+  const senales = useSenales(QUERY_DE_SENALES)
+  const indice = indiceDeSenales(senales.data)
+
   return (
     <div className="flex flex-col gap-6">
       <EnlaceVolver />
@@ -249,6 +264,19 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
       />
 
       <MiniStatsVehiculo vehiculo={vehiculo} />
+
+      {/*
+        `isLoading` y NO `isPending`: con la consulta apagada (`enabled: DETECCION_DE_SENALES_
+        CONECTADA`) el status queda en `pending` para siempre, así que `isPending` dejaría el panel
+        en skeleton eterno. `isLoading` es `isPending && isFetching`, o sea "de verdad está pidiendo
+        ahora", que es lo que este prop significa.
+      */}
+      <SenalesIndicador
+        indice={indice}
+        vehiculoFlotaId={vehiculo.id}
+        cargando={senales.isLoading}
+        fallo={senales.isError}
+      />
 
       <Tabs defaultValue="info">
         <TabsList variant="line" className="flex-wrap">

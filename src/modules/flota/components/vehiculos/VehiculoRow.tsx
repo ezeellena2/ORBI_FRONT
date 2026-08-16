@@ -1,10 +1,13 @@
 import { Eye, MoreVertical, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { VehiculoBadgeEstado } from './VehiculoBadgeEstado'
+import { SenalBadgeSeveridad } from '../senales/SenalBadgeSeveridad'
 import { lecturaDeUltimaSenal } from '../../vocabulario-conexion'
+import { lecturaDeSenales, type IndiceDeSenales } from '../../vocabulario-senales'
 import type { VehiculoListItemDto } from '@/services/contracts/flota'
 import { BotonIcono } from '@/shared/ui/BotonIcono'
 import { MenuAcciones, type ItemMenuAcciones } from '@/shared/ui/MenuAcciones'
+import { Skeleton } from '@/shared/ui/Skeleton'
 
 /**
  * Las celdas de UNA fila de vehiculo.
@@ -194,6 +197,46 @@ export function CeldaUltimaSenal({ vehiculo }: CeldaVehiculoProps) {
 
   const relativo = formatearRelativo(lectura.fechaUtc, i18n.language)
   return <span className="text-fg-secundario">{relativo ?? sinDato}</span>
+}
+
+/**
+ * ⚠️ LA CELDA MAS FACIL DE LEER MAL DE TODA LA TABLA, y por eso NUNCA queda muda.
+ *
+ * Hoy esta columna esta vacia en el **100 %** de las filas de **todas** las organizaciones: no existe
+ * ni un escritor de alertas en el backend (**B-38 / GATE 2**: el catalogo `tipos_alerta_flota` se creo
+ * vacio a proposito y la FK rechaza toda insercion). Una celda en blanco ahi se lee como "este
+ * vehiculo no tiene nada", que es exactamente lo que la pantalla **no sabe**: nadie miro.
+ *
+ * Por eso no hay rama "vacio silencioso". La celda imprime el marcador de dato ausente con la
+ * explicacion en el `title` —el mismo tratamiento que `sin_dato` de slice-05— y la pagina declara
+ * arriba, una sola vez, que la deteccion no esta conectada (`AvisoDeSenales`). El tooltip solo no
+ * alcanza: nadie lee 20 tooltips, la lectura de conjunto la da el aviso.
+ *
+ * Y **no hay badge en cero**: `f-12` paso 3 lo prohibe explicito. Un `0` verde afirma "revisado y
+ * limpio", que es la misma mentira con otra tipografia.
+ *
+ * La rama `sin_senales` existe y hoy es INALCANZABLE (anclada por test): es el copy correcto para el
+ * dia que la deteccion corra y este vehiculo este efectivamente limpio.
+ */
+export function CeldaSenales({
+  vehiculo,
+  indiceDeSenales,
+}: CeldaVehiculoProps & { indiceDeSenales: IndiceDeSenales }) {
+  const { t } = useTranslation('flota')
+
+  const lectura = lecturaDeSenales(indiceDeSenales, vehiculo.id)
+
+  if (lectura.tipo === 'cargando') return <Skeleton variante="linea" />
+
+  if (lectura.tipo === 'con_senales') {
+    return <SenalBadgeSeveridad severidad={lectura.severidad} cantidad={lectura.cantidad} />
+  }
+
+  return (
+    <span className="text-fg-terciario" title={t(lectura.claveAyuda)}>
+      {t(lectura.clave)}
+    </span>
+  )
 }
 
 export function CeldaCreado({ vehiculo }: CeldaVehiculoProps) {

@@ -3,14 +3,20 @@
  * vehiculo<->dispositivo y catalogos growables) + slice-04 (conductores operativos, vinculo
  * conductor<->dispositivo, documentos y asignacion vehiculo<->conductor) + slice-05 (composicion
  * con Telemetria: estado de conexion y ultima senal REALES en los 2 listados, filtros compuestos,
- * snapshot tecnico del dispositivo y mapa en vivo).
+ * snapshot tecnico del dispositivo y mapa en vivo) + slice-06 (Centro de Problemas: problemas,
+ * reglas del motor, webhooks salientes y senales).
  *
  * FUENTE UNICA: `TracAutoV2/src/Flota/docs/00-contrato/dtos.ts` + `api.md`. Redefinir un shape aca
  * esta prohibido: si falta un campo, se corrige el contrato del backend, no este archivo.
  *
- * Este archivo solo espeja lo que USAN los slices construidos. Los shapes de geozonas, problemas e
- * integraciones quedan fuera a proposito: llegan con sus slices. El mapa entra en §9 porque su
- * backend se construyo en slice-05 `f-04` (`MapaController`, 2 endpoints).
+ * ⚠️ EXCEPCION YA ESTABLECIDA (slice-03/04/05): cuando `dtos.ts` y el C# que corre difieren, MANDA
+ * EL SERVER — el shape se espeja como lo emite `Flota.Api` y el drift se declara en comentario, sin
+ * inventar un valor para cumplir el tipo. `dtos.ts` es del PO y no se toca desde aca.
+ *
+ * Este archivo solo espeja lo que USAN los slices construidos. Los shapes de GEOZONAS quedan fuera
+ * a proposito (DIFERIDO DA-08). El mapa entra en §9 porque su backend se construyo en slice-05
+ * `f-04`; problemas, reglas, webhooks y alertas entran en §10 porque el suyo cerro en slice-06
+ * `f-03`/`f-04`/`f-05` (2026-08-15).
  *
  * ─────────────────────────────────────────────────────────────────────────────────────────────
  * DRIFT CONTRATO ↔ BACKEND REAL (verificado contra
@@ -1396,4 +1402,694 @@ export interface PosicionEnVivoDto {
   latitud: number
   longitud: number
   fechaUtc: string
+}
+
+/* ============================================================================
+ * 10. CENTRO DE PROBLEMAS — slice-06 (`f-03`/`f-04`/`f-05`, backend cerrado el 2026-08-15)
+ *
+ * Espejo de `Flota.Application/DTOs/{Problema,Regla,Webhook,Alerta}Dtos.cs`, que es el codigo que
+ * corre. Cubre las 4 secciones de `api.md` que este slice construyo: §Problemas (5 de 8 filas),
+ * §Reglas operativas (3 de 3), §Integraciones/webhooks (8 de 8) y §Alertas (1 de 2).
+ *
+ * ⚠️ REGLA APLICADA (precedente de slice-03/04/05): cuando `dtos.ts` y el backend real difieren,
+ * MANDA EL SERVER y el drift se declara aca. Los casos de esta seccion siguen la numeracion del
+ * encabezado del archivo (5 a 10).
+ *
+ * ── LO QUE ESTA SECCION NO DECLARA, Y POR QUE ────────────────────────────────────────────────
+ * Ninguna de estas ausencias es olvido: cada una tiene bloqueante con dueno en
+ * `src/Flota/docs/ESTADO.md`.
+ *
+ *  - **`POST /problemas/{id}/estado`** y su request: `ProblemasController` **NO LO ENRUTA**. Falta
+ *    el body (`dtos.ts` §9 no publica shape) y falta el catalogo `transiciones_problema_flota`,
+ *    que ni siquiera se creo. Tipar `{ estadoDestino }` aca seria inventar el contrato.
+ *  - **`POST /problemas/{id}/comentarios`** (`CrearComentarioProblemaRequest`): PENDIENTE #17 —
+ *    `problemas_timeline_flota.titulo` es NOT NULL y el request trae UN campo de texto.
+ *  - **`GET /problemas/exportar`**: B-34, su unico 400 no tiene `code`.
+ *  - **`POST /alertas/{id}/gestionar`** (`GestionarAlertaRequest`): no enrutado — permiso
+ *    contradictorio entre `api.md` y `permisos.md`, y sus 2 errores sin `code`.
+ *  - **Filtros y `sortBy`** de `/problemas` y `/problemas/reglas`: B-17. Las 4 querys de esta
+ *    seccion son `PageQuery` PELADO, igual que el backend.
+ *  - **`eventos[]` / `scopes[]`** en el alta de webhook: PENDIENTE #3 (mitad de DA-IN-08). El
+ *    request del server no los acepta, asi que el espejo tampoco los declara.
+ *  - **`vehiculosIds` / `geozonasIds` / `conductoresIds` / `destinatarios` / `canalesInternos`** en
+ *    el alta/edicion de regla: PENDIENTE #2, no tienen tabla puente. Toda regla alcanza a toda la
+ *    organizacion.
+ * ─────────────────────────────────────────────────────────────────────────────────────────────
+ *
+ * ── DRIFT `dtos.ts` ↔ BACKEND REAL, declarado y no aplicado ──────────────────────────────────
+ *  5. `sla.estado` tiene 4 valores en el union y `EstadoSlaDerivado` **nunca emite `por_vencer`**:
+ *     ningun documento fija el umbral. Se conserva en el tipo (el vocabulario es cerrado) y
+ *     NINGUNA pantalla dibuja ese badge.
+ *  6. `contextoOperativo.criticidadActivo`: `dtos.ts` lo tipa `SeveridadProblema` NO nulable; el
+ *     backend lo declara nullable y lo sirve SIEMPRE `null` (el modelo no tiene marca de activo
+ *     critico). Igual criterio que B-33 con el rumbo del mapa.
+ *  7. `integracion.{enviado,ultimoEstado}` y `webhooks[]` del detalle: `false`/`null`/`[]`
+ *     SIEMPRE. Ninguna columna ata una entrega de webhook a un problema, asi que la agregacion no
+ *     es derivable. Es **partial-data**, no "no se envio nada".
+ *  8. `prioridadDetalle.factores[]` puede sumar **MENOS** que `prioridad`: 3 de los 7 factores se
+ *     recomponen al leer y no tienen snapshot en la fila. La suma NO se presenta como cuadre.
+ *  9. `ReglaProblemaDto.activa` es la columna fisica `habilitada` (PENDIENTE #11); `activo` del
+ *     bloque de auditoria es la baja logica. Lo mismo con `WebhookEndpointDto.activo` <->
+ *     `habilitado`. El nombre del DTO no se toca.
+ * 10. `AlertaListItemDto.descripcion`: PENDIENTE #7 — el evento trae `titulo` + `detalle?` y
+ *     ningun doc dice cual es `descripcion`. El backend sirve el `titulo`.
+ * ─────────────────────────────────────────────────────────────────────────────────────────────
+ * ========================================================================== */
+
+/**
+ * Las 4 querys del Centro son `PageQuery` PELADO — `page` / `pageSize` y nada mas.
+ *
+ * No es un recorte del espejo: `ProblemasPageQuery`, `ReglasPageQuery`, `WebhooksPageQuery` y
+ * `AlertasPageQuery` heredan `PageQuery` y **no** `SortedPageQuery<TEnum>` en el backend, con el
+ * motivo escrito en el propio C#: `api.md` dice "listado paginado con filtros" y **no nombra
+ * ninguno**, y el enum de `sortBy` es PENDIENTE declarada (B-17). Cada listado tiene UN solo
+ * ORDER BY, resuelto por el server:
+ *  - problemas -> prioridad DESC, deteccion DESC, id DESC
+ *  - reglas -> nombre ASC, id ASC
+ *  - webhooks y entregas -> fecha DESC, id DESC
+ *  - alertas -> apertura DESC, id DESC
+ *
+ * ⚠️ Mandar `sortBy` o cualquier filtro NO da error: el binder lo descarta y el server devuelve la
+ * lista sin filtrar. Un chip que se manda y no filtra ya rompio dos veces en este modulo
+ * (D-S3-33). Ninguna toolbar del Centro debe emitir parametros.
+ */
+export type ProblemasPageQuery = PageQuery
+export type ReglasPageQuery = PageQuery
+export type WebhooksPageQuery = PageQuery
+export type AlertasPageQuery = PageQuery
+
+/* ── 10.1 Vocabularios cerrados (catalogos DB, snake_case — D-7) ────────────────────────────── */
+
+/** `estados_problema_flota` — 7 valores. `resuelto` y `descartado` son los 2 TERMINALES. */
+export type EstadoProblema =
+  | 'detectado'
+  | 'priorizado'
+  | 'asignado'
+  | 'en_analisis'
+  | 'silenciado'
+  | 'resuelto'
+  | 'descartado'
+
+/**
+ * `severidades_problema_flota` — 4 valores.
+ *
+ * ⚠️ NO es el mismo vocabulario que `SeveridadAlerta` (3 valores, sin `critica`): son 2 catalogos
+ * distintos, no uno con subconjunto (PENDIENTE #12).
+ */
+export type SeveridadProblema = 'baja' | 'media' | 'alta' | 'critica'
+
+/**
+ * `tipos_problema_flota` — 12 valores.
+ *
+ * Los 2 de geozona estan SEMBRADOS (el catalogo es contrato) y sus filas **nunca se pueblan**
+ * mientras DA-08 siga abierta. `mantenimiento_vencido` tampoco: el servicio Operaciones no existe.
+ */
+export type TipoProblema =
+  | 'dtc_critico'
+  | 'dispositivo_sin_senal'
+  | 'gps_desconectado_ignicion_activa'
+  | 'salida_geozona_critica'
+  | 'entrada_zona_restringida'
+  | 'exceso_velocidad_sostenido'
+  | 'movimiento_sin_conductor'
+  | 'licencia_vencida'
+  | 'vehiculo_incompleto'
+  | 'mantenimiento_vencido'
+  | 'bateria_baja'
+  | 'manipulacion_dispositivo'
+
+/** `origenes_senal_flota` — 8 valores. `geozona` queda vacio por DA-08. */
+export type OrigenSenal =
+  | 'telemetria'
+  | 'diagnostico'
+  | 'geozona'
+  | 'conductor'
+  | 'dispositivo'
+  | 'calidad_datos'
+  | 'mantenimiento'
+  | 'operacion'
+
+/** `tipos_timeline_problema_flota` — 8 valores. Un comentario es una fila con `tipo: 'comentario'`. */
+export type TipoTimelineProblema =
+  | 'detectado'
+  | 'prioridad_cambiada'
+  | 'asignado'
+  | 'comentario'
+  | 'silenciado'
+  | 'webhook'
+  | 'resuelto'
+  | 'descartado'
+
+/**
+ * Estado del reloj de SLA — DERIVADO al leer, nunca persistido.
+ *
+ * ⚠️ DRIFT 5: `por_vencer` **NO SE EMITE NUNCA**. `EstadoSlaDerivado.Calcular` solo devuelve
+ * `sin_sla` (sin `venceUtc`), `vencido` o `vigente`; el umbral de `por_vencer` no lo fija ningun
+ * documento y el backend paro en vez de tomar el 25 % del factor de prioridad, que esta escrito
+ * para otra cosa. Mismo patron que `ralenti` en el mapa y que `incompleto` en la conexion.
+ *
+ * ⚠️ `sin_sla` NO es "a tiempo": el problema **no tiene reloj**. Pintarlos igual es la mentira
+ * facil de esta pantalla.
+ */
+export type EstadoSlaProblema = 'vigente' | 'por_vencer' | 'vencido' | 'sin_sla'
+
+/**
+ * Los 7 codigos de `prioridadDetalle.factores[].codigo`, en el orden de `motor-de-reglas.md` §3.1.
+ * No es un catalogo DB: es el shape del DTO, por eso vive en codigo del lado del server tambien.
+ */
+export type CodigoFactorPrioridad =
+  | 'severidad_base'
+  | 'contexto_operativo'
+  | 'urgencia'
+  | 'recurrencia'
+  | 'criticidad_activo'
+  | 'impacto_potencial'
+  | 'sla_restante'
+
+/**
+ * Lo que el hero del ticket puede ofrecer. Se DERIVA del estado del lado del server:
+ * terminal -> `['ver_vehiculo','ver_mapa']`; no terminal -> `asignar`/`silenciar`/`resolver` + los
+ * 2 de navegacion si el problema cuelga de un vehiculo.
+ *
+ * `enviar_integracion` y `crear_orden_mantenimiento` **nunca** se ofrecen: no tienen endpoint.
+ */
+export type AccionProblema = 'asignar' | 'silenciar' | 'resolver' | 'ver_mapa' | 'ver_vehiculo'
+
+/** `tipos_regla_problema_flota` — 8 valores (los mismos codigos que `OrigenSenal`, otra tabla). */
+export type TipoReglaProblema = OrigenSenal
+
+/** `estados_entrega_webhook_flota` — 5 valores. La tabla de entregas tiene que poder pintar los 5. */
+export type EstadoEntregaWebhook =
+  | 'pendiente'
+  | 'enviado'
+  | 'fallido'
+  | 'reintentando'
+  | 'agotado'
+
+/** `estados_alerta_flota` — 3 valores (D-C6). `reconocida` quedo derogado. */
+export type EstadoAlerta = 'abierta' | 'gestionada' | 'cerrada'
+
+/** `severidades_alerta_flota` — 3 valores. Ver la nota de `SeveridadProblema`. */
+export type SeveridadAlerta = 'alta' | 'media' | 'baja'
+
+/**
+ * `tipos_alerta_flota` — ⚠️ **CATALOGO VACIO A PROPOSITO (GATE 2 / B-38)**.
+ *
+ * El contrato publica DOS catalogos distintos de `tipo_alerta` que ni siquiera se solapan
+ * literalmente, y elegir uno es acto del PO. La tabla se creo vacia, la FK rechaza toda alerta y
+ * por eso `GET /api/flota/alertas` devuelve **0 items siempre**. No es "no hay alertas": es que la
+ * deteccion todavia no esta conectada.
+ *
+ * Se tipa `string` a proposito: escribir aca la union de los 2 catalogos SERIA tomar la decision.
+ */
+export type TipoAlerta = string
+
+/* ── 10.2 Problemas — `api.md` §Problemas operativos ────────────────────────────────────────── */
+
+/** Vehiculo del problema. `null` cuando el problema no cuelga de uno. */
+export interface ProblemaVehiculoDto {
+  vehiculoFlotaId: string
+  /** Snapshot de la proyeccion canonica. Puede ser el string VACIO si la proyeccion no la trae. */
+  patente: string
+  /** Etiqueta legible (marca + modelo) de la proyeccion local. Puede venir vacia. */
+  descripcion: string
+}
+
+export interface ProblemaConductorDto {
+  conductorFlotaId: string
+  nombreCompleto: string
+}
+
+/** Snapshot congelado al asignar: Flota no tiene proyeccion usuario -> persona. */
+export interface ProblemaResponsableDto {
+  usuarioId: string
+  nombre: string
+}
+
+export interface ProblemaSlaDto {
+  venceUtc: string | null // ISO 8601
+  estado: EstadoSlaProblema // nunca `por_vencer` (DRIFT 5)
+  minutosRestantes: number | null
+}
+
+/**
+ * ⚠️ DRIFT 7: hoy es **SIEMPRE** `{ enviado: false, ultimoEstado: null }`, y no significa "no se
+ * envio nada". Ninguna columna ata una entrega de webhook a un problema (la entrega guarda
+ * `webhook_endpoint_id` + `event_id`, y el `EventId` del evento de negocio no se persiste), asi que
+ * la agregacion no es derivable con el esquema actual. Tratar como **partial-data**.
+ */
+export interface ProblemaIntegracionDto {
+  enviado: boolean
+  ultimoEstado: EstadoEntregaWebhook | null
+}
+
+/** Item de `GET /api/flota/problemas` -> `PagedResult<ProblemaOperativoListItemDto>`. */
+export interface ProblemaOperativoListItemDto {
+  id: string
+  tipo: TipoProblema
+  estado: EstadoProblema
+  severidad: SeveridadProblema
+  /** 0..100. Ver DRIFT 8 antes de presentar la suma de `factores[]` como cuadre. */
+  prioridad: number
+  titulo: string
+  vehiculo: ProblemaVehiculoDto | null
+  conductor: ProblemaConductorDto | null
+  /** Codigos DISTINTOS de las senales agrupadas. Puede venir vacio. */
+  origenes: OrigenSenal[]
+  senalesCount: number
+  accionSugerida: string
+  responsable: ProblemaResponsableDto | null
+  sla: ProblemaSlaDto
+  integracion: ProblemaIntegracionDto // neutro siempre (DRIFT 7)
+  fechaDeteccionUtc: string
+  fechaActualizacionUtc: string
+}
+
+/**
+ * Contexto vivo del vehiculo al abrir el detalle (D-C1 a).
+ *
+ * ⚠️ Si Telemetria no responde, el OBJETO ENTERO viaja `null` y el resto del detalle se sirve
+ * igual: **200 partial-data, nunca 5xx**. Esta superficie NO esta en la lista cerrada de las que
+ * responden 500 `flota.telemetria.no_disponible`.
+ */
+export interface ContextoOperativoDto {
+  ignicion: boolean | null // `null` != "motor apagado"
+  velocidadKmH: number | null
+  viajeActivo: boolean // se deriva de `ignicion`: Telemetria no modela viajes (B-9)
+  geozonaActual: string | null // DIFERIDO DA-08: siempre `null`
+  ultimaSenalUtc: string | null
+  /** ⚠️ DRIFT 6: SIEMPRE `null`. El modelo no tiene marca de activo critico. No dibujar el badge. */
+  criticidadActivo: SeveridadProblema | null
+}
+
+export interface ProblemaTimelineItemDto {
+  id: string
+  tipo: TipoTimelineProblema
+  titulo: string
+  detalle: string | null
+  usuario: ProblemaResponsableDto | null
+  fechaUtc: string
+}
+
+export interface ProblemaSenalDto {
+  id: string
+  origen: OrigenSenal
+  tipo: string // codigo de la senal upstream; NO es `TipoProblema`
+  titulo: string
+  detalle: string | null
+  detectadaUtc: string
+  /** El `jsonb` tal cual se persistio. Sin shape fijo: es el payload del productor. */
+  payloadResumen: Record<string, string | number | boolean | null>
+}
+
+export interface FactorPrioridadDto {
+  codigo: CodigoFactorPrioridad
+  /**
+   * ⚠️ Viaja **VACIA** a proposito, igual que `explicacion`: son COPY, y el backend tiene prohibido
+   * hardcodear copy de negocio. La etiqueta la resuelve la UI por i18n desde `codigo`.
+   */
+  etiqueta: string
+  puntos: number
+  explicacion: string // vacia, ver `etiqueta`
+}
+
+/**
+ * Desglose auditable de la prioridad. Las **7** entradas vienen siempre, incluso con `puntos: 0`
+ * (`criticidad_activo` es 0 fijo mientras no exista la marca de activo critico).
+ *
+ * ⚠️ DRIFT 8: `sum(factores[].puntos)` puede ser **MENOR** que `prioridad`. 3 factores se
+ * recomponen al leer y no tienen snapshot, asi que la suma no cuadra siempre. Mostrar los factores
+ * como DESGLOSE explicativo, nunca como "y esto suma exactamente la prioridad".
+ */
+export interface ProblemaPrioridadDto {
+  prioridad: number
+  severidadBase: SeveridadProblema
+  factores: FactorPrioridadDto[]
+}
+
+/** `GET /api/flota/problemas/{problemaId}` -> 200 | 404 `flota.problema.no_existe`. */
+export interface ProblemaOperativoDetalleDto extends ProblemaOperativoListItemDto {
+  descripcion: string
+  prioridadDetalle: ProblemaPrioridadDto
+  senales: ProblemaSenalDto[]
+  contextoOperativo: ContextoOperativoDto | null // `null` entero = Telemetria no respondio
+  timeline: ProblemaTimelineItemDto[]
+  /** Las filas del timeline con `tipo: 'comentario'`. Mismo shape para las 2 listas. */
+  comentarios: ProblemaTimelineItemDto[]
+  /** ⚠️ SIEMPRE `[]`, misma causa que `integracion` (DRIFT 7). */
+  webhooks: WebhookEntregaDto[]
+  accionesDisponibles: AccionProblema[]
+}
+
+/**
+ * `POST /api/flota/problemas/{problemaId}/asignar` -> **204 SIN CUERPO**.
+ *
+ * ⚠️ El `comentario` opcional **NO se persiste como comentario del timeline** (la fila exige
+ * `titulo` NOT NULL y el mapeo texto -> (titulo, detalle) es PENDIENTE #17): viaja al `detalle` del
+ * hecho `asignado`. La UI no debe prometer "quedara en el hilo de comentarios".
+ */
+export interface AsignarProblemaRequest {
+  responsableUsuarioId: string
+  comentario?: string
+}
+
+/**
+ * `POST /api/flota/problemas/{problemaId}/silenciar` -> **204 SIN CUERPO**.
+ * Los 4 campos son obligatorios: faltar uno da 400 `ValidationProblemDetails` y el service no corre.
+ *
+ * El silencio arranca AHORA (el request solo trae el `hasta`) y **no pausa el reloj de SLA**.
+ */
+export interface SilenciarProblemaRequest {
+  motivo: string
+  silenciarHastaUtc: string // ISO 8601
+  silenciarNotificaciones: boolean
+  silenciarWebhooks: boolean
+}
+
+/**
+ * `POST /api/flota/problemas/{problemaId}/resolver` -> **204 SIN CUERPO**. Cierre TERMINAL.
+ *
+ * ⚠️ `crearEventoCierreIntegracion` **se acepta y no dispara nada** (DA-IN-08 abierta): emitir el
+ * cierre al plano publico exige el mapeo evento-interno <-> evento-publico, que no existe. Si la UI
+ * ofrece el toggle, tiene que decir que hoy no envia nada.
+ */
+export interface ResolverProblemaRequest {
+  resultado: 'resuelto' | 'descartado'
+  evidencia: string // vacia -> 400
+  crearEventoCierreIntegracion?: boolean
+}
+
+/* ── 10.3 Reglas del motor — `api.md` §Reglas operativas de problemas ───────────────────────── */
+
+/**
+ * Enum CERRADO de `condiciones[].campo` (`motor-de-reglas.md` §2.2, verificado contra
+ * `Flota.Domain/Reglas/GramaticaDsl.cs`). Un campo fuera de esta lista devuelve 400
+ * `flota.regla.condicion_invalida` con `motivo: 'campo_desconocido'`.
+ *
+ * Los 3 campos de geozona (`geozona_entrada`, `geozona_salida`, `minutos_en_geozona`) **no estan
+ * en v1**: DIFERIDO DA-08. Se agregan sin cambiar `version` cuando la decision cierre.
+ */
+export type CampoCondicionRegla =
+  | 'velocidad_kmh'
+  | 'ignicion'
+  | 'en_movimiento'
+  | 'minutos_sin_senal'
+  | 'bateria_pct'
+  | 'manipulacion_detectada'
+  | 'dtc_criticidad'
+  | 'dtc_codigo'
+  | 'conductor_asignado'
+  | 'dias_para_vencer'
+  | 'documento_vencido'
+  | 'vehiculo_incompleto'
+  | 'mantenimiento_vencido'
+
+/** Enum CERRADO de `condiciones[].operador` (`motor-de-reglas.md` §2.3). */
+export type OperadorCondicionRegla = '>' | '>=' | '<' | '<=' | '==' | 'in' | 'sostenido_por'
+
+/**
+ * Una condicion del DSL tal como viaja por HTTP.
+ *
+ * ⚠️ **`umbral_minutos` NO SE CAMELIZA.** El backend le pone `[JsonPropertyName("umbral_minutos")]`
+ * porque `dtos.ts` declara que el DTO expone el mismo shape que la DB. Mandar `umbralMinutos`
+ * (camelCase, que es lo que hace el resto del contrato) lo deja en `null` y la regla se rechaza con
+ * `motivo: 'umbral_minutos_invalido'` — sin ningun aviso de que el nombre estaba mal.
+ *
+ * Es **obligatorio** con `sostenido_por` y **prohibido** con cualquier otro operador.
+ */
+export interface CondicionItemJsonDto {
+  campo: CampoCondicionRegla
+  operador: OperadorCondicionRegla
+  valor: number | boolean | string | string[]
+  umbral_minutos?: number | null
+}
+
+/**
+ * `condicion_json` tal como se persiste en el `jsonb`. **Nunca string libre** (D6).
+ * v1: `version: 1`, `combinador: 'and'` (lista plana), 1..10 condiciones. Sin OR y sin arboles.
+ */
+export interface CondicionReglaJsonDto {
+  version: number
+  combinador: string // unico valor en v1: 'and'
+  condiciones: CondicionItemJsonDto[]
+}
+
+/**
+ * Los 9 valores de `args.motivo` del 400 `flota.regla.condicion_invalida`, transcriptos de
+ * `Flota.Domain/Reglas/ValidadorCondicion.cs` + `SerializacionCondicion`.
+ *
+ * `args.indice` viaja `null` en las 3 causas que no son de una condicion concreta (version,
+ * combinador, cantidad): el contrato lo define como "posicion de la condicion ofensora" y un `0`
+ * apuntaria a una condicion inocente.
+ */
+export type MotivoCondicionInvalida =
+  | 'version_no_soportada'
+  | 'combinador_no_soportado'
+  | 'cantidad_de_condiciones_invalida'
+  | 'campo_desconocido'
+  | 'operador_no_admitido'
+  | 'tipo_de_valor_incompatible'
+  | 'umbral_minutos_invalido'
+  | 'lista_in_invalida'
+  | 'json_no_parseable'
+
+/** Item de `GET /api/flota/problemas/reglas` -> `PagedResult<ReglaProblemaDto>`. */
+export interface ReglaProblemaDto {
+  id: string
+  nombre: string
+  /** Se fija en el ALTA y **no se edita** (DA-PR-08): el `PATCH` ni siquiera lo declara. */
+  tipo: TipoReglaProblema
+  /** Representacion LEGIBLE derivada de `condicionJson`. Se arma al leer; el JSON es la verdad. */
+  condicion: string
+  condicionJson: CondicionReglaJsonDto
+  severidadBase: SeveridadProblema
+  /** ⚠️ DRIFT 9: es la columna fisica `habilitada`. `activa: false` = regla PAUSADA, no dada de baja. */
+  activa: boolean
+  ventanaHoraria: string | null
+  /**
+   * ⚠️ Los 5 de abajo viajan **SIEMPRE en 0 / vacio**, y no es "no hay ninguno": el ALCANCE de una
+   * regla no tiene tabla puente ni columna en ningun documento normativo (PENDIENTE #2). **Hoy
+   * toda regla alcanza a toda la organizacion**, anclado por test del lado del server.
+   */
+  vehiculosAlcanzadosCount: number
+  geozonasAlcanzadasCount: number // + DIFERIDO DA-08
+  conductoresAlcanzadosCount: number
+  destinatarios: string[]
+  canalesInternos: string[]
+  slaMinutos: number
+  accionSugerida: string
+  webhookEndpointId: string | null
+  ventanaSilencioMinutos: number | null
+  /**
+   * ⚠️ SIEMPRE 0: contarlas exige el vinculo problema -> regla que lo disparo, que ninguna tabla
+   * declara (PENDIENTE #8), y ademas la ventana de 24 h es DA-PR-04 abierta.
+   */
+  ultimasActivacionesCount: number
+  /** Denormalizada en la fila justo porque el vinculo de arriba no existe. */
+  ultimaActivacionUtc: string | null
+}
+
+/**
+ * `POST /api/flota/problemas/reglas` -> **200** con la regla creada (no 201: `api.md` no declara
+ * `GET /reglas/{id}`, asi que un `Location` apuntaria a una URL rota).
+ *
+ * ⚠️ **Nombre duplicado no tiene `code` y no se invento** (DA-PR-07): tampoco hay indice unico
+ * sobre `nombre`. La UI **no debe anticipar** un `code` que no existe.
+ */
+export interface CrearReglaProblemaRequest {
+  nombre: string
+  tipo: TipoReglaProblema
+  condicionJson: CondicionReglaJsonDto
+  severidadBase: SeveridadProblema
+  activa?: boolean // default true en el server
+  ventanaHoraria?: string | null
+  slaMinutos: number
+  accionSugerida: string
+  webhookEndpointId?: string | null
+  ventanaSilencioMinutos?: number | null
+}
+
+/**
+ * `PATCH /api/flota/problemas/reglas/{reglaId}` -> 200 con la regla actualizada.
+ * Un solo endpoint para editar / activar / pausar / ajustar (DA-PR-08). `tipo` NO se edita.
+ *
+ * ⚠️ **Ningun `PATCH` del modulo puede BORRAR un campo** (B-18): `System.Text.Json` no distingue
+ * "propiedad ausente" de "propiedad en `null`", asi que el service PRESERVA. Alcanza a
+ * `webhookEndpointId`, que `dtos.ts` promete desvinculable con `null` explicito — y no lo es.
+ *
+ * `condicionJson` es **reemplazo completo** del objeto: no se mergea condicion por condicion.
+ */
+export interface ActualizarReglaProblemaRequest {
+  nombre?: string
+  severidadBase?: SeveridadProblema
+  condicionJson?: CondicionReglaJsonDto
+  slaMinutos?: number
+  webhookEndpointId?: string | null
+  activa?: boolean
+  ventanaHoraria?: string | null
+  accionSugerida?: string
+  ventanaSilencioMinutos?: number | null
+}
+
+/* ── 10.4 Integraciones: webhooks salientes — `api.md` §Integraciones ───────────────────────── */
+
+/** Item de `GET /api/flota/integraciones/webhooks` -> `PagedResult<WebhookEndpointDto>`. */
+export interface WebhookEndpointDto {
+  id: string
+  nombre: string
+  url: string
+  /** ⚠️ DRIFT 9: es la columna fisica `habilitado` (pausado/activo), no la baja logica. */
+  activo: boolean
+  /**
+   * ⚠️ Los 2 de abajo viajan **SIEMPRE vacios** (PENDIENTE #3, mitad de DA-IN-08): no hay tabla
+   * puente. Es la contracara de que el alta no los acepte, **no** "es un endpoint recien creado".
+   *
+   * Consecuencia FAIL-CLOSED y declarada: un endpoint **no tiene suscripciones**, asi que **no
+   * recibe ninguna entrega automatica**. La unica entrega que existe es la explicita de `/probar`.
+   */
+  eventos: string[]
+  scopes: string[]
+  /** Toda entrega va firmada, asi que hoy no tiene camino a `false`. */
+  firmaHmacActiva: boolean
+  /** Prefijo mostrable. El secreto completo se devuelve **una sola vez**, al crear o al rotar. */
+  secretoHuella: string
+  ultimoEnvioUtc: string | null
+  /** Estado de la ULTIMA entrega del endpoint. El badge de la UI se deriva de `activo` + esto. */
+  ultimoEstado: EstadoEntregaWebhook | null
+}
+
+/**
+ * `POST /api/flota/integraciones/webhooks` -> **200 `SecretoWebhookDto`** (no 201, y el cuerpo NO
+ * es el recurso: es el secreto de una sola lectura).
+ *
+ * ⚠️ **No declara `eventos[]` ni `scopes[]`**, que `dtos.ts` publica como requeridos: no tienen
+ * donde persistirse (PENDIENTE #3). El alta funciona y crea un endpoint SIN suscripciones.
+ *
+ * La `url` pasa por anti-SSRF: exige `https`, rechaza IP literal privada/loopback/link-local y
+ * hostname que resuelva a rango privado -> 400 `flota.webhook.url_no_permitida` con `args {url}`.
+ */
+export interface CrearWebhookEndpointRequest {
+  nombre: string
+  url: string
+  activo?: boolean // default true
+}
+
+/** `PATCH .../webhooks/{webhookId}` -> **204 SIN CUERPO**. Mismo limite de B-18: no borra campos. */
+export interface ActualizarWebhookEndpointRequest {
+  nombre?: string
+  url?: string
+  activo?: boolean
+}
+
+/**
+ * Respuesta del ALTA y de `POST .../rotar-secreto`: **la unica vez** que el secreto completo sale
+ * de Flota. Despues, la pantalla solo puede mostrar `secretoHuella`.
+ *
+ * ⚠️ El aviso de "copialo ahora, no vas a poder verlo de nuevo" tiene que estar **ANTES** de que el
+ * usuario pueda cerrar el modal, no despues.
+ *
+ * ⚠️ `secretoAnteriorVigenteHastaUtc` es **DATO INERTE hoy (B-39)**: Flota firma con el nuevo
+ * secreto desde t=0 y manda **una sola** firma, asi que un receptor que todavia tiene el viejo
+ * pierde el 100 % de las entregas desde el instante de la rotacion. **La UI NO debe decir que el
+ * anterior sigue funcionando**: hoy es falso.
+ */
+export interface SecretoWebhookDto {
+  webhookEndpointId: string
+  secreto: string // nunca loguear, nunca persistir en el store
+  secretoHuella: string
+  secretoAnteriorVigenteHastaUtc: string | null // `null` en el alta (no habia anterior)
+}
+
+/** Fila del log de entregas — `GET .../webhooks/entregas` -> `PagedResult<WebhookEntregaDto>`. */
+export interface WebhookEntregaDto {
+  id: string
+  webhookEndpointId: string
+  /** Clave de idempotencia EXTERNA: viaja en `X-Orbi-Event-Id` y es por lo que dedupe el receptor. */
+  eventId: string
+  /** Nombre PUBLICO del evento (ingles). `webhook.test` viaja por aca. */
+  eventType: string
+  estado: EstadoEntregaWebhook
+  intentos: number
+  httpStatus: number | null
+  /**
+   * Nunca lleva secretos. Desde el cierre de slice-06 persiste la CONSTANTE `http_error` y no el
+   * `ReasonPhrase` del receptor (era texto elegido por un tercero, servido a una pantalla).
+   * El diagnostico util es `httpStatus`.
+   */
+  errorResumen: string | null
+  ultimoIntentoUtc: string | null
+  /** Lo que sostiene el backoff. ⚠️ Ver `ResultadoReintentoWebhookDto` antes de prometer reintento. */
+  proximoIntentoUtc: string | null
+}
+
+/**
+ * `POST .../webhooks/{webhookId}/probar` -> 200. **Efecto secundario cero**: no genera problema, no
+ * entra al motor de reglas, no abre alerta y no publica nada al bus interno. Lo unico que produce
+ * es UNA fila de entrega.
+ *
+ * Devuelve **200 aunque el receptor haya fallado**: el resultado de la prueba es un dato, no un
+ * error de la API. Y **probar no marca al endpoint como sano** — solo agrega la fila.
+ */
+export interface ResultadoPruebaWebhookDto {
+  entrega: WebhookEntregaDto
+}
+
+/**
+ * `POST .../webhooks/{webhookId}/reintentar` -> 200.
+ *
+ * ⚠️ **El shape lo INVENTO el backend y esta declarado como tal**: `dtos.ts` no publica ninguno
+ * para esta fila y `api.md` solo dice "reencolar entregas fallidas". Ratificarlo es del PO.
+ *
+ * ⚠️ **B-40: NADIE DRENA LA COLA.** El 200 es cierto sobre lo que hace (reprograma N filas) y falso
+ * sobre lo que va a pasar: no existe job que las mande y el cuerpo original **no es
+ * reconstruible** (la fila guarda el hash, no el payload). Una entrega fallida queda en
+ * `reintentando` para siempre.
+ */
+export interface ResultadoReintentoWebhookDto {
+  reencoladas: number
+}
+
+/* ── 10.5 Alertas (senales) — `api.md` §Alertas y senales operativas ────────────────────────── */
+
+export interface AlertaVehiculoDto {
+  vehiculoFlotaId: string
+  patente: string
+}
+
+export interface AlertaConductorDto {
+  conductorFlotaId: string
+  nombreCompleto: string
+}
+
+export interface AlertaGeozonaDto {
+  geozonaFlotaId: string
+  nombre: string
+}
+
+export interface AlertaUbicacionDto {
+  latitud: number
+  longitud: number
+}
+
+/**
+ * Item de `GET /api/flota/alertas` -> `PagedResult<AlertaListItemDto>`.
+ *
+ * ⚠️ **HOY ESTE LISTADO DEVUELVE 0 ITEMS SIEMPRE, Y NO ES UN BUG** (GATE 2 / B-38): no existe ni un
+ * escritor de alertas en todo el backend, porque el catalogo `tipos_alerta_flota` esta vacio a
+ * proposito y la FK rechaza toda insercion. El vacio de esta pantalla **no puede decir "no hay
+ * alertas"** —seria mentira— sino que la deteccion todavia no esta conectada.
+ */
+export interface AlertaListItemDto {
+  id: string
+  tipo: TipoAlerta // catalogo VACIO hasta que cierre GATE 2
+  severidad: SeveridadAlerta
+  vehiculo: AlertaVehiculoDto
+  conductor: AlertaConductorDto | null
+  geozona: AlertaGeozonaDto | null // DIFERIDO DA-08: nunca poblado
+  /** ⚠️ DRIFT 10: el backend sirve el `titulo` de la senal (PENDIENTE #7). */
+  descripcion: string
+  fechaInicio: string
+  fechaResolucion: string | null
+  estado: EstadoAlerta
+  ubicacion: AlertaUbicacionDto | null
 }

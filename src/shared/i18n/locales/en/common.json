@@ -681,6 +681,18 @@
         "no_existe": "The document does not exist or has already been deleted.",
         "tipo_invalido": "The document type {{tipo}} is not available in your organization.",
         "url_no_permitida": "That link cannot be used. It must be an https URL reachable from the internet."
+      },
+      "problema": {
+        "no_existe": "The problem does not exist or does not belong to your organization.",
+        "transicion_invalida": "The problem cannot move from {{estadoActual}} to {{estadoDestino}}."
+      },
+      "regla": {
+        "no_existe": "The rule does not exist or does not belong to your organization.",
+        "condicion_invalida": "The rule condition is not valid."
+      },
+      "webhook": {
+        "no_existe": "The webhook does not exist or does not belong to your organization.",
+        "url_no_permitida": "The URL {{url}} is not allowed: it must be https and point to a public server."
       }
     },
     "auth": {
@@ -780,7 +792,8 @@
       "confSeguridad": "Security",
       "confApariencia": "Appearance",
       "confRoles": "Roles and permissions",
-      "usuarios": "Users"
+      "usuarios": "Users",
+      "flotaProblemas": "Problems"
     },
     "sidebar": {
       "collapse": "Collapse menu",

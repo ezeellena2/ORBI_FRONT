@@ -47,6 +47,8 @@
   justify-content: center;
   background: transparent;
   border: 0;
+  /* Ancla del anillo de severidad de abajo, que es un ::after posicionado. */
+  position: relative;
 }
 
 .marcador-vehiculo__punto {
@@ -94,6 +96,47 @@
     0 0 0 3px var(--s-mapa),
     0 0 0 6px var(--s-marca),
     var(--s-sombra-md);
+}
+
+/* ── Anillo de SEVERIDAD DE SEÑALES (slice-06, f-12 paso 5) ───────────────
+ * SE SUPERPONE al color de conexion, no lo reemplaza: el punto sigue diciendo
+ * si el vehiculo reporta y el anillo dice si tiene señales abiertas. Son dos
+ * preguntas distintas y pisar el relleno borraria la primera.
+ *
+ * Va como `::after` sobre el contenedor de 36px —y no como `box-shadow` del
+ * punto— para no pelearse con el anillo de SELECCION, que ya usa `box-shadow`
+ * de 6px sobre ese mismo elemento. Con `inset: 2px` el circulo mide 32px, o sea
+ * queda POR FUERA del anillo de seleccion (30px) y los dos se leen a la vez.
+ *
+ * ⚠️ Hoy ninguna de estas 3 clases se aplica nunca: no hay escritor de alertas
+ * (B-38 / GATE 2). No es codigo muerto — es la capa que el dia que el PO cierre
+ * el catalogo se enciende sin tocar el componente — pero **el mapa no puede
+ * quedarse solo con esto**: la ausencia de anillo la explica el panel izquierdo,
+ * porque un pin sin anillo no afirma nada por si mismo. */
+.marcador-vehiculo--senal-peligro::after,
+.marcador-vehiculo--senal-advertencia::after,
+.marcador-vehiculo--senal-neutro::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: var(--s-radio-full);
+  border-width: 2px;
+  border-style: solid;
+  pointer-events: none;
+}
+
+.marcador-vehiculo--senal-peligro::after {
+  border-color: var(--s-peligro);
+}
+
+.marcador-vehiculo--senal-advertencia::after {
+  border-color: var(--s-advertencia);
+}
+
+/* `baja` es neutro: una señal de severidad baja no merece color de alarma en un
+   mapa donde el color ya esta ocupado por el estado de conexion. */
+.marcador-vehiculo--senal-neutro::after {
+  border-color: var(--s-fg-terciario);
 }
 
 /* Leaflet hace focusable al marcador cuando `keyboard: true` (su default). El

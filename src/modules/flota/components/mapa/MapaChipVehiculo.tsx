@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { BadgeConexion } from '../BadgeConexion'
+import { SenalBadgeSeveridad } from '../senales/SenalBadgeSeveridad'
 import { antiguedadDeLaSenal, puedeMostrarVelocidad } from '../../vocabulario-mapa'
 import { SIN_DATO } from '../detalle/formato'
-import type { MapaItemDto } from '@/services/contracts/flota'
+import type { MapaItemDto, SeveridadAlerta } from '@/services/contracts/flota'
 import { cn } from '@/shared/utils/cn'
 
 /**
@@ -24,6 +25,16 @@ export interface MapaChipVehiculoProps {
   onSeleccionar: (vehiculoFlotaId: string) => void
   /** Instante de referencia para la antiguedad. Lo pasa el panel: una sola lectura del reloj. */
   ahoraMs: number
+  /**
+   * Severidad maxima de las señales abiertas, o `null` si no tiene ninguna — **o si la deteccion no
+   * esta conectada**, que es el caso de hoy en el 100 % de los vehiculos.
+   *
+   * Con `null` el chip **no dibuja nada**: no hay badge "sin señales" ni marcador de dato ausente por
+   * fila. La explicacion de por que ningun chip tiene badge la da el panel UNA vez, arriba
+   * (`AvisoDeSenales`); repetirla 20 veces en una lista angosta la volveria ruido y taparia el estado
+   * de conexion, que es la lectura principal de este chip.
+   */
+  severidad?: SeveridadAlerta | null
 }
 
 export function MapaChipVehiculo({
@@ -31,6 +42,7 @@ export function MapaChipVehiculo({
   seleccionado,
   onSeleccionar,
   ahoraMs,
+  severidad = null,
 }: MapaChipVehiculoProps) {
   const { t, i18n } = useTranslation('flota')
 
@@ -82,7 +94,15 @@ export function MapaChipVehiculo({
             : (item.conductorAsignado.nombreCompleto ?? t('mapa.chip.conductorSinNombre'))}
         </span>
 
-        <BadgeConexion estado={item.estado} sufijo={velocidad} />
+        <div className="flex flex-wrap items-center gap-1.5">
+          <BadgeConexion estado={item.estado} sufijo={velocidad} />
+          {/*
+            La lectura de TEXTO de la severidad. En el mapa la severidad viaja como anillo de color y
+            el color ya esta ocupado por la conexion: sin este badge, la severidad seria significado
+            portado SOLO por color, que es la regla que la primitiva `Badge` existe para sostener.
+          */}
+          {severidad === null ? null : <SenalBadgeSeveridad severidad={severidad} />}
+        </div>
       </div>
     </button>
   )

@@ -86,7 +86,8 @@
       "estado": "Estado",
       "ultimaSenal": "Última señal",
       "creado": "Creado",
-      "acciones": "Acciones"
+      "acciones": "Acciones",
+      "senales": "Señales"
     },
     "celda": {
       "sinDato": "—",
@@ -149,7 +150,8 @@
     "volverADispositivos": "Volver a dispositivos",
     "noSePuedeBorrar": "Vaciar un campo todavía no lo borra: {{campos}} van a quedar como estaban. El resto de los cambios sí se guarda.",
     "separadorLista": ", ",
-    "volverAConductores": "Volver a conductores"
+    "volverAConductores": "Volver a conductores",
+    "cerrar": "Cerrar"
   },
   "forbidden": {
     "titulo": "Sin acceso",
@@ -434,7 +436,8 @@
     },
     "motivo": {
       "max_length": "El motivo no puede superar los 500 caracteres.",
-      "invalid": "Ese motivo de cierre no es válido."
+      "invalid": "Ese motivo de cierre no es válido.",
+      "required": "El motivo es obligatorio."
     },
     "dispositivo_flota_id": {
       "required": "Elegí un dispositivo de la lista."
@@ -497,6 +500,30 @@
     },
     "enviar_invitacion": {
       "no_soportado": "Todavía no se pueden enviar invitaciones por email a los conductores."
+    },
+    "evidencia": {
+      "required": "La evidencia del cierre es obligatoria.",
+      "max_length": "La evidencia no puede superar los 2000 caracteres."
+    },
+    "resultado": {
+      "required": "Elegí un resultado del cierre."
+    },
+    "silenciar_hasta_utc": {
+      "required": "Elegí una ventana de silencio."
+    },
+    "url": {
+      "required": "La URL es obligatoria."
+    },
+    "sla_minutos": {
+      "invalid": "El plazo tiene que ser mayor a cero.",
+      "max": "El plazo no puede superar un año."
+    },
+    "accion_sugerida": {
+      "required": "La acción sugerida es obligatoria.",
+      "max_length": "La acción sugerida no puede superar los 500 caracteres."
+    },
+    "condicion_json": {
+      "required": "Completá la condición: campo, operador y valor."
     }
   },
   "estadoStockDispositivo": {
@@ -1369,6 +1396,726 @@
       "titulo": "Ningún vehículo tiene posición conocida ahora",
       "descripcion": "Puede ser que no tengan GPS instalado, que los equipos todavía no hayan reportado, o que el servicio de posición no esté respondiendo. Todavía no pudimos contar cuántos vehículos tiene la organización, así que este número no lo sabemos.",
       "cta": "Ver todos los vehículos"
+    }
+  },
+  "estadoProblema": {
+    "detectado": "Detectado",
+    "priorizado": "Priorizado",
+    "asignado": "Asignado",
+    "en_analisis": "En análisis",
+    "silenciado": "Silenciado",
+    "resuelto": "Resuelto",
+    "descartado": "Descartado"
+  },
+  "severidadProblema": {
+    "critica": "Crítica",
+    "alta": "Alta",
+    "media": "Media",
+    "baja": "Baja"
+  },
+  "tipoProblema": {
+    "dtc_critico": "Falla crítica del motor",
+    "dispositivo_sin_senal": "Dispositivo sin señal",
+    "gps_desconectado_ignicion_activa": "GPS desconectado con el motor en marcha",
+    "salida_geozona_critica": "Salida de zona crítica",
+    "entrada_zona_restringida": "Entrada a zona restringida",
+    "exceso_velocidad_sostenido": "Exceso de velocidad sostenido",
+    "movimiento_sin_conductor": "Vehículo en movimiento sin conductor asignado",
+    "licencia_vencida": "Licencia vencida",
+    "vehiculo_incompleto": "Datos del vehículo incompletos",
+    "mantenimiento_vencido": "Mantenimiento vencido",
+    "bateria_baja": "Batería baja",
+    "manipulacion_dispositivo": "Posible manipulación del dispositivo"
+  },
+  "origenSenal": {
+    "telemetria": "Telemetría",
+    "diagnostico": "Diagnóstico",
+    "geozona": "Geozonas",
+    "conductor": "Conductor",
+    "dispositivo": "Dispositivo",
+    "calidad_datos": "Calidad de datos",
+    "mantenimiento": "Mantenimiento",
+    "operacion": "Operación"
+  },
+  "tipoTimelineProblema": {
+    "detectado": "Detectado",
+    "prioridad_cambiada": "Cambió la prioridad",
+    "asignado": "Asignado",
+    "comentario": "Comentario",
+    "silenciado": "Silenciado",
+    "webhook": "Envío a integración",
+    "resuelto": "Resuelto",
+    "descartado": "Descartado"
+  },
+  "estadoSlaProblema": {
+    "vigente": "En plazo",
+    "por_vencer": "Por vencer",
+    "vencido": "Vencido",
+    "sin_sla": "Sin plazo"
+  },
+  "slaAyuda": {
+    "vigente": "Todavía está dentro del plazo objetivo de su regla.",
+    "por_vencer": "Está cerca de vencer el plazo objetivo.",
+    "vencido": "Pasó el plazo objetivo de su regla.",
+    "sin_sla": "Este problema no tiene plazo objetivo: nadie está midiendo cuánto tarda en resolverse."
+  },
+  "factorPrioridad": {
+    "severidad_base": "Severidad de la regla",
+    "contexto_operativo": "Contexto operativo",
+    "urgencia": "Urgencia",
+    "recurrencia": "Recurrencia",
+    "criticidad_activo": "Criticidad del vehículo",
+    "impacto_potencial": "Impacto potencial",
+    "sla_restante": "Plazo restante",
+    "ayuda": {
+      "severidad_base": "Punto de partida que fija la severidad de la regla que abrió el problema.",
+      "contexto_operativo": "Qué estaba haciendo el vehículo cuando se detectó.",
+      "urgencia": "Cuánto hace que se detectó y a qué ritmo llegan señales nuevas.",
+      "recurrencia": "Cuántas veces se repitió lo mismo en este vehículo.",
+      "criticidad_activo": "Suma 0 siempre: todavía no existe una forma de marcar un vehículo como crítico, así que este factor no puede aportar puntos.",
+      "impacto_potencial": "Qué puede pasar si el problema no se atiende.",
+      "sla_restante": "Cuánto queda del plazo objetivo."
+    }
+  },
+  "prioridadDesglose": {
+    "titulo": "Cómo se calculó la prioridad",
+    "aclaracionSuma": "El desglose explica de dónde sale la prioridad, pero puede no sumar exactamente el número del encabezado: algunos factores se recalculan al abrir el problema y no quedan guardados.",
+    "suma": "Suma de los factores",
+    "desfasaje": "La suma de los factores no llega a la prioridad guardada: parte del cálculo se rehace al leer y no quedó registrada cuando se priorizó el caso."
+  },
+  "accionProblema": {
+    "asignar": "Asignar",
+    "silenciar": "Silenciar",
+    "resolver": "Resolver",
+    "ver_mapa": "Ver en el mapa",
+    "ver_vehiculo": "Ver vehículo"
+  },
+  "tipoRegla": {
+    "telemetria": "Telemetría",
+    "diagnostico": "Diagnóstico",
+    "geozona": "Geozonas",
+    "conductor": "Conductor",
+    "dispositivo": "Dispositivo",
+    "calidad_datos": "Calidad de datos",
+    "mantenimiento": "Mantenimiento",
+    "operacion": "Operación"
+  },
+  "estadoEntregaWebhook": {
+    "pendiente": "Pendiente",
+    "enviado": "Enviado",
+    "fallido": "Falló",
+    "reintentando": "En reintento",
+    "agotado": "Sin más intentos"
+  },
+  "estadoWebhook": {
+    "inactivo": "Inactivo",
+    "sin_envios": "Sin envíos",
+    "activo": "Activo",
+    "pendiente": "Pendiente",
+    "con_errores": "Con errores",
+    "fallando": "Fallando"
+  },
+  "estadoAlerta": {
+    "abierta": "Abierta",
+    "gestionada": "Gestionada",
+    "cerrada": "Cerrada"
+  },
+  "severidadAlerta": {
+    "alta": "Alta",
+    "media": "Media",
+    "baja": "Baja"
+  },
+  "condicionInvalida": {
+    "titulo": "Revisá la condición",
+    "enCondicion": "Condición {{indice}}",
+    "sinIndice": "En la condición general de la regla",
+    "motivo": {
+      "version_no_soportada": "La versión del formato de la condición no está soportada.",
+      "combinador_no_soportado": "Solo se pueden combinar condiciones con \"y\": todas tienen que cumplirse.",
+      "cantidad_de_condiciones_invalida": "Una regla necesita entre 1 y 10 condiciones.",
+      "campo_desconocido": "Ese campo no se puede usar en una condición.",
+      "operador_no_admitido": "Ese operador no se puede usar con ese campo.",
+      "tipo_de_valor_incompatible": "El valor no tiene el tipo que ese campo y ese operador esperan.",
+      "umbral_minutos_invalido": "Los minutos sostenidos son obligatorios con \"sostenido por\" y no se pueden usar con ningún otro operador.",
+      "lista_in_invalida": "La lista de valores tiene que tener entre 1 y 50 elementos, sin repetidos.",
+      "json_no_parseable": "No pudimos leer la condición.",
+      "desconocido": "La condición no es válida."
+    }
+  },
+  "centroError": {
+    "transicionBloqueada": "Mover el problema entre estados todavía no está habilitado. No es una falla momentánea: volver a intentarlo da el mismo resultado.",
+    "problemaCerrado": "Este problema ya está cerrado, así que la acción no se puede aplicar. Actualizá la vista para ver su estado actual.",
+    "condicionInvalida": "Revisá la condición marcada. No se guardó ningún cambio.",
+    "urlNoPermitida": "Corregí la URL: tiene que ser https y apuntar a un servidor público.",
+    "conflicto": "Algo cambió mientras trabajabas. Actualizá y volvé a elegir.",
+    "noEncontrado": "No lo encontramos: puede que ya no exista o que no pertenezca a tu organización.",
+    "sinPermiso": "No tenés el permiso necesario para esta acción.",
+    "moduloNoActivo": "Tu organización no tiene el módulo Flota activo.",
+    "validacion": "Revisá los campos marcados.",
+    "red": "No pudimos comunicarnos con el servidor. No sabemos si el cambio llegó a guardarse: actualizá antes de volver a intentar.",
+    "generico": "No pudimos completar la acción."
+  },
+  "centroBloqueado": {
+    "cambiarEstado": "Mover problemas entre estados todavía no está habilitado: falta definir qué transiciones se permiten, así que ningún cambio se puede guardar. No es una falla momentánea — volver a intentarlo da el mismo resultado.",
+    "comentar": "Comentar todavía no está disponible: no se puede registrar la nota en el historial del problema. Lo que sí queda registrado es asignar, silenciar y resolver.",
+    "exportar": "Exportar problemas todavía no está disponible.",
+    "filtros": "Filtrar y ordenar esta bandeja todavía no está disponible. Se muestra la lista completa, con el orden por prioridad.",
+    "alcanceRegla": "Todavía no se puede acotar una regla a vehículos, conductores o zonas: esta regla alcanza a toda la organización.",
+    "suscripciones": "Todavía no se puede elegir a qué eventos se suscribe un endpoint, así que no va a recibir envíos automáticos. Podés probarlo manualmente con \"Probar\".",
+    "reintentarEntregas": "Reencolar envíos todavía no vuelve a enviarlos: quedarían en espera sin salir. Por eso la acción no está disponible.",
+    "ventanaDeGracia": "Al rotar, el sistema empieza a firmar con el secreto nuevo de inmediato y el anterior deja de servir. Coordiná el cambio con quien recibe los envíos antes de rotar.",
+    "gestionarAlerta": "Gestionar una señal todavía no está disponible.",
+    "deteccionAlertas": "La detección de señales todavía no está conectada: por ahora ninguna se puede registrar. Que esta lista esté vacía no significa que no haya nada para revisar."
+  },
+  "centro": {
+    "problemas": {
+      "titulo": "Centro de Problemas",
+      "subtitulo": "Los casos operativos abiertos de tu flota, ordenados por prioridad.",
+      "vacioSinResultados": {
+        "titulo": "Sin coincidencias para los filtros aplicados",
+        "limpiar": "Limpiar"
+      },
+      "error": {
+        "titulo": "No pudimos cargar los problemas",
+        "reintentar": "Reintentar",
+        "tituloRefresco": "No pudimos actualizar la bandeja"
+      },
+      "datosParciales": {
+        "titulo": "Faltan datos de contexto",
+        "descripcion": "No pudimos traer el estado en vivo del vehículo. El problema y sus datos propios se muestran igual."
+      },
+      "sinValor": "—",
+      "sinAcceso": {
+        "titulo": "Sin acceso",
+        "descripcion": "Necesitás el permiso {{permiso}} para ver esta pantalla.",
+        "volver": "Volver al dashboard"
+      },
+      "paginacion": {
+        "anterior": "Página anterior",
+        "siguiente": "Página siguiente",
+        "porPagina": "Por página",
+        "rango": "{{desde}}–{{hasta}} de {{total}}"
+      },
+      "actualizando": "Actualizando…",
+      "total_one": "{{count}} problema en tu organización",
+      "total_other": "{{count}} problemas en tu organización",
+      "resumen": {
+        "linea": "En esta página: {{enPagina}} problemas · {{criticos}} críticos · {{plazoVencido}} con plazo vencido · {{sinResponsable}} sin responsable",
+        "aclaracion": "Los conteos son de los problemas de esta página, no de toda la organización: todavía no hay un resumen del total."
+      },
+      "vacioDeLaBandeja": {
+        "titulo": "No hay problemas en esta bandeja",
+        "descripcion": "Un problema se abre solo si una regla activa lo detecta y llega la señal que la dispara. Que la bandeja esté vacía no significa que no haya nada para revisar: mirá tus reglas antes de darlo por bueno."
+      }
+    },
+    "reglas": {
+      "titulo": "Reglas de problemas",
+      "subtitulo": "Qué señales se convierten en un problema, con qué prioridad y con qué plazo.",
+      "vacioSinDatos": {
+        "titulo": "Aún no configuraste reglas",
+        "descripcion": "Las reglas convierten señales de tus vehículos y conductores en problemas accionables con prioridad y plazo.",
+        "cta": "Nueva regla"
+      },
+      "vacioSinResultados": {
+        "titulo": "Ninguna regla coincide con tus filtros",
+        "limpiar": "Limpiar"
+      },
+      "error": {
+        "titulo": "No pudimos cargar las reglas",
+        "reintentar": "Reintentar",
+        "tituloRefresco": "No pudimos actualizar la lista",
+        "tituloAlternar": "No pudimos cambiar el estado de la regla"
+      },
+      "alcanceTodaLaOrganizacion": "Toda la organización",
+      "conWebhook": "Con webhook",
+      "sinWebhook": "Sin webhook",
+      "activa": "Activa",
+      "inactiva": "Inactiva",
+      "ordenFijo": "Ordenadas por nombre. Todavía no se puede cambiar el orden ni filtrar esta lista.",
+      "condicionSinTexto": "Sin descripción legible. La condición guardada es la que vale.",
+      "duplicarSufijo": " (copia)",
+      "vacioSinSeed": "Si esperabas encontrar reglas configuradas: las reglas iniciales todavía no se cargan solas en una organización nueva. No perdiste nada.",
+      "sinAcceso": {
+        "titulo": "No tenés acceso a las reglas",
+        "descripcion": "Necesitás el permiso {{permiso}} para ver las reglas de problemas.",
+        "volver": "Volver al inicio"
+      },
+      "acciones": {
+        "abrir": "Acciones de {{nombre}}",
+        "sinPermiso": "Necesitás el permiso {{permiso}}."
+      },
+      "accion": {
+        "editar": "Editar",
+        "duplicar": "Duplicar",
+        "pausar": "Pausar",
+        "activar": "Activar",
+        "probarWebhook": "Probar webhook",
+        "verConductores": "Ver conductores"
+      },
+      "columnas": {
+        "regla": "Regla",
+        "estado": "Estado",
+        "severidad": "Severidad",
+        "condicion": "Condición",
+        "operacion": "Operación",
+        "plazo": "Plazo",
+        "webhook": "Webhook",
+        "acciones": "Acciones"
+      },
+      "plazo": {
+        "minutos_one": "{{count}} min",
+        "minutos_other": "{{count}} min",
+        "horas_one": "{{count}} h",
+        "horas_other": "{{count}} h"
+      },
+      "paginacion": {
+        "rango_one": "Mostrando {{desde}}–{{hasta}} de {{total}} regla",
+        "rango_other": "Mostrando {{desde}}–{{hasta}} de {{total}} reglas",
+        "porPagina": "Por página",
+        "anterior": "Página anterior",
+        "siguiente": "Página siguiente"
+      },
+      "resumen": {
+        "titulo": "Resumen de reglas",
+        "activas": "Activas",
+        "activasDetalle_one": "de {{total}} regla",
+        "activasDetalle_other": "de {{total}} reglas",
+        "criticas": "Críticas",
+        "criticasDetalle": "activas con severidad crítica",
+        "activaciones": "Activaciones",
+        "activacionesDetalle": "todavía no se registra qué regla abrió cada problema",
+        "conWebhook": "Con webhook",
+        "conWebhookDetalle": "tienen un endpoint guardado; todavía no reciben envíos",
+        "sinDato": "—",
+        "deLaPagina": "Estos números son de las reglas de esta página, no de toda la organización."
+      },
+      "campo": {
+        "velocidad_kmh": "Velocidad (km/h)",
+        "ignicion": "Ignición",
+        "en_movimiento": "En movimiento",
+        "minutos_sin_senal": "Minutos sin señal",
+        "bateria_pct": "Batería del equipo (%)",
+        "manipulacion_detectada": "Manipulación del equipo",
+        "dtc_criticidad": "Criticidad de la falla",
+        "dtc_codigo": "Código de falla (DTC)",
+        "conductor_asignado": "Tiene conductor asignado",
+        "dias_para_vencer": "Días para vencer",
+        "documento_vencido": "Documento vencido",
+        "vehiculo_incompleto": "Vehículo con datos incompletos",
+        "mantenimiento_vencido": "Mantenimiento vencido"
+      },
+      "campoAyuda": {
+        "velocidad_kmh": "Velocidad informada por el GPS en la última señal.",
+        "ignicion": "Si el motor figura encendido en la última señal del GPS.",
+        "en_movimiento": "Si el vehículo figura en movimiento en la última señal del GPS.",
+        "minutos_sin_senal": "Minutos transcurridos desde la última señal del equipo.",
+        "bateria_pct": "Carga de la batería del equipo, en porcentaje.",
+        "manipulacion_detectada": "Hoy ninguna fuente completa este dato: una regla que lo use se guarda y no se dispara nunca.",
+        "dtc_criticidad": "Criticidad del caso de diagnóstico que abrió la falla.",
+        "dtc_codigo": "Código informado por la computadora del vehículo, por ejemplo P0300.",
+        "conductor_asignado": "Si el vehículo tiene hoy un conductor asignado.",
+        "dias_para_vencer": "Días que faltan para que venza un documento habilitante. Solo se revisa cuando llega una señal del vehículo: nada lo controla por su cuenta.",
+        "documento_vencido": "Si hay un documento habilitante vencido. Solo se revisa cuando llega una señal del vehículo: nada lo controla por su cuenta.",
+        "vehiculo_incompleto": "Si al vehículo le faltan datos de carga. Solo se revisa cuando llega una señal del vehículo: nada lo controla por su cuenta.",
+        "mantenimiento_vencido": "Lo informa el módulo de Operaciones, que todavía no existe: hasta entonces este campo nunca es verdadero."
+      },
+      "operador": {
+        "mayor": "es mayor que",
+        "mayorIgual": "es mayor o igual que",
+        "menor": "es menor que",
+        "menorIgual": "es menor o igual que",
+        "igual": "es igual a",
+        "en": "es alguno de",
+        "sostenidoPor": "se mantiene durante"
+      },
+      "modal": {
+        "tituloAlta": "Nueva regla de problema",
+        "tituloEditar": "Editar regla de problema",
+        "subtitulo": "Definí qué señal abre un problema, con qué severidad y en qué plazo hay que resolverlo.",
+        "nombre": "Nombre",
+        "tipo": "Tipo",
+        "tipoAyuda": "De dónde sale la señal que evalúa esta regla.",
+        "tipoFijo": "El tipo se fija al crear la regla y después no se puede cambiar.",
+        "severidad": "Severidad",
+        "plazo": "Plazo objetivo",
+        "plazoAyuda": "Tiempo para resolver el problema. Se propone según la severidad y lo podés cambiar.",
+        "condicion": "Condición",
+        "condicionAyuda": "Todas las condiciones tienen que cumplirse para que la regla abra un problema.",
+        "combinadorFijo": "y",
+        "campo": "Campo",
+        "operador": "Operador",
+        "valor": "Valor",
+        "valorPlaceholder": "Elegí un valor",
+        "umbral": "Minutos",
+        "umbralAyuda": "Minutos que la condición tiene que mantenerse sin cortes. Todavía no se guarda el historial de señales, así que una condición sostenida puede no cumplirse nunca.",
+        "listaAyuda": "Separá los valores con comas.",
+        "verdadero": "Sí",
+        "falso": "No",
+        "agregarCondicion": "Agregar condición",
+        "quitarCondicion": "Quitar la condición {{indice}}",
+        "minimoCondiciones": "Una regla necesita al menos una condición.",
+        "maximoCondiciones": "Una regla admite hasta {{maximo}} condiciones.",
+        "webhook": "Webhook",
+        "webhookAyuda": "La regla guarda el endpoint, pero todavía no le avisa nada cuando abre un problema: el envío automático no está construido. Por ahora lo único que genera una entrega es el botón «Probar» de Integraciones.",
+        "webhookNinguno": "Sin webhook",
+        "webhookCargando": "Cargando webhooks…",
+        "webhookSinPermiso": "Para elegir un webhook necesitás el permiso {{permiso}}. Lo que la regla ya tenga configurado se mantiene.",
+        "webhookYaConfigurado": "Webhook ya configurado",
+        "webhookNoSeDesvincula": "Volver a «Sin webhook» todavía no desvincula el que ya tenía: la regla va a seguir con el mismo endpoint guardado. El resto de los cambios sí se guarda.",
+        "accionSugerida": "Acción sugerida",
+        "accionSugeridaAyuda": "Qué tiene que hacer quien reciba el problema. Se muestra en el ticket.",
+        "activa": "Regla activa",
+        "activaAyuda": "Una regla pausada no evalúa señales y no abre problemas nuevos.",
+        "guardar": "Guardar regla"
+      }
+    },
+    "integraciones": {
+      "titulo": "Integraciones",
+      "subtitulo": "Webhooks salientes firmados con HMAC hacia tus sistemas.",
+      "vacioSinDatos": {
+        "titulo": "Aún no configuraste webhooks",
+        "descripcion": "Conectá Orbi con tus sistemas (ERP, TMS, mesa de soporte) recibiendo eventos firmados con HMAC.",
+        "cta": "Nuevo webhook"
+      },
+      "vacioSinResultados": {
+        "titulo": "Ningún webhook coincide con tus filtros",
+        "limpiar": "Limpiar filtros"
+      },
+      "vacioSinEntregas": {
+        "titulo": "Todavía no hay entregas registradas",
+        "descripcion": "Un endpoint todavía no puede suscribirse a eventos, así que lo único que genera una entrega es el botón “Probar”."
+      },
+      "error": {
+        "titulo": "No pudimos cargar las integraciones",
+        "tituloAlternar": "No pudimos cambiar el estado del webhook"
+      },
+      "entregasDeTodaLaOrganizacion": "Se muestran las entregas más recientes de toda la organización; el filtro por endpoint se aplica sobre lo que ya se cargó.",
+      "secreto": {
+        "titulo": "Guardá el secreto ahora",
+        "descripcion": "Es la única vez que se muestra completo. Después vas a ver solo su prefijo.",
+        "copiar": "Copiar",
+        "copiado": "Copiado",
+        "entendido": "Ya lo guardé",
+        "subtituloAlta": "El webhook quedó creado. Este es su secreto para firmar las entregas.",
+        "subtituloRotacion": "El secreto se rotó. Este es el nuevo valor con el que se van a firmar las entregas.",
+        "confirmacion": "Ya guardé el secreto en un lugar seguro",
+        "errorCopiar": "No pudimos copiarlo. Seleccionalo a mano y copialo antes de cerrar: no se puede volver a pedir."
+      },
+      "probar": {
+        "accion": "Probar",
+        "aclaracion": "Envía un mensaje de prueba firmado a la URL real. Que llegue no marca al endpoint como sano: solo agrega una entrega al historial.",
+        "titulo": "Probar {{nombre}}",
+        "resultadoAclaracion": "Este es el resultado de la entrega de prueba. El endpoint no queda marcado como sano por haberla recibido."
+      },
+      "firma": {
+        "titulo": "Firma HMAC",
+        "descripcion": "Cada entrega viaja firmada. Quien recibe tiene que validar las tres cosas: el timestamp, la firma y el identificador del evento.",
+        "stringCanonico": "Cadena firmada",
+        "tolerancia": "Tolerancia del timestamp",
+        "toleranciaPendiente": "—",
+        "headerSignature": "La firma HMAC del cuerpo del mensaje.",
+        "headerEventId": "Identificador único del evento. Usalo para descartar duplicados.",
+        "headerEventType": "Tipo de evento, con su nombre público.",
+        "headerTimestamp": "Momento del envío. Sirve para rechazar mensajes reenviados.",
+        "rawBody": "Se firma el cuerpo tal cual viaja, sin volver a serializarlo. El prefijo v1= es parte del valor del header.",
+        "validacionTriple": "Quien recibe tiene que validar las tres cosas: que el timestamp esté dentro de tolerancia, que la firma coincida y que el identificador del evento no se haya procesado antes.",
+        "huellaDe": "Huella del secreto de {{nombre}}",
+        "rotar": "Rotar secreto",
+        "sinEndpoint": "Configurá un webhook para ver su huella y poder rotar el secreto."
+      },
+      "eventos": {
+        "titulo": "Eventos disponibles",
+        "noDisponible": "No disponible",
+        "aclaracionSinSuscripciones": "Este catálogo describe los eventos del sistema. Todavía no se puede suscribir un endpoint a ninguno."
+      },
+      "sinEnviosAun": "Todavía no se envió nada a este endpoint.",
+      "ultimaEntrega": "Última entrega: {{estado}} · {{fecha}}",
+      "lista": {
+        "titulo": "Webhooks configurados"
+      },
+      "sinAcceso": {
+        "titulo": "No tenés acceso a las integraciones",
+        "descripcion": "Necesitás el permiso {{permiso}} para ver los webhooks de tu organización.",
+        "volver": "Volver al inicio"
+      },
+      "acciones": {
+        "abrir": "Acciones de {{nombre}}",
+        "sinPermiso": "Necesitás el permiso {{permiso}}."
+      },
+      "accion": {
+        "editar": "Editar",
+        "probar": "Probar",
+        "verEntregas": "Ver entregas",
+        "pausar": "Pausar",
+        "activar": "Activar",
+        "eliminar": "Eliminar"
+      },
+      "filtros": {
+        "busqueda": "Buscar",
+        "busquedaPlaceholder": "Nombre o URL",
+        "estado": "Estado",
+        "estadoTodos": "Todos",
+        "estadoPrevalece": "Al elegir un estado, se muestran también los pausados.",
+        "soloActivos": "Solo activos",
+        "soloEstaPagina": "Se está filtrando sobre los {{cargados}} webhooks cargados, de {{total}} en la organización."
+      },
+      "salud": {
+        "titulo": "Estado de las integraciones",
+        "activos": "Webhooks activos",
+        "activosDetalle_one": "de {{total}} configurado",
+        "activosDetalle_other": "de {{total}} configurados",
+        "entregas": "Entregas 24 h",
+        "entregasDetalle": "todavía no está definido cómo se cuenta",
+        "fallos": "Fallos abiertos",
+        "fallosDetalle": "todavía no está definido cómo se cuenta",
+        "sinDato": "—",
+        "deLaPagina": "Estos números son de los webhooks de esta página, no de toda la organización."
+      },
+      "entregas": {
+        "titulo": "Últimas entregas",
+        "evento": "Evento",
+        "endpoint": "Endpoint",
+        "endpointNoCargado": "No está en esta página",
+        "estado": "Estado",
+        "intentos": "Intentos",
+        "status": "Status",
+        "sinStatus": "Sin respuesta",
+        "proximoIntento": "Próximo intento",
+        "error": "No pudimos cargar las entregas",
+        "filtradoPor": "Mostrando solo las entregas de {{nombre}} que ya estaban cargadas.",
+        "quitarFiltro": "Ver todas",
+        "soloEstaPagina": "Se cargaron las {{cargadas}} más recientes, de {{total}} en la organización. No hay forma de traer las anteriores."
+      },
+      "modal": {
+        "tituloAlta": "Nuevo webhook",
+        "tituloEditar": "Editar webhook",
+        "subtitulo": "Orbi va a firmar cada entrega con HMAC hacia la URL que indiques.",
+        "nombre": "Nombre",
+        "url": "URL",
+        "urlAyuda": "Tiene que ser https y apuntar a un servidor público.",
+        "activo": "Webhook activo",
+        "activoAyuda": "Un webhook pausado no recibe entregas, ni siquiera las de prueba.",
+        "guardar": "Guardar webhook"
+      },
+      "eliminar": {
+        "titulo": "Eliminar {{nombre}}",
+        "descripcion": "El endpoint deja de recibir entregas. El historial de lo que ya se envió se conserva.",
+        "confirmar": "Eliminar webhook"
+      },
+      "rotar": {
+        "titulo": "Rotar el secreto de {{nombre}}",
+        "confirmar": "Rotar secreto"
+      },
+      "vacioSinEntregasDelEndpoint": {
+        "titulo": "Ninguna de las entregas cargadas es de {{nombre}}",
+        "verTodas": "Ver todas las entregas"
+      }
+    },
+    "submenu": {
+      "vistas": "Vistas",
+      "configurar": "Configurar",
+      "sala": "Sala de operaciones",
+      "timeline": "Línea de tiempo",
+      "reglas": "Reglas",
+      "integraciones": "Integraciones",
+      "sinPermiso": "Necesitás el permiso {{permiso}} para entrar acá.",
+      "alternar": "Mostrar u ocultar el menú del Centro",
+      "kanban": "Kanban por estado"
+    },
+    "sala": {
+      "cola": {
+        "titulo": "Cola priorizada",
+        "aclaracionOrden": "Ordenada por prioridad, como la resuelve el servidor.",
+        "aclaracionSinFiltros": "Se muestran todos los problemas de la organización, abiertos y cerrados: todavía no se puede filtrar ni ordenar esta bandeja.",
+        "senales_one": "{{count}} señal",
+        "senales_other": "{{count}} señales",
+        "sinPatente": "Sin patente",
+        "sinResponsable": "Sin responsable"
+      },
+      "detalle": {
+        "titulo": "Detalle",
+        "vacio": "Elegí un problema de la cola para ver su detalle.",
+        "quePaso": "Qué pasó",
+        "sinDescripcion": "El problema no trae descripción.",
+        "accionSugerida": "Acción sugerida",
+        "detectado": "Detectado",
+        "vehiculo": "Vehículo",
+        "conductor": "Conductor",
+        "responsable": "Responsable",
+        "senales": "Señales agrupadas",
+        "senalSinDetalle": "Sin detalle",
+        "errorTitulo": "No pudimos cargar el detalle del problema",
+        "abrirTicket": "Abrir ticket completo"
+      },
+      "acciones": {
+        "sinPermiso": "Necesitás el permiso {{permiso}}.",
+        "asignarBloqueado": "Todavía no se puede elegir un responsable: no existe la lista de personas asignables de tu organización."
+      },
+      "sla": {
+        "enPlazo_one": "Vence en {{count}} minuto",
+        "enPlazo_other": "Vence en {{count}} minutos",
+        "vencido_one": "Venció hace {{count}} minuto",
+        "vencido_other": "Venció hace {{count}} minutos",
+        "sinPlazo": "Sin plazo",
+        "sinDato": "Sin dato"
+      },
+      "contexto": {
+        "titulo": "Contexto",
+        "operativo": "Estado en vivo del vehículo",
+        "ignicion": "Ignición",
+        "ignicionSi": "Puesta",
+        "ignicionNo": "Cortada",
+        "velocidad": "Velocidad",
+        "velocidadValor": "{{valor}} km/h",
+        "ultimaSenal": "Última señal",
+        "sinVehiculo": "Este problema no cuelga de un vehículo, así que no tiene estado en vivo.",
+        "otrosDelVehiculo": "Otros problemas de este vehículo",
+        "otrosDelVehiculoAclaracion": "Solo los que están en esta página de la bandeja.",
+        "otrosDelVehiculoVacio": "Ningún otro problema de este vehículo en esta página."
+      }
+    },
+    "timeline": {
+      "titulo": "Línea de tiempo",
+      "ventana": "Del {{desde}} al {{hasta}}",
+      "ventanaAclaracion": "Es el período que cubren los problemas de esta página. Todavía no se puede elegir otro rango.",
+      "ahora": "Ahora",
+      "leyenda": "Severidad",
+      "aclaracionOrigenes": "Un problema con más de un origen aparece en cada carril que le corresponde: es el mismo caso, no varios.",
+      "fueraDeLosCarriles_one": "{{count}} problema de esta página no tiene origen conocido, así que no aparece en ningún carril.",
+      "fueraDeLosCarriles_other": "{{count}} problemas de esta página no tienen origen conocido, así que no aparecen en ningún carril.",
+      "carril": {
+        "eventos_one": "{{count}} problema",
+        "eventos_other": "{{count}} problemas",
+        "criticos_one": "{{count}} crítico",
+        "criticos_other": "{{count}} críticos",
+        "vacio": "Sin problemas de este origen",
+        "geozonaDiferido": "Las zonas todavía no generan problemas."
+      },
+      "evento": {
+        "abrir": "Ver el detalle de {{titulo}}"
+      },
+      "insight": {
+        "ajustarRegla": "Ajustar reglas"
+      }
+    },
+    "silenciar": {
+      "titulo": "Silenciar problema",
+      "descripcion": "Usalo solo cuando exista una justificación operativa.",
+      "motivo": "Motivo",
+      "motivoAyuda": "Queda registrado en el historial del problema.",
+      "ventana": "Ventana",
+      "ventana30": "30 minutos",
+      "ventana120": "2 horas",
+      "ventanaFinDeTurnoPendiente": "Todavía no se puede silenciar “hasta fin de turno”: falta definir la jornada de tu organización.",
+      "notificaciones": "Silenciar notificaciones",
+      "webhooks": "Silenciar envíos a integraciones",
+      "aclaracion": "El silencio empieza ahora. No borra señales, no detiene la detección y no pausa el plazo: el problema puede vencer igual.",
+      "confirmar": "Silenciar",
+      "webhooksAclaracion": "Todavía no sale ningún envío por un problema, así que por ahora esta opción se guarda y no cambia nada."
+    },
+    "resolver": {
+      "titulo": "Resolver problema",
+      "descripcion": "Registrá el cierre antes de cambiar el estado.",
+      "resultado": "Resultado",
+      "resuelto": "Resuelto",
+      "resueltoAyuda": "Se atendió y el caso queda cerrado.",
+      "descartado": "Descartado",
+      "descartadoAyuda": "No requería acción.",
+      "evidencia": "Evidencia",
+      "evidenciaAyuda": "Qué se hizo, o por qué se descarta. Queda en el historial.",
+      "aclaracion": "Es un cierre definitivo: no hay forma de reabrir el problema desde acá.",
+      "aclaracionIntegracion": "El cierre no se envía a tus integraciones: esa conexión todavía no está construida.",
+      "confirmar": "Cerrar problema"
+    },
+    "kanban": {
+      "aclaracionPagina": "El tablero agrupa los problemas de esta página de la bandeja, no todos los de la organización: todavía no se puede filtrar ni ordenar.",
+      "columnaVacia": "Sin problemas en esta columna",
+      "verMas_one": "Ver 1 más de esta página",
+      "verMas_other": "Ver {{count}} más de esta página",
+      "fueraDelTableroSilenciados_one": "1 problema silenciado no entra en ninguna columna. Sigue abierto y su plazo corre.",
+      "fueraDelTableroSilenciados_other": "{{count}} problemas silenciados no entran en ninguna columna. Siguen abiertos y su plazo corre.",
+      "fueraDelTableroCerrados_one": "1 problema ya cerrado queda fuera de “Resuelto hoy”: su última actualización no es de hoy.",
+      "fueraDelTableroCerrados_other": "{{count}} problemas ya cerrados quedan fuera de “Resuelto hoy”: su última actualización no es de hoy.",
+      "columna": {
+        "detectado": "Detectado",
+        "en_analisis": "En análisis",
+        "esperando_externo": "Esperando externo",
+        "resuelto_hoy": "Resuelto hoy"
+      },
+      "columnaAyuda": {
+        "detectado": "Detectados, priorizados y ya asignados a alguien.",
+        "en_analisis": "Alguien los está trabajando.",
+        "esperando_externo": "Todavía no está definido qué problemas van acá, así que la columna queda vacía.",
+        "resuelto_hoy": "Resueltos y descartados cuya última actualización es de hoy, según la fecha de tu equipo."
+      }
+    },
+    "ticket": {
+      "volver": "Volver",
+      "noExiste": "No encontramos este problema",
+      "actualizado": "Última actualización",
+      "sinAcciones": "Este problema está cerrado: no quedan acciones para aplicarle.",
+      "tipoDeProblema": "Tipo: {{tipo}}",
+      "sinSenales": "Este problema no tiene señales asociadas.",
+      "porUsuario": "Por {{nombre}}",
+      "tabs": {
+        "resumen": "Resumen",
+        "timeline": "Línea de tiempo",
+        "regla": "Contexto regla",
+        "integraciones": "Integraciones"
+      },
+      "timelineVacio": {
+        "titulo": "Todavía no hay actividad",
+        "descripcion": "Acá van a quedar registradas las acciones que se apliquen sobre el problema."
+      },
+      "regla": {
+        "titulo": "Contexto de la regla",
+        "descripcion": "Cómo viene comportándose la regla que abrió este problema.",
+        "sinVinculo": "Todavía no se guarda qué regla abrió cada problema, así que no podemos mostrar su comportamiento acá. Podés revisar tus reglas desde su pantalla."
+      },
+      "integraciones": {
+        "titulo": "Envíos a tus sistemas",
+        "sinEntregas": "Este problema todavía no generó ningún envío.",
+        "sinCorrelacion": "Todavía no se guarda qué envío corresponde a cada problema, así que acá no podemos mostrarlos. El historial completo de envíos está en Integraciones.",
+        "configurar": "Ir a Integraciones",
+        "intentos_one": "{{count}} intento",
+        "intentos_other": "{{count}} intentos"
+      }
+    }
+  },
+  "senales": {
+    "badge": {
+      "conConteo_one": "{{severidad}} · {{count}}",
+      "conConteo_other": "{{severidad}} · {{count}}"
+    },
+    "celda": {
+      "sinConectar": "—",
+      "sinSenales": "Sin señales"
+    },
+    "ayuda": {
+      "sinConectar": "Todavía no se detectan señales: la detección no está conectada. Que esta celda esté vacía no significa que el vehículo esté bien.",
+      "sinSenales": "No hay señales abiertas para este vehículo.",
+      "indiceParcial": "Hay más señales de las que se trajeron: este vehículo puede tener alguna que no se ve acá."
+    },
+    "aviso": {
+      "deteccion_sin_conectar": {
+        "titulo": "La detección de señales todavía no está conectada",
+        "descripcion": "Ningún vehículo puede mostrar señales todavía. Que no aparezca ninguna NO significa que la flota esté revisada: significa que nadie está mirando aún."
+      },
+      "indice_parcial": {
+        "titulo": "Se están mostrando solo las señales más recientes",
+        "descripcion": "Hay más señales de las que entran en una página. Un vehículo sin marca acá puede igual tener alguna abierta."
+      },
+      "sin_fuente": {
+        "titulo": "No pudimos leer las señales",
+        "descripcion": "El resto de la información está completa y actualizada. Lo único que falta es la capa de señales, así que ningún vehículo se puede dar por revisado."
+      }
+    },
+    "panel": {
+      "titulo": "Señales",
+      "subtitulo": "Activas y recientes · solo lectura",
+      "sinFecha": "Sin fecha",
+      "sinCorrelacion": "Todavía no se puede saber a qué problema pertenece cada señal, así que el enlace abre el Centro de Problemas sin preseleccionar ninguno.",
+      "irAlCentro": "Ir al Centro de Problemas"
     }
   }
 }

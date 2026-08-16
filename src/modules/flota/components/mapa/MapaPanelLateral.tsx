@@ -2,14 +2,12 @@ import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, MapPinOff, Search, SearchX } from 'lucide-react'
 import { MapaChipVehiculo } from './MapaChipVehiculo'
 import { PistaDeFueraDelMapa } from './PistaDeFueraDelMapa'
-import { AvisoDatosDeConexion } from '../AvisoDatosDeConexion'
 import {
-  coberturaDeConexion,
   VALORES_FILTRO_CONEXION,
   claveDeConexion,
   claveDeVacioPorFiltroDeConexion,
 } from '../../vocabulario-conexion'
-import type { EstadoConexion, MapaItemDto } from '@/services/contracts/flota'
+import type { EstadoConexion, MapaItemDto, SeveridadAlerta } from '@/services/contracts/flota'
 import { Boton } from '@/shared/ui/Boton'
 import { BotonIcono } from '@/shared/ui/BotonIcono'
 import { Icono } from '@/shared/ui/Icono'
@@ -36,6 +34,14 @@ import { Skeleton } from '@/shared/ui/Skeleton'
  * Los conteos por estado de la leyenda del mockup tampoco se dibujan como "tablero": lo unico que se
  * puede afirmar es la cobertura DE LO QUE SE ESTA VIENDO, y de eso ya se encarga
  * `AvisoDatosDeConexion` — que ademas lo dice en su copy.
+ *
+ * ── LO QUE ESTE PANEL YA NO TIENE, Y ES A PROPOSITO (cierre de slice-06) ──────────────────────
+ * `AvisoDatosDeConexion` y `AvisoDeSenales` **se mudaron a la pagina**, sobre el lienzo. Vivian en
+ * la rama expandida de este componente, asi que **colapsar el panel se los llevaba**: quedaba un
+ * mapa de pines de colores sin la unica linea que dice que un pin gris no significa "apagado" y que
+ * un pin sin anillo no significa "sin problemas". Un aviso que explica una lectura de conjunto no
+ * puede vivir adentro de algo plegable. Lo que si queda aca es `AvisoFueraDelMapa`, que habla de la
+ * LISTA de este panel.
  */
 
 export interface MapaPanelLateralProps {
@@ -58,6 +64,8 @@ export interface MapaPanelLateralProps {
   onSeleccionar: (vehiculoFlotaId: string) => void
   onVerVehiculos: () => void
   ahoraMs: number
+  /** Severidad maxima de las señales abiertas del vehiculo; `null` si no tiene (o no se sabe). */
+  severidadDe: (item: MapaItemDto) => SeveridadAlerta | null
 }
 
 export function MapaPanelLateral(props: MapaPanelLateralProps) {
@@ -142,10 +150,6 @@ export function MapaPanelLateral(props: MapaPanelLateralProps) {
         </p>
       ) : null}
 
-      <AvisoDatosDeConexion
-        cobertura={coberturaDeConexion(props.visibles.map((item) => item.estado))}
-      />
-
       <AvisoFueraDelMapa
         fueraDelMapa={props.fueraDelMapa}
         totalDeLaFlota={props.totalDeLaFlota}
@@ -204,6 +208,14 @@ function ListaDeChips(props: MapaPanelLateralProps) {
           seleccionado={item.vehiculoFlotaId === props.seleccionadoId}
           onSeleccionar={props.onSeleccionar}
           ahoraMs={props.ahoraMs}
+          /*
+            La lectura NO-cromatica de la severidad. En el mapa la severidad es un anillo de color, y
+            el color ya esta ocupado por el estado de conexion: el chip es el unico lugar de esta
+            pantalla donde la severidad se lee como TEXTO. Es ademas el camino accesible que la
+            pantalla ya declaraba para todo lo demas (un mapa de tiles no puede ser la superficie
+            primaria de un lector de pantalla).
+          */
+          severidad={props.severidadDe(item)}
         />
       ))}
     </>

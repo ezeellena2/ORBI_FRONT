@@ -6,12 +6,15 @@ import { TablaVehiculos } from '../components/vehiculos/TablaVehiculos'
 import { VehiculoFiltros } from '../components/vehiculos/VehiculoFiltros'
 import { AvisoDatosDeConexion } from '../components/AvisoDatosDeConexion'
 import { AvisoOperacion } from '../components/AvisoOperacion'
+import { AvisoDeSenales } from '../components/senales/AvisoDeSenales'
 import { useEliminarVehiculo } from '../hooks/useEliminarVehiculo'
+import { useSenales } from '../hooks/useSenales'
 import { useVehiculos } from '../hooks/useVehiculos'
 import {
   claveDeVacioPorFiltroDeConexion,
   coberturaDeConexion,
 } from '../vocabulario-conexion'
+import { QUERY_DE_SENALES, avisoDeSenales, indiceDeSenales } from '../vocabulario-senales'
 import type { VehiculoListItemDto } from '@/services/contracts/flota'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
 import { Boton } from '@/shared/ui/Boton'
@@ -36,6 +39,10 @@ import { useSessionStore } from '@/stores/session-store'
  * los filtros `estado` (conexion) y `situacion` que este slice destrabo, `soloActivos`, orden,
  * paginacion, menu de fila con "Ver detalle" y "Eliminar" (baja logica) y los 5 estados —
  * incluido **partial-data**, que es el que define este slice.
+ *
+ * `f-12` (slice-06) agrego la columna **Señales** + su aviso de pantalla. Los dos van juntos y no se
+ * separan: la columna esta vacia en el 100 % de las filas (GATE 2 / **B-38**, no hay escritor de
+ * alertas) y sin el aviso esa tabla afirma "todos tus vehiculos estan bien". Ver `AvisoDeSenales`.
  *
  * ── LO QUE NO ENTRA, Y NO ES UN OLVIDO ────────────────────────────────────────────────────────
  *  - **Contadores del header** (total, con GPS, sin GPS, sin conductor): **B-35**. No hay endpoint
@@ -106,6 +113,19 @@ export default function VehiculosListPage() {
   const filtros = { patente, estado, situacion, soloActivos, page, pageSize, sortBy, sortDirection }
   const consulta = useVehiculos(aQueryVehiculos(filtros))
   const eliminar = useEliminarVehiculo()
+
+  /*
+    ── SEÑALES EMBEBIDAS (`f-12`) — UNA request por pagina, jamas una por fila ────────────────────
+    `GET /alertas` no acepta `?vehiculoId=` (es `PageQuery` pelado, B-17), asi que la unica forma de
+    alimentar N filas es traer una pagina e indexar en cliente. `QUERY_DE_SENALES` es una CONSTANTE
+    de modulo: la misma referencia en cada render, para que la query key no cambie de identidad.
+
+    ⚠️ Un fallo de este request **no rompe el listado** (`f-12` paso 8: partial-data). Lo que si hace
+    es cambiar el aviso: sin fuente, la columna vacia no puede leerse como "todo bien".
+  */
+  const senales = useSenales(QUERY_DE_SENALES)
+  const indice = indiceDeSenales(senales.data)
+  const avisoSenales = avisoDeSenales(indice, senales.isError)
 
   // La pagina quedo fuera de rango: pasa al borrar la ultima fila de la ultima pagina. El backend
   // devuelve items vacio con totalItems > 0, y sin esto la pantalla decia "Aun no cargaste
@@ -309,6 +329,13 @@ export default function VehiculosListPage() {
       */}
       <AvisoDatosDeConexion cobertura={cobertura} />
 
+      {/*
+        La columna "Señales" va a estar vacia en TODAS las filas mientras GATE 2 siga abierto. Sin
+        esta linea, una tabla de 20 filas sin badge se lee como "20 vehiculos sin problemas" — que es
+        lo que la pantalla no puede afirmar, porque la deteccion no corre. Ver `AvisoDeSenales`.
+      */}
+      <AvisoDeSenales cual={avisoSenales} />
+
       <TablaVehiculos
         vehiculos={vehiculos}
         cargando={consulta.isPending}
@@ -317,6 +344,7 @@ export default function VehiculosListPage() {
         vacio={vacio}
         error={error}
         puedeEliminar={puedeEliminar}
+        indiceDeSenales={indice}
         onVerDetalle={(vehiculo) => navigate(`/app/flota/vehiculos/${vehiculo.id}`)}
         onEliminar={setAEliminar}
       />

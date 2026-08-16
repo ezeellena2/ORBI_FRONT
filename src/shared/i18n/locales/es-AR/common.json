@@ -681,6 +681,18 @@
         "no_existe": "El documento no existe o ya fue eliminado.",
         "tipo_invalido": "El tipo de documento {{tipo}} no está disponible en tu organización.",
         "url_no_permitida": "Ese enlace no se puede usar. Tiene que ser una URL https accesible desde internet."
+      },
+      "problema": {
+        "no_existe": "El problema no existe o no pertenece a tu organización.",
+        "transicion_invalida": "No se puede pasar el problema de {{estadoActual}} a {{estadoDestino}}."
+      },
+      "regla": {
+        "no_existe": "La regla no existe o no pertenece a tu organización.",
+        "condicion_invalida": "La condición de la regla no es válida."
+      },
+      "webhook": {
+        "no_existe": "El webhook no existe o no pertenece a tu organización.",
+        "url_no_permitida": "La URL {{url}} no está permitida: tiene que ser https y apuntar a un servidor público."
       }
     },
     "auth": {
@@ -780,7 +792,8 @@
       "confSeguridad": "Seguridad",
       "confApariencia": "Apariencia",
       "confRoles": "Roles y permisos",
-      "usuarios": "Usuarios"
+      "usuarios": "Usuarios",
+      "flotaProblemas": "Problemas"
     },
     "sidebar": {
       "collapse": "Colapsar menú",

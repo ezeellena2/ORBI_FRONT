@@ -1,9 +1,13 @@
 import type {
+  AlertasPageQuery,
   ConductoresPageQuery,
   DispositivosPageQuery,
   HistorialConductorQuery,
   HistorialStockQuery,
+  ProblemasPageQuery,
+  ReglasPageQuery,
   VehiculosPageQuery,
+  WebhooksPageQuery,
 } from '@/services/contracts/flota'
 
 /**
@@ -141,6 +145,58 @@ export const flotaKeys = {
   catalogoMarcas: (q: string | undefined) => ['flota', 'catalogo', 'marcas', q ?? ''] as const,
 
   catalogoTipos: () => ['flota', 'catalogo', 'tipos-vehiculo'] as const,
+
+  /**
+   * Prefijo del CENTRO DE PROBLEMAS (slice-06). Cubre la bandeja, el timeline, el kanban y el
+   * ticket: las **4 vistas leen del mismo par de endpoints** (`GET /problemas` y
+   * `GET /problemas/{id}`), asi que invalidar este prefijo las mueve a las 4 de una vez. Es
+   * exactamente lo que hace falta despues de asignar, silenciar o resolver.
+   */
+  problemas: () => ['flota', 'problemas'] as const,
+
+  problemasListado: (query: ProblemasPageQuery) => ['flota', 'problemas', query] as const,
+
+  problemaDetalle: (problemaId: string) => ['flota', 'problemas', problemaId] as const,
+
+  /**
+   * REGLAS del motor — prefijo PROPIO, no cuelga de `problemas()`, aunque la ruta HTTP si cuelgue
+   * (`/api/flota/problemas/reglas`). La cache modela lo que se invalida junto, no la URL:
+   *  - resolver un problema **no cambia** ninguna regla;
+   *  - pausar una regla **no cambia** los problemas ya abiertos (el vinculo problema -> regla que lo
+   *    disparo ni siquiera existe como columna, PENDIENTE #8).
+   * Colgarlas del prefijo de problemas tiraria la tabla de reglas en cada accion de la bandeja.
+   */
+  reglasProblemas: () => ['flota', 'reglas'] as const,
+
+  reglasProblemasListado: (query: ReglasPageQuery) => ['flota', 'reglas', query] as const,
+
+  /**
+   * INTEGRACIONES (webhooks salientes) — prefijo propio por el mismo criterio, y con una razon extra
+   * medida: **ninguna columna ata una entrega de webhook a un problema**, asi que resolver un
+   * problema no puede cambiar el log de entregas ni al reves (`integracion` y `webhooks[]` del
+   * detalle viajan neutros SIEMPRE).
+   */
+  integraciones: () => ['flota', 'integraciones'] as const,
+
+  webhooksListado: (query: WebhooksPageQuery) =>
+    ['flota', 'integraciones', 'webhooks', query] as const,
+
+  /**
+   * Log de entregas. Cuelga del prefijo de integraciones —una prueba (`/probar`) agrega una fila y
+   * tiene que verse— pero es una key **hermana** del listado de endpoints, no hija: el endpoint no
+   * es un segmento porque `GET /webhooks/entregas` es de **toda la organizacion** y no acepta filtro
+   * por endpoint (ver `integraciones-service`).
+   */
+  webhookEntregas: (query: WebhooksPageQuery) =>
+    ['flota', 'integraciones', 'entregas', query] as const,
+
+  /**
+   * SENALES (alertas). Prefijo propio: es otro controller y otro permiso
+   * (`flota.vehiculos.leer`), y hoy **no tiene ningun escritor** — nada la invalida.
+   */
+  alertas: () => ['flota', 'alertas'] as const,
+
+  alertasListado: (query: AlertasPageQuery) => ['flota', 'alertas', query] as const,
 }
 
 /**
@@ -196,3 +252,48 @@ export const flotaKeysAfectadasPorAsignacionConductor = () =>
  */
 export const flotaKeysAfectadasPorVinculoConductorDispositivo = () =>
   [flotaKeys.conductores(), flotaKeys.dispositivos()] as const
+
+/**
+ * Las keys que hay que invalidar despues de ASIGNAR, SILENCIAR o RESOLVER un problema.
+ *
+ * Es **un solo prefijo a proposito**, y conviene entender por que alcanza y por que no hay que
+ * agregarle nada:
+ *
+ * ✅ **Lo que SI se mueve, y todo cae bajo `['flota','problemas']`**: la bandeja de la Sala, la vista
+ *    timeline y el kanban (las 3 leen `GET /problemas`, no hay endpoint propio de ninguna) y el
+ *    ticket abierto (`GET /problemas/{id}`). Las 3 mutaciones devuelven **204 sin cuerpo**, asi que
+ *    no hay DTO con el que sembrar el detalle: se invalida y se refetchea.
+ *
+ * ❌ **Lo que NO se mueve, aunque parezca**:
+ *  - las **reglas** — no existe el vinculo problema -> regla que lo disparo (PENDIENTE #8), y
+ *    `ultimasActivacionesCount` viaja en 0 SIEMPRE. Invalidarlas seria tirar una tabla que no
+ *    cambio;
+ *  - las **entregas de webhook** — ninguna columna ata una entrega a un problema, asi que resolver
+ *    no puede producir ni cambiar una fila del log;
+ *  - las **alertas** — no tienen escritor (GATE 2);
+ *  - **vehiculos** y **conductores** — el problema los referencia, no los modifica.
+ *
+ * Invalidar de mas cuesta un refetch; invalidar de menos deja la pantalla mintiendo hasta un F5. Acá
+ * el limite esta medido contra el esquema, no supuesto.
+ */
+export const flotaKeysAfectadasPorCambioDeProblema = () => [flotaKeys.problemas()] as const
+
+/**
+ * Las keys que hay que invalidar despues de tocar un WEBHOOK (alta, edicion, baja, prueba, rotacion
+ * o reencolado).
+ *
+ * ⚠️ **Es el prefijo ENTERO de integraciones y no la key del listado**, porque casi toda mutacion
+ * mueve **dos** superficies que viven en ramas distintas:
+ *  1. la lista de endpoints — `activo`, `url`, `nombre`, `secretoHuella`, `ultimoEstado` y
+ *     `ultimoEnvioUtc`;
+ *  2. la tabla de entregas — `POST .../probar` agrega **una fila nueva**, y `/reintentar` cambia el
+ *     `estado` y el `proximoIntentoUtc` de varias.
+ *
+ * `POST .../probar` es el caso que lo hace obligatorio: el badge del endpoint se **deriva** de
+ * `activo` + `ultimoEstado`, asi que una prueba cambia las 2 cosas a la vez.
+ *
+ * ⚠️ **No incluye `problemas()`**: `integracion.{enviado,ultimoEstado}` y `webhooks[]` del problema
+ * viajan neutros SIEMPRE (no hay columna que ate una entrega a un problema), asi que ninguna
+ * operacion de webhook puede cambiar lo que muestra el ticket.
+ */
+export const flotaKeysAfectadasPorWebhook = () => [flotaKeys.integraciones()] as const

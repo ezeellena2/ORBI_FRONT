@@ -53,6 +53,13 @@ export const NAV_CONFIG: NavItem[] = [
       { key: 'flota.vehiculos', labelKey: 'shell.nav.flotaVehiculos', path: '/app/flota/vehiculos', permiso: 'flota.vehiculos.leer' },
       { key: 'flota.dispositivos', labelKey: 'shell.nav.flotaDispositivos', path: '/app/flota/dispositivos', permiso: 'flota.dispositivos.leer' },
       { key: 'flota.conductores', labelKey: 'shell.nav.flotaConductores', path: '/app/flota/conductores', permiso: 'flota.conductores.leer' },
+      // Centro de Problemas. Entra al menú con la pantalla construida: antes la ruta servía un
+      // andamio, y un link a un andamio es peor que ninguno.
+      // `Reglas` e `Integraciones` **están construidas** (f-10 / f-11) y aun así NO entran acá, por
+      // otro motivo: son configuración del Centro, se llega por su submenú, y sus permisos son de
+      // otros grupos (`flota.reglas.*` / `flota.integraciones.*`) que supervisor no tiene — el menú
+      // lateral mostraría 2 entradas grises a la mitad de los roles-plantilla.
+      { key: 'flota.problemas', labelKey: 'shell.nav.flotaProblemas', path: '/app/flota/problemas', permiso: 'flota.problemas.leer' },
       { key: 'flota.geozonas', labelKey: 'shell.nav.flotaGeozonas', path: '/app/flota/geozonas', permiso: 'flota.geozonas.leer' },
     ],
   },
