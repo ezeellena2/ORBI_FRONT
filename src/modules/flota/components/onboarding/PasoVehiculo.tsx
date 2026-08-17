@@ -12,8 +12,8 @@ import {
 } from '@/shared/errors/parse-api-error'
 import type { VehiculoDetalleDto } from '@/services/contracts/flota'
 import { AvisoOperacion } from '../AvisoOperacion'
+import { CampoMarcaYModelo } from './CampoMarcaYModelo'
 import { CampoSelectCatalogo } from './CampoSelectCatalogo'
-import { useCatalogoMarcas } from '../../hooks/useCatalogoMarcas'
 import { useCatalogoTipos } from '../../hooks/useCatalogoTipos'
 import { useCrearVehiculo } from '../../hooks/useCrearVehiculo'
 import {
@@ -52,7 +52,6 @@ const TIPO_ERROR_SERVIDOR = 'servidor'
  */
 export function PasoVehiculo({ onCreado }: { onCreado: (vehiculo: VehiculoDetalleDto) => void }) {
   const { t } = useTranslation(['flota', 'common'])
-  const marcas = useCatalogoMarcas()
   const tipos = useCatalogoTipos()
   const mutacion = useCrearVehiculo()
 
@@ -136,48 +135,11 @@ export function PasoVehiculo({ onCreado }: { onCreado: (vehiculo: VehiculoDetall
         )}
       </Campo>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {/*
-          Los dos selects van por `Controller` y no por `register` + `watch`: son controles
-          controlados (no un `<select>` nativo), y `watch()` devuelve una función que el compilador de
-          React no puede memorizar sin arriesgar UI vieja.
-        */}
-        <Controller
-          control={form.control}
-          name="marca"
-          render={({ field, fieldState }) => (
-            <CampoSelectCatalogo
-              etiqueta={t('flota:onboarding.campos.marca')}
-              opciones={(marcas.data?.items ?? []).map((marca) => ({
-                valor: marca.nombre,
-                etiqueta: marca.nombre,
-              }))}
-              valor={field.value}
-              onCambio={field.onChange}
-              cargando={marcas.isPending}
-              fallo={marcas.isError}
-              error={mensajeDe(fieldState.error)}
-              placeholder={t('flota:onboarding.campos.marcaPlaceholder')}
-              avisoVacio={t('flota:onboarding.catalogo.marcasVacias')}
-            />
-          )}
-        />
-
-        <Campo
-          etiqueta={t('flota:onboarding.campos.modelo')}
-          requerido
-          error={mensajeDe(form.formState.errors.modelo)}
-        >
-          {(control) => (
-            <Input
-              {...control}
-              {...form.register('modelo')}
-              maxLength={50}
-              invalido={form.formState.errors.modelo !== undefined}
-            />
-          )}
-        </Campo>
-      </div>
+      {/*
+        Marca + Modelo salen juntos del catálogo canónico (la cascada). Están acoplados —cambiar la
+        marca invalida el modelo— así que viven en un componente propio.
+      */}
+      <CampoMarcaYModelo form={form} mensajeDe={mensajeDe} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Campo

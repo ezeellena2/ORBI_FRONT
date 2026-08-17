@@ -329,6 +329,7 @@
       "marca": "Make",
       "marcaPlaceholder": "Pick a make",
       "modelo": "Model",
+      "modeloPlaceholder": "Pick a model",
       "anio": "Year",
       "anioAyuda": "Between {{min}} and {{max}}.",
       "tipo": "Type",
@@ -346,7 +347,10 @@
       "vacio": "Catalog has no options",
       "fallo": "The catalog could not be loaded. Try again in a few seconds.",
       "marcasVacias": "The make catalog is still empty: no makes have been loaded into the platform.",
-      "tiposVacios": "The vehicle type catalog is still empty."
+      "tiposVacios": "The vehicle type catalog is still empty.",
+      "modelosVacios": "This make has no models loaded in the catalog yet.",
+      "modeloTextoLibre": "The catalog has no models for this make yet: type it as it appears on the registration.",
+      "modeloSinMarca": "Pick a make first to see its models, or type it manually."
     },
     "errores": {
       "sinFilaFantasma": "No vehicle was created: you can retry without risk of duplicating it."

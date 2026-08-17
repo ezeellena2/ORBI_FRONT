@@ -144,6 +144,13 @@ export const flotaKeys = {
    */
   catalogoMarcas: (q: string | undefined) => ['flota', 'catalogo', 'marcas', q ?? ''] as const,
 
+  /**
+   * Paso 2 de la cascada. Lleva `marcaId` en la clave porque los modelos SON de esa marca: sin él,
+   * elegir otra marca serviría los modelos cacheados de la anterior.
+   */
+  catalogoModelos: (marcaId: string | undefined, q: string | undefined) =>
+    ['flota', 'catalogo', 'modelos', marcaId ?? '', q ?? ''] as const,
+
   catalogoTipos: () => ['flota', 'catalogo', 'tipos-vehiculo'] as const,
 
   /**

@@ -52,6 +52,17 @@ export const crearVehiculoSchema = z.object({
     .min(1, 'validation.modelo.required')
     .max(50, 'validation.modelo.max_length'),
 
+  /**
+   * Ids del catálogo canónico. NO se validan ni son requeridos: son el ANCLA INTERMEDIA, y su
+   * ausencia es un estado válido (identidad por texto libre) mientras el catálogo no cubra ese
+   * vehículo. Exigirlos trabaría el alta de un auto real que el catálogo todavía no tiene.
+   *
+   * `marcaId` no viaja al backend: sirve solo para filtrar los modelos de esa marca. El que viaja
+   * es `modeloId`, que ya implica la marca por la cascada.
+   */
+  marcaId: z.string(),
+  modeloId: z.string(),
+
   anio: z
     .string()
     .trim()
@@ -88,6 +99,8 @@ export const valoresInicialesCrearVehiculo: CrearVehiculoFormulario = {
   patente: '',
   marca: '',
   modelo: '',
+  marcaId: '',
+  modeloId: '',
   anio: '',
   tipo: '',
   vin: '',
@@ -109,8 +122,13 @@ export function aCrearVehiculoRequest(valores: CrearVehiculoFormulario): CrearVe
     // El uppercase también se aplica mientras se tipea; acá se repite porque el request se arma
     // desde los valores del form y no desde lo que se ve en pantalla.
     patente: valores.patente.trim().toUpperCase(),
+    // El TEXTO viaja siempre, haya o no id: el Canónico guarda las dos cosas —el id para decidir,
+    // el texto para mostrar— y esa convivencia es deliberada, no redundancia.
     marca: valores.marca.trim(),
     modelo: valores.modelo.trim(),
+    // El ancla intermedia, solo si el usuario ELIGIÓ del catálogo. `marcaId` NO viaja: ya está
+    // implicada por la cascada (modelo → marca), y mandarla sería una segunda verdad del mismo dato.
+    modeloId: textoOpcional(valores.modeloId),
     anio: Number(valores.anio),
     // Código snake_case del catálogo canónico. Lo que se muestra es la etiqueta traducida; lo que
     // viaja es este mismo string.

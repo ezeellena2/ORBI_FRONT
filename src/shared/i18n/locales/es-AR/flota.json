@@ -329,6 +329,7 @@
       "marca": "Marca",
       "marcaPlaceholder": "Elegí una marca",
       "modelo": "Modelo",
+      "modeloPlaceholder": "Elegí un modelo",
       "anio": "Año",
       "anioAyuda": "Entre {{min}} y {{max}}.",
       "tipo": "Tipo",
@@ -346,7 +347,10 @@
       "vacio": "Catálogo sin opciones",
       "fallo": "No se pudo cargar el catálogo. Volvé a intentarlo en unos segundos.",
       "marcasVacias": "El catálogo de marcas todavía está vacío: no se cargaron las marcas en la plataforma.",
-      "tiposVacios": "El catálogo de tipos de vehículo todavía está vacío."
+      "tiposVacios": "El catálogo de tipos de vehículo todavía está vacío.",
+      "modelosVacios": "Esta marca todavía no tiene modelos cargados en el catálogo.",
+      "modeloTextoLibre": "El catálogo todavía no tiene modelos de esta marca: escribilo como figura en la cédula.",
+      "modeloSinMarca": "Elegí primero una marca para ver sus modelos, o escribilo a mano."
     },
     "errores": {
       "sinFilaFantasma": "No se creó ningún vehículo: podés reintentar sin miedo a duplicarlo."

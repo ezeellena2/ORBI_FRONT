@@ -4,6 +4,7 @@ import type {
   CatalogoCanonicoItemDto,
   CatalogoPageQuery,
   MarcaCatalogoDto,
+  ModeloCatalogoDto,
   PagedResult,
   VersionCaminoCompletoDto,
 } from '@/services/contracts/flota'
@@ -29,6 +30,19 @@ export const catalogoService = {
   /** GET /catalogo/marcas?q=&page=&pageSize= -> 200 PagedResult<MarcaCatalogoDto> */
   listarMarcas: (query: CatalogoPageQuery = {}) =>
     httpClient.get<PagedResult<MarcaCatalogoDto>>(`${BASE}/marcas`, {
+      ...configCanonica,
+      params: query,
+    }),
+
+  /**
+   * GET /catalogo/marcas/{marcaId}/modelos?q= -> 200 PagedResult<ModeloCatalogoDto>.
+   *
+   * Paso 2 de la cascada, y el ultimo que Flota consume: el `modeloId` que devuelve es el ANCLA
+   * INTERMEDIA que viaja en el alta. Los pasos 3 (anios) y 4 (versiones) NO se usan acá — una flota
+   * no conoce el trim de sus unidades, y exigirlo trabaria el alta.
+   */
+  listarModelos: (marcaId: string, query: CatalogoPageQuery = {}) =>
+    httpClient.get<PagedResult<ModeloCatalogoDto>>(`${BASE}/marcas/${marcaId}/modelos`, {
       ...configCanonica,
       params: query,
     }),

@@ -289,6 +289,17 @@ export interface CrearVehiculoRequest {
   modelo: string
   anio: number
   tipo: string // codigo de catalogo (snake_case)
+
+  /**
+   * Modelo del catalogo canonico — el ANCLA INTERMEDIA (2026-08-16). Viaja solo si el usuario lo
+   * ELIGIO del catalogo; si lo tipeo a mano va `undefined` y la identidad queda por texto libre,
+   * que es un estado valido mientras el catalogo no cubra ese modelo.
+   *
+   * `marca`/`modelo` viajan IGUAL cuando este presente: el Canonico guarda el id para decidir y el
+   * texto para mostrar. Flota NO manda `versionId` (el trim): nadie en una flota lo conoce.
+   */
+  modeloId?: string // uuid
+
   vin?: string
   color?: string
   combustible?: string // PENDIENTE (DA-nueva, C-6) — se acepta y hoy no se persiste
@@ -404,6 +415,17 @@ export interface CatalogoCanonicoItemDto {
 
 /** Paso 1 de la cascada: `GET /catalogo/marcas?q=` -> `PagedResult<MarcaCatalogoDto>`. */
 export interface MarcaCatalogoDto {
+  id: string
+  nombre: string
+}
+
+/**
+ * Paso 2 de la cascada: `GET /catalogo/marcas/{marcaId}/modelos?q=` -> `PagedResult<ModeloCatalogoDto>`.
+ *
+ * Es el nivel que FLOTA consume: identifica marca + modelo sin exigir el trim (la version), que una
+ * flota no conoce. Su `id` es el que viaja en `CrearVehiculoRequest.modeloId`.
+ */
+export interface ModeloCatalogoDto {
   id: string
   nombre: string
 }
