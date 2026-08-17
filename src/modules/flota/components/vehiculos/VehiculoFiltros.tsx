@@ -1,11 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { Search } from 'lucide-react'
 import { claveDeConexion, VALORES_FILTRO_CONEXION } from '../../vocabulario-conexion'
 import { claveDeSituacion, VALORES_SITUACION_VEHICULO } from '../../vocabulario-situacion'
-import { Boton } from '@/shared/ui/Boton'
-import { Input } from '@/shared/ui/Input'
-import { Select } from '@/shared/ui/Select'
-import { Toggle } from '@/shared/ui/Toggle'
+import { BarraDeFiltros, FiltroSelect } from '@/shared/ui/BarraDeFiltros'
 import type { FiltroConexion, FiltroSituacion } from '@/stores/flota-filters-store'
 
 /**
@@ -82,68 +78,34 @@ export function VehiculoFiltros({
   ]
 
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-lg border border-borde bg-superficie-1 p-3">
-      <label className="flex min-w-56 flex-1 flex-col gap-1 text-xs text-fg-secundario">
-        {t('vehiculosListado.buscar.etiqueta')}
-        <Input
-          type="search"
-          mono
-          iconoIzq={Search}
-          autoComplete="off"
-          placeholder={t('vehiculosListado.buscar.placeholder')}
-          value={busqueda}
-          onChange={(evento) => onBusqueda(evento.target.value)}
-        />
-      </label>
-
+    <BarraDeFiltros
+      busqueda={{
+        valor: busqueda,
+        onCambio: onBusqueda,
+        placeholder: t('vehiculosListado.buscar.placeholder'),
+        etiqueta: t('vehiculosListado.buscar.etiqueta'),
+      }}
+      soloActivos={{
+        valor: soloActivos,
+        onCambio: onSoloActivos,
+        etiqueta: t('vehiculosListado.soloActivos'),
+      }}
+      hayFiltros={hayFiltros}
+      onLimpiar={onLimpiar}
+      etiquetaLimpiar={t('vehiculosListado.limpiar')}
+    >
       <FiltroSelect
         etiqueta={t('conexion.filtro.etiqueta')}
         opciones={opcionesEstado}
         valor={estado}
         onCambio={(valor) => onEstado(valor as FiltroConexion)}
       />
-
       <FiltroSelect
         etiqueta={t('vehiculosListado.filtros.situacion')}
-        // El titulo explica por que este filtro sigue sirviendo cuando la conexion no tiene datos:
-        // sale de las asignaciones de Flota, no de la senal del GPS.
-        ayuda={t('vehiculosListado.filtros.situacionAyuda')}
         opciones={opcionesSituacion}
         valor={situacion}
         onCambio={(valor) => onSituacion(valor as FiltroSituacion)}
       />
-
-      <Toggle
-        etiqueta={t('vehiculosListado.soloActivos')}
-        activo={soloActivos}
-        onCambio={onSoloActivos}
-      />
-
-      <Boton variante="fantasma" tamano="sm" deshabilitado={!hayFiltros} onClick={onLimpiar}>
-        {t('vehiculosListado.limpiar')}
-      </Boton>
-    </div>
-  )
-}
-
-function FiltroSelect({
-  etiqueta,
-  ayuda,
-  opciones,
-  valor,
-  onCambio,
-}: {
-  /** Ya resuelto por i18n. */
-  etiqueta: string
-  ayuda?: string
-  opciones: Array<{ valor: string; etiqueta: string }>
-  valor: string
-  onCambio: (valor: string) => void
-}) {
-  return (
-    <label className="flex min-w-52 flex-col gap-1 text-xs text-fg-secundario" title={ayuda}>
-      {etiqueta}
-      <Select opciones={opciones} valor={valor} onCambio={onCambio} />
-    </label>
+    </BarraDeFiltros>
   )
 }

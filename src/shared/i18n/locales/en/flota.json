@@ -72,7 +72,7 @@
       "placeholder": "Search by plate"
     },
     "soloActivos": "Active only",
-    "limpiar": "Clear filters",
+    "limpiar": "Clear",
     "filtros": {
       "situacion": "Situation",
       "situacionTodos": "Whole fleet",
@@ -544,7 +544,7 @@
       "stock": "Stock status",
       "stockTodos": "All",
       "soloActivos": "Active only",
-      "limpiar": "Clear filters",
+      "limpiar": "Clear",
       "modelo": "Model",
       "modeloTodos": "All models",
       "asignacion": "Assignment",
@@ -884,7 +884,7 @@
       "asignacion": "Assignment",
       "asignacionTodos": "All",
       "soloActivos": "Active only",
-      "limpiar": "Clear filters"
+      "limpiar": "Clear"
     },
     "columnas": {
       "conductor": "Driver",

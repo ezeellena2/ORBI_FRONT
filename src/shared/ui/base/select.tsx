@@ -59,9 +59,13 @@ function SelectContent({
   children,
   side = "bottom",
   sideOffset = 4,
-  align = "center",
+  align = "start",
   alignOffset = 0,
-  alignItemWithTrigger = true,
+  // Base UI trae `true`, que posiciona el popup con el item seleccionado ENCIMA del trigger
+  // (estilo select nativo de macOS). En web se lee como un panel flotando mal puesto: el input
+  // asoma por debajo y parece pegoteado. Con `false` cae debajo del trigger, que es lo que
+  // espera cualquiera. Reportado por el PO mirando los filtros de Flota.
+  alignItemWithTrigger = false,
   ...props
 }: SelectPrimitive.Popup.Props &
   Pick<

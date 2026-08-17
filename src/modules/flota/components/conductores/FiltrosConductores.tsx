@@ -1,7 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Boton } from '@/shared/ui/Boton'
-import { Select } from '@/shared/ui/Select'
-import { Toggle } from '@/shared/ui/Toggle'
+import { BarraDeFiltros, FiltroSelect } from '@/shared/ui/BarraDeFiltros'
 import type {
   FiltroAsignacionConductor,
   FiltroEstadoConductor,
@@ -86,50 +84,28 @@ export function FiltrosConductores({
   ]
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-borde bg-superficie-1 p-3">
+    <BarraDeFiltros
+      soloActivos={{
+        valor: soloActivos,
+        onCambio: onSoloActivos,
+        etiqueta: t('conductoresListado.filtros.soloActivos'),
+      }}
+      hayFiltros={hayFiltros}
+      onLimpiar={onLimpiar}
+      etiquetaLimpiar={t('conductoresListado.filtros.limpiar')}
+    >
       <FiltroSelect
         etiqueta={t('conductoresListado.filtros.estado')}
         opciones={opcionesEstado}
         valor={estado}
         onCambio={(valor) => onEstado(valor as FiltroEstado)}
       />
-
       <FiltroSelect
         etiqueta={t('conductoresListado.filtros.asignacion')}
         opciones={opcionesAsignacion}
         valor={asignacion}
         onCambio={(valor) => onAsignacion(valor as FiltroAsignacion)}
       />
-
-      <Toggle
-        etiqueta={t('conductoresListado.filtros.soloActivos')}
-        activo={soloActivos}
-        onCambio={onSoloActivos}
-      />
-
-      <Boton variante="fantasma" tamano="sm" deshabilitado={!hayFiltros} onClick={onLimpiar}>
-        {t('conductoresListado.filtros.limpiar')}
-      </Boton>
-    </div>
-  )
-}
-
-function FiltroSelect({
-  etiqueta,
-  opciones,
-  valor,
-  onCambio,
-}: {
-  /** Ya resuelto por i18n. */
-  etiqueta: string
-  opciones: Array<{ valor: string; etiqueta: string }>
-  valor: string
-  onCambio: (valor: string) => void
-}) {
-  return (
-    <label className="flex min-w-52 flex-col gap-1 text-xs text-fg-secundario">
-      {etiqueta}
-      <Select opciones={opciones} valor={valor} onCambio={onCambio} />
-    </label>
+    </BarraDeFiltros>
   )
 }
