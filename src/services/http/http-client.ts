@@ -67,7 +67,7 @@ function attachHeaders(
 }
 
 export const httpClient = axios.create({
-  baseURL: appConfig.accessApiBaseUrl,
+  baseURL: appConfig.apiBaseUrl,
   timeout: 15_000,
   withCredentials: true,
 })

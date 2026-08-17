@@ -101,7 +101,7 @@ export function AppBootstrap() {
                     {t('bootstrap.sidebar.baseUrl.label')}
                   </dt>
                   <dd className="font-mono text-sm text-text-primary">
-                    {appConfig.accessApiBaseUrl}
+                    {appConfig.apiBaseUrl || window.location.origin}
                   </dd>
                 </div>
 

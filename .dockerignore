@@ -1,0 +1,11 @@
+# Lo que NO se envia al construir la imagen del front.
+# node_modules y dist se generan DENTRO de la imagen (npm ci + vite build).
+node_modules/
+dist/
+.git/
+.gitignore
+*.log
+.vscode/
+.vs/
+Dockerfile
+.dockerignore

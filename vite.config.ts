@@ -13,7 +13,17 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5175,
-    strictPort: true
+    strictPort: true,
+    proxy: {
+      // Single-origin en dev: el browser habla SOLO con Vite (5175); Vite reenvia /api al
+      // API Gateway YARP (https://localhost:7101). Sin CORS ni cookies cross-site.
+      // secure:false acepta el dev-cert self-signed del gateway. Ver ADR-0081.
+      '/api': {
+        target: 'https://localhost:7101',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   resolve: {
     alias: {

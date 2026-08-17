@@ -105,9 +105,12 @@ Si una tarea toca `Google Sign-In`, no asumir endpoints ni contratos por fuera d
 
 - `C:\Users\ezequ\source\repos\TracAutoV2\docs\planes\arquitectura-v3\14-cuentas-federadas-y-google-sign-in.md`
 
-Backend base URL por defecto en desarrollo:
+Backend base URL en desarrollo — **single-origin** (ADR-0081):
 
-- `https://localhost:7201`
+- El front pega a `/api/*` **relativo** (mismo origen), NO a una URL absoluta. `VITE_API_BASE_URL` vacío por defecto.
+- En dev, el proxy de Vite (`server.proxy['/api']`) reenvía `/api` al **API Gateway** (`https://localhost:7101`), que
+  rutea a cada microservicio (Access `7201`, PlataformaCanonica `7203`, ...). El header de cliente es `X-orbi-Client`.
+- Detalle y topología de contenedores: `TracAutoV2/docsv2/adr/0081-api-gateway-yarp-single-origin.md`.
 
 ## Stack y versiones instaladas
 

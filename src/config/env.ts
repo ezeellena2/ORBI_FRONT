@@ -1,3 +1,6 @@
+// Base URL de la API. Vacio = rutas relativas (/api/...) contra el MISMO origen del front:
+// en dev via el proxy de Vite -> API Gateway; en prod via el borde (nginx/gateway). Ver ADR-0081.
+const DEFAULT_API_BASE_URL = ''
 const DEFAULT_ACCESS_API_BASE_URL = 'https://localhost:7201'
 // Cada modulo de negocio tiene su propio backend duenio y su propio puerto: Flota es 7212/7213 y
 // PlataformaCanonica 7203 (registro en TracAutoV2 `_puertos-asignados.md`). Sin base URL propia, una
@@ -13,6 +16,9 @@ function trimTrailingSlash(value: string) {
 }
 
 export const appConfig = {
+  apiBaseUrl: trimTrailingSlash(
+    import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL,
+  ),
   accessApiBaseUrl: trimTrailingSlash(
     import.meta.env.VITE_ACCESS_API_BASE_URL ?? DEFAULT_ACCESS_API_BASE_URL,
   ),
