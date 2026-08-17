@@ -322,7 +322,7 @@ function Formulario({
           )}
         />
 
-        {conEstadoActivo ? <ToggleActivo dispositivo={dispositivo} /> : null}
+        {conEstadoActivo ? <ToggleActivo dispositivo={dispositivo} onHecho={onCerrar} /> : null}
       </form>
     </Modal>
   )
@@ -397,8 +397,27 @@ function IdentidadTecnicaBloqueada({ dispositivo }: { dispositivo: DispositivoDe
  * Se DESHABILITA con el motivo visible en vez de ocultarse: el estado activo/inactivo es informacion
  * que el usuario necesita ver aunque no pueda cambiarlo (y ocultarlo dejaria un modal que cambia de
  * forma segun el rol, sin decir por que).
+ *
+ * ── POR QUE SE CIERRA EL MODAL AL TERMINAR ────────────────────────────────────────────────────
+ * Los 2 endpoints responden **204 sin cuerpo**, asi que no hay DTO nuevo con el que repintar: el
+ * `dispositivo` de este modal es el de la cache y sigue diciendo `activo: true` hasta que aterrice
+ * el refetch. Dejar el modal abierto mostraba el toggle **volviendo a "encendido"** despues de una
+ * baja exitosa. Y ese refetch, para un equipo recien dado de baja, es un **404** (el detalle se lee
+ * sin `IgnoreQueryFilters()`), asi que no hay nada que esperar: se cierra y el listado queda como
+ * unica superficie honesta.
+ *
+ * ⚠️ Consecuencia declarada: la rama `reactivar` de este toggle es **inalcanzable** por el mismo
+ * 404 —el modal no puede abrirse sobre un equipo dado de baja—. No se borra: el dia que el detalle
+ * alcance la fila inactiva funciona sin tocar nada. Pendiente anotado en `ESTADO.md`.
+ * ─────────────────────────────────────────────────────────────────────────────────────────────
  */
-function ToggleActivo({ dispositivo }: { dispositivo: DispositivoDetalleDto }) {
+function ToggleActivo({
+  dispositivo,
+  onHecho,
+}: {
+  dispositivo: DispositivoDetalleDto
+  onHecho: () => void
+}) {
   const { t } = useTranslation(['flota', 'common'])
   const { tienePermiso } = usePermisos()
   const baja = useBajaDispositivo(dispositivo.id)
@@ -423,10 +442,10 @@ function ToggleActivo({ dispositivo }: { dispositivo: DispositivoDetalleDto }) {
           deshabilitado={!puedeCambiarEstado}
           onCambio={(activo) => {
             if (activo) {
-              reactivar.mutate()
+              reactivar.mutate(undefined, { onSuccess: onHecho })
               return
             }
-            baja.mutate()
+            baja.mutate(undefined, { onSuccess: onHecho })
           }}
         />
       </AccionConMotivo>

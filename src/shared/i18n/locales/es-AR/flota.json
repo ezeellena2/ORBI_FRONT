@@ -4,13 +4,51 @@
     "vehiculoDetalle": "Vehículo",
     "vehiculosOnboarding": "Nuevo vehículo",
     "dispositivosListado": "Dispositivos",
-    "dispositivoDetalle": "Dispositivo"
+    "dispositivoDetalle": "Dispositivo",
+    "conductoresListado": "Conductores",
+    "conductorDetalle": "Conductor"
   },
   "estadoConexion": {
     "en_linea": "En línea",
     "desconectado": "Desconectado",
     "incompleto": "Incompleto",
-    "sin_dato": "Sin datos"
+    "sin_dato": "Sin dato"
+  },
+  "conexion": {
+    "ayuda": {
+      "en_linea": "El GPS está reportando ahora.",
+      "desconectado": "El GPS venía reportando y dejó de hacerlo hace más de 5 minutos.",
+      "incompleto": "Falta terminar de configurar el vehículo para que pueda reportar.",
+      "sin_dato": "No llegó ninguna señal para este vehículo. No quiere decir que esté desconectado: puede no tener GPS instalado, o el servicio de posición no estar respondiendo."
+    },
+    "ayudaEquipo": {
+      "sinDato": "No llegó ninguna señal de este equipo. No quiere decir que esté desconectado: puede que todavía no haya reportado, o que el servicio de posición no esté respondiendo.",
+      "sinDatoNoInstalado": "Este equipo no está instalado en ningún vehículo, así que no tiene desde dónde reportar. No tener señal es lo esperable: no es una falla."
+    },
+    "filtro": {
+      "etiqueta": "Conexión",
+      "todos": "Cualquier conexión"
+    },
+    "vacio": {
+      "sinFuente": "Ningún vehículo está en ese estado de conexión ahora mismo. Puede que ninguno lo esté, o que no esté llegando la señal: los vehículos siguen estando.",
+      "incompleto": "Este filtro todavía no devuelve resultados: Flota aún no marca vehículos como «Incompleto»."
+    },
+    "vacioEquipo": {
+      "sinFuente": "Ningún equipo está en ese estado de conexión ahora mismo. Puede que ninguno lo esté, o que no esté llegando la señal: los equipos siguen en tu inventario.",
+      "incompleto": "Este filtro no aplica a los equipos: «Incompleto» describe a un vehículo sin dispositivo. Para buscar equipos sin vehículo, usá Asignación."
+    },
+    "datosParciales": {
+      "titulo": "Sin datos de conexión",
+      "descripcion_one": "No hay señal para la única fila de esta página. Puede ser que no tenga GPS instalado, o que el servicio de posición no esté respondiendo. Todo lo demás está actualizado.",
+      "descripcion_other": "No hay señal para ninguna de las {{count}} filas de esta página. Puede ser que no tengan GPS instalado, o que el servicio de posición no esté respondiendo. Todo lo demás está actualizado.",
+      "parcial": "{{sinFuente}} de {{total}} sin datos de conexión"
+    }
+  },
+  "situacionVehiculo": {
+    "con_dispositivo_gps": "Con dispositivo GPS",
+    "sin_dispositivo_gps": "Sin dispositivo GPS",
+    "con_conductor": "Con conductor",
+    "sin_conductor": "Sin conductor"
   },
   "tipoVehiculo": {
     "auto": "Auto",
@@ -35,6 +73,11 @@
     },
     "soloActivos": "Solo activos",
     "limpiar": "Limpiar filtros",
+    "filtros": {
+      "situacion": "Situación",
+      "situacionTodos": "Toda la flota",
+      "situacionAyuda": "Sale de las asignaciones vigentes de Flota, no de la señal del GPS: sigue siendo exacto aunque no haya datos de conexión."
+    },
     "columnas": {
       "patente": "Patente",
       "vehiculo": "Vehículo",
@@ -43,17 +86,17 @@
       "estado": "Estado",
       "ultimaSenal": "Última señal",
       "creado": "Creado",
-      "acciones": "Acciones"
+      "acciones": "Acciones",
+      "senales": "Señales"
     },
     "celda": {
       "sinDato": "—",
-      "sinDispositivo": "Sin dispositivo",
-      "sinConductor": "Sin conductor",
       "conductoresAsignados_one": "{{count}} asignado",
       "conductoresAsignados_other": "{{count}} asignados",
       "conductoresExtra": "+{{count}}",
-      "sinSenal": "Sin señal aún",
-      "velocidad": "{{velocidad}} km/h"
+      "velocidad": "{{velocidad}} km/h",
+      "dispositivoSinComponer": "Flota todavía no muestra el GPS desde el vehículo. El equipo instalado se ve en el inventario de dispositivos.",
+      "conductorSinComponer": "Flota todavía no muestra el conductor desde el vehículo. La asignación vigente se ve en la ficha del conductor."
     },
     "acciones": {
       "abrirMenu": "Acciones del vehículo",
@@ -61,14 +104,15 @@
       "eliminar": "Eliminar"
     },
     "paginacion": {
-      "rango": "Mostrando {{desde}}–{{hasta}} de {{total}} vehículos",
+      "rango_one": "Mostrando {{desde}}–{{hasta}} de {{total}} vehículo",
+      "rango_other": "Mostrando {{desde}}–{{hasta}} de {{total}} vehículos",
       "porPagina": "Por página",
       "anterior": "Página anterior",
       "siguiente": "Página siguiente"
     },
     "vacioSinDatos": {
       "titulo": "Aún no cargaste vehículos",
-      "descripcion": "Empezá agregando tu primer vehículo. Podés hacerlo manualmente o importar un CSV con tu flota actual.",
+      "descripcion": "Empezá agregando tu primer vehículo desde el asistente de alta.",
       "cta": "Agregar primer vehículo"
     },
     "vacioSinResultados": {
@@ -78,7 +122,8 @@
     },
     "error": {
       "titulo": "No se pudieron cargar los vehículos",
-      "reintentar": "Reintentar"
+      "reintentar": "Reintentar",
+      "tituloRefresco": "No se pudo actualizar la lista. Estás viendo el último resultado que cargó bien."
     },
     "sinAcceso": {
       "titulo": "Sin acceso",
@@ -104,7 +149,9 @@
     "volverAVehiculos": "Volver a vehículos",
     "volverADispositivos": "Volver a dispositivos",
     "noSePuedeBorrar": "Vaciar un campo todavía no lo borra: {{campos}} van a quedar como estaban. El resto de los cambios sí se guarda.",
-    "separadorLista": ", "
+    "separadorLista": ", ",
+    "volverAConductores": "Volver a conductores",
+    "cerrar": "Cerrar"
   },
   "forbidden": {
     "titulo": "Sin acceso",
@@ -128,7 +175,6 @@
     "cargando": "Cargando el vehículo…",
     "identidadNoDisponible": "Identidad del vehículo no disponible",
     "ultimaSenal": "Última señal: {{valor}}",
-    "sinConductor": "Sin conductor asignado",
     "noEncontrado": {
       "titulo": "Vehículo no encontrado",
       "descripcion": "Puede que se haya dado de baja o que el enlace ya no sea válido."
@@ -144,8 +190,7 @@
       "cambiarDispositivo": "Cambiar dispositivo",
       "gestionarConductores": "Gestionar conductores",
       "darDeBaja": "Dar de baja",
-      "sinPermiso": "Necesitás el permiso {{permiso}}",
-      "llegaEnOtroSlice": "Las asignaciones de dispositivo y conductor todavía no están disponibles."
+      "sinPermiso": "Necesitás el permiso {{permiso}}"
     },
     "miniStats": {
       "titulo": "Estado del vehículo",
@@ -183,25 +228,35 @@
     },
     "ubicacion": {
       "titulo": "Ubicación actual",
-      "sinSenal": "Sin señal",
-      "sinSenalDescripcion": "Todavía no hay datos de telemetría para este vehículo.",
+      "ultimaSenal": "Última señal",
+      "mapaPendiente": "Esta tarjeta no dibuja el mapa: muestra cuándo llegó la última señal.",
       "enFlotaDesde": "En la flota desde el {{fecha}}",
       "abrirMapa": "Abrir en mapa completo"
     },
     "conductor": {
       "titulo": "Conductores asignados",
-      "vacioTitulo": "Sin conductor asignado",
-      "vacioDescripcion": "Vas a poder asignar un conductor a este vehículo desde acá cuando esté disponible la gestión de conductores.",
+      "vacioTitulo": "No podemos mostrar los conductores de este vehículo",
+      "vacioDescripcion": "Flota todavía no compone esta información del lado del vehículo, así que acá no se ve ni cuando el vehículo tiene conductor asignado. La asignación vigente se ve en la ficha del conductor.",
       "dni": "DNI",
       "licencia": "Licencia",
       "telefono": "Teléfono",
-      "asignadoDesde": "Asignado desde"
+      "asignadoDesde": "Asignado desde",
+      "irAConductores": "Ir a conductores",
+      "asignar": "Asignar conductor",
+      "cambiar": "Cambiar conductor",
+      "quitar": "Quitar conductor",
+      "quitarSinId": "Para quitar al conductor hace falta la asignación de esta sesión. Si no la asignaste vos, quitala desde la ficha del conductor.",
+      "verPerfil": "Ver perfil",
+      "recienAsignadoTitulo": "Conductor asignado en esta sesión",
+      "recienAsignadoDescripcion": "La asignación quedó guardada. Los datos de la persona se ven en su ficha: Flota todavía no los compone del lado del vehículo.",
+      "pillAlMenos": "{{cantidad}}+",
+      "pillSinDato": "—"
     },
     "dispositivo": {
       "titulo": "Dispositivo GPS asociado",
       "alias": "Alias",
       "imei": "IMEI",
-      "snapshotPendiente": "El estado técnico en vivo (conexión, batería, última posición) todavía no tiene fuente disponible.",
+      "snapshotPendiente": "El estado técnico en vivo (conexión, batería, última señal) se muestra en la ficha del equipo, no acá.",
       "asociar": "Asociar dispositivo",
       "desasociar": "Desasociar",
       "desasociarSinId": "Para desasociar hace falta el identificador de la asociación, y hoy solo llega en la respuesta de asociar: se puede usar si la asociaste en esta sesión. Mientras tanto, usá Cambiar dispositivo.",
@@ -256,7 +311,8 @@
       "bloqueadaPorAsignaciones": "No se puede dar de baja: el vehículo todavía tiene un conductor o un dispositivo asignado. Primero hay que desasignarlos.",
       "etiquetaTipeo": "Para confirmar, escribí la patente",
       "confirmar": "Dar de baja"
-    }
+    },
+    "conductorNoDisponible": "Conductor sin dato"
   },
   "onboarding": {
     "bienvenida": "Bienvenido a {{organizacion}}",
@@ -273,6 +329,7 @@
       "marca": "Marca",
       "marcaPlaceholder": "Elegí una marca",
       "modelo": "Modelo",
+      "modeloPlaceholder": "Elegí un modelo",
       "anio": "Año",
       "anioAyuda": "Entre {{min}} y {{max}}.",
       "tipo": "Tipo",
@@ -290,15 +347,17 @@
       "vacio": "Catálogo sin opciones",
       "fallo": "No se pudo cargar el catálogo. Volvé a intentarlo en unos segundos.",
       "marcasVacias": "El catálogo de marcas todavía está vacío: no se cargaron las marcas en la plataforma.",
-      "tiposVacios": "El catálogo de tipos de vehículo todavía está vacío."
+      "tiposVacios": "El catálogo de tipos de vehículo todavía está vacío.",
+      "modelosVacios": "Esta marca todavía no tiene modelos cargados en el catálogo.",
+      "modeloTextoLibre": "El catálogo todavía no tiene modelos de esta marca: escribilo como figura en la cédula.",
+      "modeloSinMarca": "Elegí primero una marca para ver sus modelos, o escribilo a mano."
     },
     "errores": {
       "sinFilaFantasma": "No se creó ningún vehículo: podés reintentar sin miedo a duplicarlo."
     },
     "pasos": {
-      "accionNoDisponible": "Todavía no disponible",
       "saltarAlSiguiente": "Saltar este paso",
-      "finalizar": "Finalizar e ir a vehículos",
+      "finalizar": "Finalizar e ir al panel",
       "vehiculo": {
         "etiqueta": "Primer vehículo"
       },
@@ -315,7 +374,11 @@
         "etiqueta": "Conductor",
         "titulo": "Asignar un conductor",
         "descripcion": "Opcional. Podés saltarlo y hacerlo más adelante.",
-        "hint": "Vas a poder asignar un conductor desde el detalle del vehículo cuando esté disponible la gestión de conductores."
+        "continuar": "Asignar y finalizar",
+        "asignando": "Asignando…",
+        "asignado": "Asignaste a {{nombre}} a este vehículo.",
+        "vacio": "Todavía no hay conductores en tu organización. Podés saltar este paso y asignarlo después desde el detalle del vehículo.",
+        "vacioCta": "Ir a conductores"
       }
     },
     "importar": {
@@ -377,10 +440,94 @@
     },
     "motivo": {
       "max_length": "El motivo no puede superar los 500 caracteres.",
-      "invalid": "Ese motivo de cierre no es válido."
+      "invalid": "Ese motivo de cierre no es válido.",
+      "required": "El motivo es obligatorio."
     },
     "dispositivo_flota_id": {
       "required": "Elegí un dispositivo de la lista."
+    },
+    "persona_id": {
+      "required": "El identificador de la persona es obligatorio",
+      "invalid": "El identificador de la persona no es válido"
+    },
+    "tipo_documento": {
+      "required": "El tipo de documento es obligatorio"
+    },
+    "numero_documento": {
+      "required": "El número de documento es obligatorio"
+    },
+    "apellido": {
+      "required": "El apellido es obligatorio"
+    },
+    "telefono": {
+      "max_length": "El teléfono no puede superar los 30 caracteres."
+    },
+    "numero_legajo": {
+      "max_length": "El legajo no puede superar los 50 caracteres."
+    },
+    "notas": {
+      "max_length": "Las notas no pueden superar los 500 caracteres."
+    },
+    "conductor_flota_id": {
+      "required": "Elegí un conductor"
+    },
+    "rol": {
+      "invalid": "Ese rol de asignación no es válido."
+    },
+    "estado_nuevo": {
+      "invalid": "Ese estado destino no es válido."
+    },
+    "url_externa": {
+      "invalid": "El enlace no es válido",
+      "https_required": "El enlace tiene que empezar con https"
+    },
+    "fecha_vencimiento": {
+      "invalid": "La fecha de vencimiento no es válida"
+    },
+    "fecha_emision": {
+      "invalid": "La fecha de emisión no es válida"
+    },
+    "documento": {
+      "max_length": "El tipo y el número de documento no pueden superar los 50 caracteres juntos."
+    },
+    "numero": {
+      "max_length": "El número no puede superar los 100 caracteres."
+    },
+    "vehiculo_flota_id": {
+      "required": "Elegí un vehículo de la lista."
+    },
+    "persona": {
+      "modo_invalido": "Elegí una sola forma de alta: una persona ya conocida o un documento nuevo."
+    },
+    "licencia": {
+      "sin_destino": "La licencia no se carga en el alta: cargala como documento desde la ficha del conductor."
+    },
+    "enviar_invitacion": {
+      "no_soportado": "Todavía no se pueden enviar invitaciones por email a los conductores."
+    },
+    "evidencia": {
+      "required": "La evidencia del cierre es obligatoria.",
+      "max_length": "La evidencia no puede superar los 2000 caracteres."
+    },
+    "resultado": {
+      "required": "Elegí un resultado del cierre."
+    },
+    "silenciar_hasta_utc": {
+      "required": "Elegí una ventana de silencio."
+    },
+    "url": {
+      "required": "La URL es obligatoria."
+    },
+    "sla_minutos": {
+      "invalid": "El plazo tiene que ser mayor a cero.",
+      "max": "El plazo no puede superar un año."
+    },
+    "accion_sugerida": {
+      "required": "La acción sugerida es obligatoria.",
+      "max_length": "La acción sugerida no puede superar los 500 caracteres."
+    },
+    "condicion_json": {
+      "required": "Completá la condición: campo, operador y valor."
     }
   },
   "estadoStockDispositivo": {
@@ -401,12 +548,15 @@
       "modelo": "Modelo",
       "modeloTodos": "Todos los modelos",
       "asignacion": "Asignación",
-      "asignacionTodos": "Asignados y sin asignar"
+      "asignacionTodos": "Asignados y sin asignar",
+      "asignacionAyuda": "Sale de las asignaciones vigentes de Flota, no de la señal del GPS: sigue siendo exacto aunque no haya datos de conexión.",
+      "conexionAyuda": "Depende del servicio de posición. Si no está respondiendo, todos los equipos figuran como «Sin dato» y filtrar por «En línea» no devuelve resultados."
     },
     "columnas": {
       "aliasImei": "Alias / IMEI",
       "modelo": "Modelo",
       "vehiculo": "Vehículo",
+      "conexion": "Conexión",
       "stock": "Stock",
       "ultimaSenal": "Última señal",
       "acciones": "Acciones"
@@ -428,7 +578,8 @@
       "sinPermiso": "Necesitás el permiso {{permiso}}"
     },
     "paginacion": {
-      "rango": "Mostrando {{desde}}–{{hasta}} de {{total}} dispositivos",
+      "rango_one": "Mostrando {{desde}}–{{hasta}} de {{total}} dispositivo",
+      "rango_other": "Mostrando {{desde}}–{{hasta}} de {{total}} dispositivos",
       "porPagina": "Por página",
       "anterior": "Página anterior",
       "siguiente": "Página siguiente"
@@ -554,8 +705,17 @@
       "asociar": "Elegir vehículo"
     },
     "telemetria": {
-      "sinFuenteTitulo": "Telemetría en vivo no disponible todavía",
-      "sinFuenteDescripcion": "La posición, la velocidad, la ignición y las baterías se componen desde Telemetría, y esa integración todavía no está conectada. No es que este dispositivo no esté transmitiendo."
+      "errorTitulo": "No se pudo leer la telemetría del equipo",
+      "actualizar": "Actualizar",
+      "ultimaSenal": "Última señal",
+      "velocidad": "Velocidad",
+      "velocidadValor": "{{velocidad}} km/h",
+      "bateriaInterna": "Batería del equipo",
+      "bateriaVehiculo": "Batería del vehículo",
+      "porcentaje": "{{valor}}%",
+      "notaInstalado": "Los datos que figuran vacíos son los que el equipo todavía no reportó, o los que el servicio de posición no está devolviendo ahora.",
+      "notaSinVehiculo": "Las baterías se leen a través del vehículo. Este equipo no está instalado en ninguno, así que no hay de dónde tomarlas: no es una falla del equipo.",
+      "compuestoEn": "Compuesto el {{fecha}}"
     },
     "eventos": {
       "sinFuenteTitulo": "Historial de eventos no disponible",
@@ -586,7 +746,8 @@
       "vacioDescripcion": "Todavía no hay transiciones de estado de stock para este dispositivo.",
       "errorTitulo": "No se pudo cargar el historial",
       "transicion": "Cambio de estado",
-      "rango": "Mostrando {{desde}}–{{hasta}} de {{total}} movimientos"
+      "rango_one": "Mostrando {{desde}}–{{hasta}} de {{total}} movimiento",
+      "rango_other": "Mostrando {{desde}}–{{hasta}} de {{total}} movimientos"
     }
   },
   "filtroAsignacion": {
@@ -672,5 +833,1293 @@
     "reparacion": "Reparación",
     "baja": "Baja",
     "otro": "Otro"
+  },
+  "conductoresAndamio": {
+    "descripcion": "Estamos construyendo esta pantalla. Vas a poder gestionar los conductores de tu organización desde acá."
+  },
+  "estadoConductor": {
+    "pendiente_documentacion": "Pendiente de documentación",
+    "disponible": "Disponible",
+    "en_servicio": "En servicio",
+    "pausado": "Pausado",
+    "suspendido": "Suspendido"
+  },
+  "estadoConductorBadge": {
+    "activo": "Activo",
+    "inactivo": "Inactivo",
+    "pendiente": "Pendiente"
+  },
+  "estadoDocumento": {
+    "vigente": "Vigente",
+    "por_vencer": "Por vencer",
+    "vencido": "Vencido",
+    "sin_cargar": "Sin cargar"
+  },
+  "tipoDocumentoConductor": {
+    "licencia": "Licencia de conducir",
+    "dni": "DNI",
+    "psicofisico": "Psicofísico",
+    "art": "ART",
+    "defensivo": "Manejo defensivo",
+    "contrato": "Contrato"
+  },
+  "filtroEstadoConductor": {
+    "activo": "Activos",
+    "inactivo": "Inactivos",
+    "licencia_proxima_a_vencer": "Licencia por vencer",
+    "licencia_vencida": "Licencia vencida"
+  },
+  "filtroAsignacionConductor": {
+    "con_vehiculo": "Con vehículo",
+    "sin_vehiculo": "Sin vehículo"
+  },
+  "conductoresListado": {
+    "titulo": "Conductores",
+    "subtitulo": "Los conductores operativos de tu organización.",
+    "nuevoConductor": "Nuevo conductor",
+    "sinPermisoCrear": "Necesitás el permiso flota.conductores.crear",
+    "filtros": {
+      "estado": "Estado",
+      "estadoTodos": "Todos los estados",
+      "asignacion": "Asignación",
+      "asignacionTodos": "Todas",
+      "soloActivos": "Solo activos",
+      "limpiar": "Limpiar filtros"
+    },
+    "columnas": {
+      "conductor": "Conductor",
+      "dni": "DNI",
+      "telefono": "Teléfono",
+      "asignaciones": "Asignaciones",
+      "licencia": "Licencia",
+      "estado": "Estado",
+      "acciones": "Acciones"
+    },
+    "celda": {
+      "sinDato": "—",
+      "sinNombre": "Sin nombre cargado",
+      "identidadNoDisponible": "Los datos personales los administra la plataforma y todavía no están disponibles para tu organización.",
+      "sinLicencia": "Sin licencia cargada",
+      "sinCategoria": "Categoría no disponible",
+      "sinAsignar": "Sin asignar",
+      "vehiculosAsignados_one": "{{count}} vehículo",
+      "vehiculosAsignados_other": "{{count}} vehículos",
+      "licenciaVence": "Vence el {{fecha}}",
+      "licenciaVencida": "Vencida",
+      "licenciaVenceEnDias_one": "Vence en {{count}} día",
+      "licenciaVenceEnDias_other": "Vence en {{count}} días",
+      "legajo": "Legajo {{valor}}",
+      "sinLegajo": "Sin legajo",
+      "licenciaVencidaHace_one": "Venció hace {{count}} día",
+      "licenciaVencidaHace_other": "Venció hace {{count}} días"
+    },
+    "acciones": {
+      "abrirMenu": "Acciones del conductor",
+      "verDetalle": "Ver detalle",
+      "editar": "Editar",
+      "cambiarEstado": "Cambiar estado",
+      "asignarVehiculo": "Asignar vehículo",
+      "asignarDispositivo": "Vincular dispositivo",
+      "gestionarDocumentos": "Documentos",
+      "desactivar": "Desactivar",
+      "reactivar": "Reactivar",
+      "eliminar": "Eliminar definitivamente",
+      "sinPermiso": "Necesitás el permiso {{permiso}}"
+    },
+    "paginacion": {
+      "rango": "Mostrando {{desde}}-{{hasta}} de {{total}}",
+      "porPagina": "Por página",
+      "anterior": "Anterior",
+      "siguiente": "Siguiente"
+    },
+    "vacioSinDatos": {
+      "titulo": "Aún no cargaste conductores",
+      "descripcion": "Cuando los registres vas a poder asignarlos a vehículos y seguir el vencimiento de sus licencias.",
+      "cta": "Crear primer conductor"
+    },
+    "vacioSinResultados": {
+      "titulo": "Ningún conductor coincide con tus filtros",
+      "descripcion": "Probá ajustar los filtros activos.",
+      "cta": "Limpiar filtros"
+    },
+    "error": {
+      "titulo": "No pudimos cargar los conductores",
+      "reintentar": "Reintentar",
+      "tituloRefresco": "No pudimos actualizar el listado"
+    },
+    "sinAcceso": {
+      "titulo": "Sin acceso",
+      "descripcion": "Necesitás el permiso flota.conductores.leer para ver esta pantalla.",
+      "volver": "Volver al dashboard"
+    }
+  },
+  "conductorAlta": {
+    "titulo": "Nuevo conductor",
+    "subtitulo": "Cargá los datos del conductor. Podés asignarle vehículo y dispositivo después.",
+    "modo": "¿Cómo lo damos de alta?",
+    "modoExistente": "Ya es una persona conocida por la organización",
+    "modoNuevo": "Cargar por documento",
+    "modoAyuda": "Si no tenés el identificador de la persona, cargala por documento: la plataforma la busca y, si no existe, la crea.",
+    "personaId": "Identificador de la persona",
+    "personaIdAyuda": "Solo funciona con personas que tu organización ya registró antes.",
+    "tipoDocumento": "Tipo de documento",
+    "numeroDocumento": "Número de documento",
+    "nombre": "Nombre",
+    "apellido": "Apellido",
+    "telefono": "Teléfono",
+    "telefonoAyuda": "Opcional. Se guarda en la ficha operativa del conductor.",
+    "numeroLegajo": "Número de legajo",
+    "notas": "Notas",
+    "licenciaAparte": "La licencia se carga después, desde la ficha del conductor, como documento.",
+    "invitacionNoDisponible": "Todavía no se envían invitaciones por email a los conductores.",
+    "estadoInicial": "El conductor queda como Pendiente de documentación hasta que cargues su documentación obligatoria.",
+    "guardar": "Crear conductor",
+    "guardando": "Creando…"
+  },
+  "conductorEditar": {
+    "titulo": "Editar conductor",
+    "guardar": "Guardar cambios",
+    "numeroLegajo": "Número de legajo",
+    "notas": "Notas",
+    "leyendaCanonicos": "El nombre, el documento, el email y el teléfono se administran en la ficha de la persona, fuera de Flota.",
+    "licenciaAparte": "Los datos de la licencia se editan desde la pestaña de documentos.",
+    "campos": {
+      "numeroLegajo": "número de legajo",
+      "notas": "notas"
+    },
+    "errorCarga": "No pudimos cargar los datos del conductor"
+  },
+  "conductorEstado": {
+    "titulo": "Cambiar estado del conductor",
+    "estadoActual": "Estado actual",
+    "nuevoEstado": "Nuevo estado",
+    "sinDestinos": "Desde este estado no hay ningún cambio disponible.",
+    "suspendidoSinVuelta": "Un conductor suspendido no se puede rehabilitar desde acá. Consultá con el administrador de la organización.",
+    "motivo": "Motivo",
+    "motivoAyuda": "Opcional. Queda registrado en el evento del cambio, no en la ficha del conductor.",
+    "confirmar": "Cambiar estado"
+  },
+  "conductorBaja": {
+    "titulo": "Desactivar conductor",
+    "descripcion": "Vas a desactivar a {{nombre}}. Se conserva todo el historial y podés reactivarlo cuando quieras.",
+    "noDesasigna": "La desactivación no desasigna nada por su cuenta: si tiene un vehículo o un dispositivo vinculado, primero hay que desvincularlos.",
+    "bloqueadaPorAsignaciones": "Este conductor tiene asignaciones activas. Desvinculalas antes de desactivarlo.",
+    "etiquetaTipeo": "Escribí {{valor}} para confirmar",
+    "confirmar": "Desactivar"
+  },
+  "conductorReactivar": {
+    "titulo": "Reactivar conductor",
+    "descripcion": "Vas a reactivar a {{nombre}}.",
+    "noResetaEstado": "Vuelve con el mismo estado operativo que tenía antes de la baja. Verificá su documentación antes de asignarle un vehículo.",
+    "confirmar": "Reactivar"
+  },
+  "conductorEliminar": {
+    "titulo": "Eliminar definitivamente",
+    "descripcion": "Vas a eliminar a {{nombre}} para siempre. Esto no se puede deshacer.",
+    "etiquetaTipeo": "Escribí {{valor}} para confirmar",
+    "confirmar": "Eliminar definitivamente",
+    "cancelar": "Cancelar"
+  },
+  "conductorDetalle": {
+    "cargando": "Cargando conductor…",
+    "noEncontrado": {
+      "titulo": "Conductor no encontrado",
+      "descripcion": "Este conductor no existe o no pertenece a tu organización."
+    },
+    "error": {
+      "titulo": "No pudimos cargar el conductor",
+      "descripcion": "Probá de nuevo en unos segundos.",
+      "tituloRefresco": "No pudimos actualizar la ficha"
+    },
+    "sinAcceso": {
+      "descripcion": "Necesitás el permiso flota.conductores.leer para ver esta ficha."
+    },
+    "hero": {
+      "legajo": "Legajo {{valor}}",
+      "sinLegajo": "Sin legajo",
+      "dni": "DNI {{valor}}",
+      "telefono": "Tel. {{valor}}",
+      "conduce": "Conduce {{patente}}",
+      "sinVehiculo": "Sin vehículo asignado",
+      "altaOperativa": "En la flota desde {{fecha}}",
+      "identidadNoDisponible": "Datos personales no disponibles"
+    },
+    "acciones": {
+      "editar": "Editar",
+      "masAcciones": "Más acciones",
+      "cambiarEstado": "Cambiar estado",
+      "asignarVehiculo": "Asignar vehículo",
+      "asignarDispositivo": "Vincular dispositivo",
+      "desactivar": "Desactivar",
+      "reactivar": "Reactivar",
+      "eliminar": "Eliminar definitivamente",
+      "sinPermiso": "Necesitás el permiso {{permiso}}",
+      "asignarOtroVehiculo": "Asignar otro vehículo"
+    },
+    "tabs": {
+      "info": "Info general",
+      "asignaciones": "Asignaciones",
+      "documentos": "Licencia y documentos",
+      "actividad": "Actividad"
+    },
+    "miniStats": {
+      "titulo": "Actividad del período",
+      "kmTotales": "Km totales",
+      "horas": "Horas al volante",
+      "viajes": "Viajes",
+      "score": "Score de manejo",
+      "sinFuente": "Sin datos de telemetría"
+    },
+    "info": {
+      "titulo": "Datos del conductor",
+      "nombre": "Nombre",
+      "dni": "DNI",
+      "email": "Email",
+      "telefono": "Teléfono",
+      "legajo": "Legajo",
+      "estado": "Estado",
+      "alta": "Alta operativa",
+      "notas": "Notas",
+      "creado": "Creado",
+      "modificado": "Modificado",
+      "porUsuario": "por {{usuario}}",
+      "identidadCanonica": "El nombre, el documento y el contacto se administran fuera de Flota, en la ficha de la persona.",
+      "identidadNoDisponible": "Todavía no están disponibles para tu organización.",
+      "emailSinFuente": "El email del conductor no se guarda en Flota."
+    },
+    "licencia": {
+      "titulo": "Licencia de conducir",
+      "categoria": "Categoría",
+      "categoriaSinDato": "La categoría todavía no se puede guardar.",
+      "numero": "Número",
+      "emision": "Emitida",
+      "vencimiento": "Vence",
+      "diasParaVencer_one": "en {{count}} día",
+      "diasParaVencer_other": "en {{count}} días",
+      "vencidaHace_one": "venció hace {{count}} día",
+      "vencidaHace_other": "venció hace {{count}} días",
+      "vacioTitulo": "Sin licencia cargada",
+      "vacioDescripcion": "Cargá la licencia como documento para poder asignarle un vehículo.",
+      "cargar": "Cargar licencia"
+    },
+    "asignaciones": {
+      "vehiculoTitulo": "Vehículo asignado",
+      "vehiculoVacioTitulo": "Sin vehículo asignado",
+      "vehiculoVacioDescripcion": "Asignale un vehículo para que pueda operar.",
+      "verVehiculo": "Ver vehículo",
+      "asignarVehiculo": "Asignar vehículo",
+      "desasignar": "Desasignar",
+      "desasignarSinId": "Para desasignar hace falta abrir el historial de asignaciones.",
+      "rol": "Rol",
+      "desde": "Desde",
+      "dispositivoTitulo": "Dispositivos vinculados",
+      "dispositivoVacioTitulo": "Sin dispositivos vinculados",
+      "dispositivoVacioDescripcion": "El vínculo sirve para atribuirle viajes y eventos.",
+      "asignarDispositivo": "Vincular dispositivo",
+      "desvincular": "Desvincular",
+      "atribucionNota": "Este vínculo es de atribución: la ubicación del conductor sale siempre del vehículo que maneja.",
+      "historialTitulo": "Historial de asignaciones",
+      "historialColumnas": {
+        "vehiculo": "Vehículo",
+        "rol": "Rol",
+        "desde": "Desde",
+        "hasta": "Hasta",
+        "motivo": "Motivo de cierre"
+      },
+      "historialVigente": "Vigente",
+      "historialVacioTitulo": "Sin asignaciones",
+      "historialVacioDescripcion": "Este conductor todavía no estuvo asignado a ningún vehículo.",
+      "historialErrorTitulo": "No pudimos cargar el historial",
+      "motivoSinEspecificar": "Sin especificar",
+      "masVigentes_one": "Este conductor tiene {{count}} asignación vigente más. Está en el historial de abajo.",
+      "masVigentes_other": "Este conductor tiene {{count}} asignaciones vigentes más. Están en el historial de abajo."
+    },
+    "documentos": {
+      "titulo": "Documentos",
+      "agregar": "Agregar documento",
+      "renovarLicencia": "Renovar licencia",
+      "columnas": {
+        "documento": "Documento",
+        "numero": "Número",
+        "estado": "Estado",
+        "vencimiento": "Vencimiento",
+        "archivo": "Archivo",
+        "acciones": "Acciones"
+      },
+      "verArchivo": "Ver archivo",
+      "sinArchivo": "Sin archivo",
+      "eliminar": "Eliminar",
+      "vacioTitulo": "Sin documentos cargados",
+      "vacioDescripcion": "Cargá la licencia y la documentación obligatoria para poder ponerlo en servicio.",
+      "errorTitulo": "No pudimos cargar los documentos",
+      "sinPermisoTitulo": "Sin acceso a los documentos",
+      "sinPermisoDescripcion": "Necesitás el permiso flota.conductores.gestionar-documentos para ver esta sección.",
+      "obligatoriosTitulo": "Documentación obligatoria",
+      "obligatoriosDescripcion": "Mientras haya un documento obligatorio vencido o sin cargar, el conductor no puede pasar a En servicio.",
+      "subir": "Subir"
+    },
+    "actividad": {
+      "sinFuenteTitulo": "Sin datos de telemetría",
+      "sinFuenteDescripcion": "Los recorridos por conductor todavía no tienen una fuente de datos disponible."
+    },
+    "ubicacion": {
+      "titulo": "Ubicación actual",
+      "sinFuenteTitulo": "Sin datos de ubicación",
+      "sinFuenteDescripcion": "La ubicación del conductor sale del vehículo que maneja y todavía no tiene una fuente de datos disponible."
+    },
+    "auditoria": {
+      "titulo": "Auditoría",
+      "sinNombreUsuario": "Todavía no se puede mostrar qué usuario hizo cada cambio."
+    }
+  },
+  "documentoConductor": {
+    "titulo": "Cargar documento",
+    "tipo": "Tipo de documento",
+    "tipoPlaceholder": "Elegí un tipo",
+    "numero": "Número",
+    "fechaEmision": "Fecha de emisión",
+    "fechaVencimiento": "Fecha de vencimiento",
+    "urlExterna": "Enlace al archivo",
+    "urlExternaAyuda": "Tiene que empezar con https. Opcional: podés cargar los datos ahora y el archivo después.",
+    "sinBinariosAviso": "Por ahora no se suben archivos: se guarda el enlace a donde ya esté publicado.",
+    "guardar": "Cargar documento",
+    "guardando": "Cargando…",
+    "cancelar": "Cancelar",
+    "eliminarTitulo": "Eliminar documento",
+    "eliminarDescripcion": "Vas a eliminar {{documento}} de la ficha del conductor.",
+    "eliminarNoBorraArchivo": "El archivo original no se toca: se elimina el registro en Flota.",
+    "eliminarConfirmar": "Eliminar"
+  },
+  "asignacionConductor": {
+    "titulo": "Asignar conductor",
+    "descripcion": "Elegí un conductor de tu organización para este vehículo.",
+    "conductor": "Conductor",
+    "conductorPlaceholder": "Elegí un conductor",
+    "rol": "Rol",
+    "rolPrincipal": "Principal",
+    "rolSecundario": "Secundario",
+    "rolAyuda": "Un vehículo tiene un solo conductor principal a la vez.",
+    "sinDisponibles": "No hay conductores disponibles para asignar.",
+    "sinDisponiblesCta": "Ir a conductores",
+    "cambiarTitulo": "Cambiar conductor",
+    "cambiarDescripcion": "Vas a reemplazar al conductor asignado a este vehículo.",
+    "cambiarNoAtomico": "El cambio son dos pasos: primero se quita el conductor actual y después se asigna el nuevo. Si el segundo falla, el vehículo queda sin conductor.",
+    "asignar": "Asignar",
+    "asignando": "Asignando…",
+    "exitoAsignar": "Conductor asignado.",
+    "desasignarTitulo": "Quitar conductor",
+    "desasignarDescripcion": "Vas a quitar a {{nombre}} de este vehículo. El historial se conserva.",
+    "desasignar": "Quitar conductor",
+    "desasignando": "Quitando…",
+    "exitoDesasignar": "Conductor desasignado.",
+    "motivo": "Motivo",
+    "motivoAyuda": "Queda registrado en el historial de la asignación.",
+    "cancelar": "Cancelar",
+    "sinPermiso": "Necesitás el permiso flota.vehiculos.asignar-conductor",
+    "sinPermisoLectura": "Necesitás el permiso flota.conductores.leer para ver la lista.",
+    "buscar": "Buscar conductor",
+    "buscarPlaceholder": "Buscar por nombre o documento",
+    "limpiarBusqueda": "Limpiar búsqueda",
+    "sinResultados": "Ningún conductor coincide con la búsqueda.",
+    "cargando": "Cargando conductores…",
+    "soloPrimeros": "Se muestran los primeros {{cantidad}}. Si no encontrás al conductor, buscalo desde el listado.",
+    "actualizar": "Actualizar lista",
+    "noAvisaAlConductor": "La asignación no le avisa al conductor.",
+    "errorElegirOtro": "Ese conductor no se puede asignar en este momento. Elegí otro o revisá su estado y su licencia.",
+    "errorConflicto": "La asignación cambió mientras completabas el formulario. Actualizá y probá de nuevo.",
+    "errorNoEncontrado": "No encontramos ese conductor o esa asignación. Actualizá la pantalla.",
+    "errorGenerico": "No pudimos completar la operación. Verificá el estado antes de reintentar.",
+    "identidadNoDisponible": "Identidad no disponible",
+    "cambioAMediasTitulo": "El vehículo quedó sin conductor",
+    "cambioAMedias": "Se quitó a {{nombre}} pero el conductor nuevo no se asignó. Volvé a intentar la asignación: el paso de quitar no se repite."
+  },
+  "vinculoDispositivoConductor": {
+    "titulo": "Vincular dispositivo",
+    "descripcion": "El vínculo sirve para atribuirle viajes y eventos a este conductor.",
+    "dispositivo": "Dispositivo",
+    "dispositivoPlaceholder": "Elegí un dispositivo",
+    "notas": "Notas",
+    "sinDisponibles": "No hay dispositivos para vincular.",
+    "sinDisponiblesCta": "Ir a dispositivos",
+    "atribucionAviso": "Vincular un dispositivo no lo instala en un vehículo ni cambia su estado de inventario.",
+    "asignar": "Vincular",
+    "asignando": "Vinculando…",
+    "exitoAsignar": "Dispositivo vinculado.",
+    "cerrarTitulo": "Desvincular dispositivo",
+    "cerrarDescripcion": "Vas a cerrar el vínculo con {{dispositivo}}. El historial se conserva.",
+    "cerrar": "Desvincular",
+    "cerrando": "Desvinculando…",
+    "exitoCerrar": "Dispositivo desvinculado.",
+    "motivo": "Motivo",
+    "motivoAyuda": "Queda registrado en el historial del vínculo.",
+    "cancelar": "Cancelar",
+    "sinPermiso": "Necesitás el permiso flota.conductores.asignar-dispositivo"
+  },
+  "licenciaVisible": {
+    "sin_cargar": "Sin cargar",
+    "sin_vencimiento": "Sin vencimiento",
+    "vencida": "Vencida",
+    "vigente": "Vigente"
+  },
+  "asignacionVehiculo": {
+    "titulo": "Asignar vehículo",
+    "descripcion": "Elegí un vehículo de tu organización para este conductor.",
+    "vehiculo": "Vehículo",
+    "cargando": "Cargando vehículos…",
+    "sinDisponibles": "No hay vehículos activos en tu organización.",
+    "sinDisponiblesCta": "Ir a vehículos",
+    "sinPatente": "Sin patente",
+    "buscar": "Buscar vehículo",
+    "buscarPlaceholder": "Buscar por patente, alias, marca o modelo",
+    "limpiarBusqueda": "Limpiar búsqueda",
+    "sinResultados": "Ningún vehículo coincide con la búsqueda.",
+    "soloPrimeros": "Se muestran los primeros {{cantidad}} de {{total}}. Si no encontrás el vehículo, buscalo desde el listado.",
+    "sinPermisoLectura": "Necesitás el permiso {{permiso}} para ver la lista de vehículos.",
+    "asignar": "Asignar vehículo",
+    "noLiberaElActual": "Esto NO libera el vehículo que ya conduce: se suma una asignación. Para cerrar la anterior, usá \"Quitar\" en el tab Asignaciones.",
+    "listaSinFiltrar": "Se listan todos los vehículos activos, incluidos los que ya tienen conductor: uno con un secundario igual puede recibir un principal. Si el elegido ya tiene principal, la asignación se rechaza al guardar.",
+    "sinDisponiblesSinDispositivo": "Todos tus vehículos activos ya tienen un GPS instalado. Podés desasociar el de alguno, o dar de alta el vehículo que falta.",
+    "listaFiltradaSinDispositivo": "Se listan solo los vehículos activos sin GPS instalado. El filtro lo resuelve el servidor sobre las asociaciones vigentes: si el que buscás no aparece, es porque ya tiene un equipo."
+  },
+  "asignacionAVehiculo": {
+    "titulo": "Asignar a un vehículo",
+    "descripcion": "Elegí el vehículo en el que se va a instalar este equipo. Pasa a estado «Instalado» y sus posiciones empiezan a contar para ese vehículo.",
+    "vehiculo": "Vehículo",
+    "asignar": "Instalar en el vehículo",
+    "asignando": "Instalando…",
+    "cancelar": "Cancelar"
+  },
+  "mapa": {
+    "titulo": "Mapa en vivo",
+    "subtitulo": "Dónde está cada vehículo que está reportando su posición.",
+    "actualizando": "Actualizando…",
+    "sinPatente": "Sin patente",
+    "sinAcceso": {
+      "titulo": "No podés ver el mapa de esta organización",
+      "descripcion": "Te falta el permiso {{permiso}}. Pedíselo a quien administra los accesos de la organización.",
+      "volver": "Volver al inicio"
+    },
+    "panel": {
+      "titulo": "Vehículos en el mapa",
+      "colapsar": "Plegar el panel",
+      "expandir": "Mostrar el panel",
+      "buscarEtiqueta": "Buscar",
+      "buscar": "Patente o conductor",
+      "enElMapa_one": "{{count}} vehículo en el mapa",
+      "enElMapa_other": "{{count}} vehículos en el mapa",
+      "vacioSinResultados": "Ningún vehículo coincide con tus filtros.",
+      "limpiar": "Limpiar filtros",
+      "coinciden_one": "{{visibles}} de {{total}} coincide con tus filtros",
+      "coinciden_other": "{{visibles}} de {{total}} coinciden con tus filtros",
+      "quizaFueraDelMapa_one": "Puede estar entre el vehículo que no aparece en el mapa. En el listado de vehículos se lo encuentra igual.",
+      "quizaFueraDelMapa_other": "Puede estar entre los {{count}} vehículos que no aparecen en el mapa. En el listado de vehículos se los encuentra igual."
+    },
+    "chip": {
+      "sinConductor": "Sin conductor",
+      "conductorSinNombre": "Conductor asignado"
+    },
+    "fueraDelMapa": {
+      "siempre": "El mapa dibuja solamente los vehículos con posición conocida.",
+      "titulo_one": "1 vehículo de {{total}} no aparece en el mapa",
+      "titulo_other": "{{fuera}} vehículos de {{total}} no aparecen en el mapa",
+      "descripcion": "Puede ser que no tengan GPS instalado, que el equipo todavía no haya reportado, o que el servicio de posición no esté respondiendo. Los vehículos siguen estando.",
+      "cta": "Ver todos los vehículos"
+    },
+    "vacioSinDatos": {
+      "titulo": "Aún no hay vehículos para mostrar en el mapa",
+      "descripcion": "Cuando registres vehículos con dispositivos GPS asignados, los vas a ver en tiempo real acá.",
+      "ctaVehiculos": "Ir a vehículos",
+      "ctaAlta": "Agregar primer vehículo"
+    },
+    "vacioSinPosicion": {
+      "titulo_one": "Tu único vehículo no tiene posición conocida",
+      "titulo_other": "Ninguno de tus {{count}} vehículos tiene posición conocida",
+      "descripcion": "Puede ser que no tengan GPS instalado, que los equipos todavía no hayan reportado, o que el servicio de posición no esté respondiendo. Los vehículos siguen estando: el mapa es lo único que no los puede ubicar.",
+      "cta": "Ver todos los vehículos"
+    },
+    "error": {
+      "titulo": "No pudimos cargar el mapa",
+      "tituloRefresco": "No pudimos actualizar el mapa",
+      "reintentar": "Reintentar"
+    },
+    "enlace": {
+      "titulo": "El vehículo del enlace no está en el mapa",
+      "descripcion": "No tiene posición conocida, o ya no pertenece a esta organización. El resto de la flota se ve normalmente.",
+      "entendido": "Entendido"
+    },
+    "detalle": {
+      "cerrar": "Cerrar el panel",
+      "abrirFicha": "Abrir ficha completa",
+      "snapshot": "Datos compuestos el {{momento}}",
+      "tabs": {
+        "actual": "Actual",
+        "recorrido": "Recorrido"
+      },
+      "ubicacion": {
+        "titulo": "Ubicación actual",
+        "coordenadas": "Coordenadas",
+        "altitud": "Altitud",
+        "reportada": "Posición reportada"
+      },
+      "telemetria": {
+        "titulo": "Telemetría",
+        "velocidad": "Velocidad",
+        "rumbo": "Rumbo",
+        "motor": "Motor",
+        "ignicion": "Ignición",
+        "odometro": "Odómetro"
+      },
+      "conductor": {
+        "titulo": "Conductor"
+      },
+      "error": {
+        "titulo": "No pudimos cargar este vehículo",
+        "reintentar": "Reintentar"
+      }
+    },
+    "recorrido": {
+      "titulo": "El recorrido histórico todavía no está disponible",
+      "descripcion": "Las posiciones anteriores de un vehículo no se guardan todavía, así que no hay recorrido que reproducir. Cuando exista esa información, el recorrido del día se va a ver acá."
+    },
+    "motor": {
+      "encendido": "Encendido",
+      "apagado": "Apagado",
+      "ralenti": "En ralentí"
+    },
+    "ignicion": {
+      "si": "Puesta",
+      "no": "Cortada"
+    },
+    "unidades": {
+      "kmh": "{{valor}} km/h",
+      "km": "{{valor}} km",
+      "grados": "{{valor}}°",
+      "metros": "{{valor}} m"
+    },
+    "vacioTotalDesconocido": {
+      "titulo": "Ningún vehículo tiene posición conocida ahora",
+      "descripcion": "Puede ser que no tengan GPS instalado, que los equipos todavía no hayan reportado, o que el servicio de posición no esté respondiendo. Todavía no pudimos contar cuántos vehículos tiene la organización, así que este número no lo sabemos.",
+      "cta": "Ver todos los vehículos"
+    }
+  },
+  "estadoProblema": {
+    "detectado": "Detectado",
+    "priorizado": "Priorizado",
+    "asignado": "Asignado",
+    "en_analisis": "En análisis",
+    "silenciado": "Silenciado",
+    "resuelto": "Resuelto",
+    "descartado": "Descartado"
+  },
+  "severidadProblema": {
+    "critica": "Crítica",
+    "alta": "Alta",
+    "media": "Media",
+    "baja": "Baja"
+  },
+  "tipoProblema": {
+    "dtc_critico": "Falla crítica del motor",
+    "dispositivo_sin_senal": "Dispositivo sin señal",
+    "gps_desconectado_ignicion_activa": "GPS desconectado con el motor en marcha",
+    "salida_geozona_critica": "Salida de zona crítica",
+    "entrada_zona_restringida": "Entrada a zona restringida",
+    "exceso_velocidad_sostenido": "Exceso de velocidad sostenido",
+    "movimiento_sin_conductor": "Vehículo en movimiento sin conductor asignado",
+    "licencia_vencida": "Licencia vencida",
+    "vehiculo_incompleto": "Datos del vehículo incompletos",
+    "mantenimiento_vencido": "Mantenimiento vencido",
+    "bateria_baja": "Batería baja",
+    "manipulacion_dispositivo": "Posible manipulación del dispositivo"
+  },
+  "origenSenal": {
+    "telemetria": "Telemetría",
+    "diagnostico": "Diagnóstico",
+    "geozona": "Geozonas",
+    "conductor": "Conductor",
+    "dispositivo": "Dispositivo",
+    "calidad_datos": "Calidad de datos",
+    "mantenimiento": "Mantenimiento",
+    "operacion": "Operación"
+  },
+  "tipoTimelineProblema": {
+    "detectado": "Detectado",
+    "prioridad_cambiada": "Cambió la prioridad",
+    "asignado": "Asignado",
+    "comentario": "Comentario",
+    "silenciado": "Silenciado",
+    "webhook": "Envío a integración",
+    "resuelto": "Resuelto",
+    "descartado": "Descartado"
+  },
+  "estadoSlaProblema": {
+    "vigente": "En plazo",
+    "por_vencer": "Por vencer",
+    "vencido": "Vencido",
+    "sin_sla": "Sin plazo"
+  },
+  "slaAyuda": {
+    "vigente": "Todavía está dentro del plazo objetivo de su regla.",
+    "por_vencer": "Está cerca de vencer el plazo objetivo.",
+    "vencido": "Pasó el plazo objetivo de su regla.",
+    "sin_sla": "Este problema no tiene plazo objetivo: nadie está midiendo cuánto tarda en resolverse."
+  },
+  "factorPrioridad": {
+    "severidad_base": "Severidad de la regla",
+    "contexto_operativo": "Contexto operativo",
+    "urgencia": "Urgencia",
+    "recurrencia": "Recurrencia",
+    "criticidad_activo": "Criticidad del vehículo",
+    "impacto_potencial": "Impacto potencial",
+    "sla_restante": "Plazo restante",
+    "ayuda": {
+      "severidad_base": "Punto de partida que fija la severidad de la regla que abrió el problema.",
+      "contexto_operativo": "Qué estaba haciendo el vehículo cuando se detectó.",
+      "urgencia": "Cuánto hace que se detectó y a qué ritmo llegan señales nuevas.",
+      "recurrencia": "Cuántas veces se repitió lo mismo en este vehículo.",
+      "criticidad_activo": "Suma 0 siempre: todavía no existe una forma de marcar un vehículo como crítico, así que este factor no puede aportar puntos.",
+      "impacto_potencial": "Qué puede pasar si el problema no se atiende.",
+      "sla_restante": "Cuánto queda del plazo objetivo."
+    }
+  },
+  "prioridadDesglose": {
+    "titulo": "Cómo se calculó la prioridad",
+    "aclaracionSuma": "El desglose explica de dónde sale la prioridad, pero puede no sumar exactamente el número del encabezado: algunos factores se recalculan al abrir el problema y no quedan guardados.",
+    "suma": "Suma de los factores",
+    "desfasaje": "La suma de los factores no llega a la prioridad guardada: parte del cálculo se rehace al leer y no quedó registrada cuando se priorizó el caso."
+  },
+  "accionProblema": {
+    "asignar": "Asignar",
+    "silenciar": "Silenciar",
+    "resolver": "Resolver",
+    "ver_mapa": "Ver en el mapa",
+    "ver_vehiculo": "Ver vehículo"
+  },
+  "tipoRegla": {
+    "telemetria": "Telemetría",
+    "diagnostico": "Diagnóstico",
+    "geozona": "Geozonas",
+    "conductor": "Conductor",
+    "dispositivo": "Dispositivo",
+    "calidad_datos": "Calidad de datos",
+    "mantenimiento": "Mantenimiento",
+    "operacion": "Operación"
+  },
+  "estadoEntregaWebhook": {
+    "pendiente": "Pendiente",
+    "enviado": "Enviado",
+    "fallido": "Falló",
+    "reintentando": "En reintento",
+    "agotado": "Sin más intentos"
+  },
+  "estadoWebhook": {
+    "inactivo": "Inactivo",
+    "sin_envios": "Sin envíos",
+    "activo": "Activo",
+    "pendiente": "Pendiente",
+    "con_errores": "Con errores",
+    "fallando": "Fallando"
+  },
+  "estadoAlerta": {
+    "abierta": "Abierta",
+    "gestionada": "Gestionada",
+    "cerrada": "Cerrada"
+  },
+  "severidadAlerta": {
+    "alta": "Alta",
+    "media": "Media",
+    "baja": "Baja"
+  },
+  "condicionInvalida": {
+    "titulo": "Revisá la condición",
+    "enCondicion": "Condición {{indice}}",
+    "sinIndice": "En la condición general de la regla",
+    "motivo": {
+      "version_no_soportada": "La versión del formato de la condición no está soportada.",
+      "combinador_no_soportado": "Solo se pueden combinar condiciones con \"y\": todas tienen que cumplirse.",
+      "cantidad_de_condiciones_invalida": "Una regla necesita entre 1 y 10 condiciones.",
+      "campo_desconocido": "Ese campo no se puede usar en una condición.",
+      "operador_no_admitido": "Ese operador no se puede usar con ese campo.",
+      "tipo_de_valor_incompatible": "El valor no tiene el tipo que ese campo y ese operador esperan.",
+      "umbral_minutos_invalido": "Los minutos sostenidos son obligatorios con \"sostenido por\" y no se pueden usar con ningún otro operador.",
+      "lista_in_invalida": "La lista de valores tiene que tener entre 1 y 50 elementos, sin repetidos.",
+      "json_no_parseable": "No pudimos leer la condición.",
+      "desconocido": "La condición no es válida."
+    }
+  },
+  "centroError": {
+    "transicionBloqueada": "Mover el problema entre estados todavía no está habilitado. No es una falla momentánea: volver a intentarlo da el mismo resultado.",
+    "problemaCerrado": "Este problema ya está cerrado, así que la acción no se puede aplicar. Actualizá la vista para ver su estado actual.",
+    "condicionInvalida": "Revisá la condición marcada. No se guardó ningún cambio.",
+    "urlNoPermitida": "Corregí la URL: tiene que ser https y apuntar a un servidor público.",
+    "conflicto": "Algo cambió mientras trabajabas. Actualizá y volvé a elegir.",
+    "noEncontrado": "No lo encontramos: puede que ya no exista o que no pertenezca a tu organización.",
+    "sinPermiso": "No tenés el permiso necesario para esta acción.",
+    "moduloNoActivo": "Tu organización no tiene el módulo Flota activo.",
+    "validacion": "Revisá los campos marcados.",
+    "red": "No pudimos comunicarnos con el servidor. No sabemos si el cambio llegó a guardarse: actualizá antes de volver a intentar.",
+    "generico": "No pudimos completar la acción."
+  },
+  "centroBloqueado": {
+    "cambiarEstado": "Mover problemas entre estados todavía no está habilitado: falta definir qué transiciones se permiten, así que ningún cambio se puede guardar. No es una falla momentánea — volver a intentarlo da el mismo resultado.",
+    "comentar": "Comentar todavía no está disponible: no se puede registrar la nota en el historial del problema. Lo que sí queda registrado es asignar, silenciar y resolver.",
+    "exportar": "Exportar problemas todavía no está disponible.",
+    "filtros": "Filtrar y ordenar esta bandeja todavía no está disponible. Se muestra la lista completa, con el orden por prioridad.",
+    "alcanceRegla": "Todavía no se puede acotar una regla a vehículos, conductores o zonas: esta regla alcanza a toda la organización.",
+    "suscripciones": "Todavía no se puede elegir a qué eventos se suscribe un endpoint, así que no va a recibir envíos automáticos. Podés probarlo manualmente con \"Probar\".",
+    "reintentarEntregas": "Reencolar envíos todavía no vuelve a enviarlos: quedarían en espera sin salir. Por eso la acción no está disponible.",
+    "ventanaDeGracia": "Al rotar, el sistema empieza a firmar con el secreto nuevo de inmediato y el anterior deja de servir. Coordiná el cambio con quien recibe los envíos antes de rotar.",
+    "gestionarAlerta": "Gestionar una señal todavía no está disponible.",
+    "deteccionAlertas": "La detección de señales todavía no está conectada: por ahora ninguna se puede registrar. Que esta lista esté vacía no significa que no haya nada para revisar."
+  },
+  "centro": {
+    "problemas": {
+      "titulo": "Centro de Problemas",
+      "subtitulo": "Los casos operativos abiertos de tu flota, ordenados por prioridad.",
+      "vacioSinResultados": {
+        "titulo": "Sin coincidencias para los filtros aplicados",
+        "limpiar": "Limpiar"
+      },
+      "error": {
+        "titulo": "No pudimos cargar los problemas",
+        "reintentar": "Reintentar",
+        "tituloRefresco": "No pudimos actualizar la bandeja"
+      },
+      "datosParciales": {
+        "titulo": "Faltan datos de contexto",
+        "descripcion": "No pudimos traer el estado en vivo del vehículo. El problema y sus datos propios se muestran igual."
+      },
+      "sinValor": "—",
+      "sinAcceso": {
+        "titulo": "Sin acceso",
+        "descripcion": "Necesitás el permiso {{permiso}} para ver esta pantalla.",
+        "volver": "Volver al dashboard"
+      },
+      "paginacion": {
+        "anterior": "Página anterior",
+        "siguiente": "Página siguiente",
+        "porPagina": "Por página",
+        "rango": "{{desde}}–{{hasta}} de {{total}}"
+      },
+      "actualizando": "Actualizando…",
+      "total_one": "{{count}} problema en tu organización",
+      "total_other": "{{count}} problemas en tu organización",
+      "resumen": {
+        "linea": "En esta página: {{enPagina}} problemas · {{criticos}} críticos · {{plazoVencido}} con plazo vencido · {{sinResponsable}} sin responsable",
+        "aclaracion": "Los conteos son de los problemas de esta página, no de toda la organización: todavía no hay un resumen del total."
+      },
+      "vacioDeLaBandeja": {
+        "titulo": "No hay problemas en esta bandeja",
+        "descripcion": "Un problema se abre solo si una regla activa lo detecta y llega la señal que la dispara. Que la bandeja esté vacía no significa que no haya nada para revisar: mirá tus reglas antes de darlo por bueno."
+      }
+    },
+    "reglas": {
+      "titulo": "Reglas de problemas",
+      "subtitulo": "Qué señales se convierten en un problema, con qué prioridad y con qué plazo.",
+      "vacioSinDatos": {
+        "titulo": "Aún no configuraste reglas",
+        "descripcion": "Las reglas convierten señales de tus vehículos y conductores en problemas accionables con prioridad y plazo.",
+        "cta": "Nueva regla"
+      },
+      "vacioSinResultados": {
+        "titulo": "Ninguna regla coincide con tus filtros",
+        "limpiar": "Limpiar"
+      },
+      "error": {
+        "titulo": "No pudimos cargar las reglas",
+        "reintentar": "Reintentar",
+        "tituloRefresco": "No pudimos actualizar la lista",
+        "tituloAlternar": "No pudimos cambiar el estado de la regla"
+      },
+      "alcanceTodaLaOrganizacion": "Toda la organización",
+      "conWebhook": "Con webhook",
+      "sinWebhook": "Sin webhook",
+      "activa": "Activa",
+      "inactiva": "Inactiva",
+      "ordenFijo": "Ordenadas por nombre. Todavía no se puede cambiar el orden ni filtrar esta lista.",
+      "condicionSinTexto": "Sin descripción legible. La condición guardada es la que vale.",
+      "duplicarSufijo": " (copia)",
+      "vacioSinSeed": "Si esperabas encontrar reglas configuradas: las reglas iniciales todavía no se cargan solas en una organización nueva. No perdiste nada.",
+      "sinAcceso": {
+        "titulo": "No tenés acceso a las reglas",
+        "descripcion": "Necesitás el permiso {{permiso}} para ver las reglas de problemas.",
+        "volver": "Volver al inicio"
+      },
+      "acciones": {
+        "abrir": "Acciones de {{nombre}}",
+        "sinPermiso": "Necesitás el permiso {{permiso}}."
+      },
+      "accion": {
+        "editar": "Editar",
+        "duplicar": "Duplicar",
+        "pausar": "Pausar",
+        "activar": "Activar",
+        "probarWebhook": "Probar webhook",
+        "verConductores": "Ver conductores"
+      },
+      "columnas": {
+        "regla": "Regla",
+        "estado": "Estado",
+        "severidad": "Severidad",
+        "condicion": "Condición",
+        "operacion": "Operación",
+        "plazo": "Plazo",
+        "webhook": "Webhook",
+        "acciones": "Acciones"
+      },
+      "plazo": {
+        "minutos_one": "{{count}} min",
+        "minutos_other": "{{count}} min",
+        "horas_one": "{{count}} h",
+        "horas_other": "{{count}} h"
+      },
+      "paginacion": {
+        "rango_one": "Mostrando {{desde}}–{{hasta}} de {{total}} regla",
+        "rango_other": "Mostrando {{desde}}–{{hasta}} de {{total}} reglas",
+        "porPagina": "Por página",
+        "anterior": "Página anterior",
+        "siguiente": "Página siguiente"
+      },
+      "resumen": {
+        "titulo": "Resumen de reglas",
+        "activas": "Activas",
+        "activasDetalle_one": "de {{total}} regla",
+        "activasDetalle_other": "de {{total}} reglas",
+        "criticas": "Críticas",
+        "criticasDetalle": "activas con severidad crítica",
+        "activaciones": "Activaciones",
+        "activacionesDetalle": "todavía no se registra qué regla abrió cada problema",
+        "conWebhook": "Con webhook",
+        "conWebhookDetalle": "tienen un endpoint guardado; todavía no reciben envíos",
+        "sinDato": "—",
+        "deLaPagina": "Estos números son de las reglas de esta página, no de toda la organización."
+      },
+      "campo": {
+        "velocidad_kmh": "Velocidad (km/h)",
+        "ignicion": "Ignición",
+        "en_movimiento": "En movimiento",
+        "minutos_sin_senal": "Minutos sin señal",
+        "bateria_pct": "Batería del equipo (%)",
+        "manipulacion_detectada": "Manipulación del equipo",
+        "dtc_criticidad": "Criticidad de la falla",
+        "dtc_codigo": "Código de falla (DTC)",
+        "conductor_asignado": "Tiene conductor asignado",
+        "dias_para_vencer": "Días para vencer",
+        "documento_vencido": "Documento vencido",
+        "vehiculo_incompleto": "Vehículo con datos incompletos",
+        "mantenimiento_vencido": "Mantenimiento vencido"
+      },
+      "campoAyuda": {
+        "velocidad_kmh": "Velocidad informada por el GPS en la última señal.",
+        "ignicion": "Si el motor figura encendido en la última señal del GPS.",
+        "en_movimiento": "Si el vehículo figura en movimiento en la última señal del GPS.",
+        "minutos_sin_senal": "Minutos transcurridos desde la última señal del equipo.",
+        "bateria_pct": "Carga de la batería del equipo, en porcentaje.",
+        "manipulacion_detectada": "Hoy ninguna fuente completa este dato: una regla que lo use se guarda y no se dispara nunca.",
+        "dtc_criticidad": "Criticidad del caso de diagnóstico que abrió la falla.",
+        "dtc_codigo": "Código informado por la computadora del vehículo, por ejemplo P0300.",
+        "conductor_asignado": "Si el vehículo tiene hoy un conductor asignado.",
+        "dias_para_vencer": "Días que faltan para que venza un documento habilitante. Solo se revisa cuando llega una señal del vehículo: nada lo controla por su cuenta.",
+        "documento_vencido": "Si hay un documento habilitante vencido. Solo se revisa cuando llega una señal del vehículo: nada lo controla por su cuenta.",
+        "vehiculo_incompleto": "Si al vehículo le faltan datos de carga. Solo se revisa cuando llega una señal del vehículo: nada lo controla por su cuenta.",
+        "mantenimiento_vencido": "Lo informa el módulo de Operaciones, que todavía no existe: hasta entonces este campo nunca es verdadero."
+      },
+      "operador": {
+        "mayor": "es mayor que",
+        "mayorIgual": "es mayor o igual que",
+        "menor": "es menor que",
+        "menorIgual": "es menor o igual que",
+        "igual": "es igual a",
+        "en": "es alguno de",
+        "sostenidoPor": "se mantiene durante"
+      },
+      "modal": {
+        "tituloAlta": "Nueva regla de problema",
+        "tituloEditar": "Editar regla de problema",
+        "subtitulo": "Definí qué señal abre un problema, con qué severidad y en qué plazo hay que resolverlo.",
+        "nombre": "Nombre",
+        "tipo": "Tipo",
+        "tipoAyuda": "De dónde sale la señal que evalúa esta regla.",
+        "tipoFijo": "El tipo se fija al crear la regla y después no se puede cambiar.",
+        "severidad": "Severidad",
+        "plazo": "Plazo objetivo",
+        "plazoAyuda": "Tiempo para resolver el problema. Se propone según la severidad y lo podés cambiar.",
+        "condicion": "Condición",
+        "condicionAyuda": "Todas las condiciones tienen que cumplirse para que la regla abra un problema.",
+        "combinadorFijo": "y",
+        "campo": "Campo",
+        "operador": "Operador",
+        "valor": "Valor",
+        "valorPlaceholder": "Elegí un valor",
+        "umbral": "Minutos",
+        "umbralAyuda": "Minutos que la condición tiene que mantenerse sin cortes. Todavía no se guarda el historial de señales, así que una condición sostenida puede no cumplirse nunca.",
+        "listaAyuda": "Separá los valores con comas.",
+        "verdadero": "Sí",
+        "falso": "No",
+        "agregarCondicion": "Agregar condición",
+        "quitarCondicion": "Quitar la condición {{indice}}",
+        "minimoCondiciones": "Una regla necesita al menos una condición.",
+        "maximoCondiciones": "Una regla admite hasta {{maximo}} condiciones.",
+        "webhook": "Webhook",
+        "webhookAyuda": "La regla guarda el endpoint, pero todavía no le avisa nada cuando abre un problema: el envío automático no está construido. Por ahora lo único que genera una entrega es el botón «Probar» de Integraciones.",
+        "webhookNinguno": "Sin webhook",
+        "webhookCargando": "Cargando webhooks…",
+        "webhookSinPermiso": "Para elegir un webhook necesitás el permiso {{permiso}}. Lo que la regla ya tenga configurado se mantiene.",
+        "webhookYaConfigurado": "Webhook ya configurado",
+        "webhookNoSeDesvincula": "Volver a «Sin webhook» todavía no desvincula el que ya tenía: la regla va a seguir con el mismo endpoint guardado. El resto de los cambios sí se guarda.",
+        "accionSugerida": "Acción sugerida",
+        "accionSugeridaAyuda": "Qué tiene que hacer quien reciba el problema. Se muestra en el ticket.",
+        "activa": "Regla activa",
+        "activaAyuda": "Una regla pausada no evalúa señales y no abre problemas nuevos.",
+        "guardar": "Guardar regla"
+      }
+    },
+    "integraciones": {
+      "titulo": "Integraciones",
+      "subtitulo": "Webhooks salientes firmados con HMAC hacia tus sistemas.",
+      "vacioSinDatos": {
+        "titulo": "Aún no configuraste webhooks",
+        "descripcion": "Conectá Orbi con tus sistemas (ERP, TMS, mesa de soporte) recibiendo eventos firmados con HMAC.",
+        "cta": "Nuevo webhook"
+      },
+      "vacioSinResultados": {
+        "titulo": "Ningún webhook coincide con tus filtros",
+        "limpiar": "Limpiar filtros"
+      },
+      "vacioSinEntregas": {
+        "titulo": "Todavía no hay entregas registradas",
+        "descripcion": "Un endpoint todavía no puede suscribirse a eventos, así que lo único que genera una entrega es el botón “Probar”."
+      },
+      "error": {
+        "titulo": "No pudimos cargar las integraciones",
+        "tituloAlternar": "No pudimos cambiar el estado del webhook"
+      },
+      "entregasDeTodaLaOrganizacion": "Se muestran las entregas más recientes de toda la organización; el filtro por endpoint se aplica sobre lo que ya se cargó.",
+      "secreto": {
+        "titulo": "Guardá el secreto ahora",
+        "descripcion": "Es la única vez que se muestra completo. Después vas a ver solo su prefijo.",
+        "copiar": "Copiar",
+        "copiado": "Copiado",
+        "entendido": "Ya lo guardé",
+        "subtituloAlta": "El webhook quedó creado. Este es su secreto para firmar las entregas.",
+        "subtituloRotacion": "El secreto se rotó. Este es el nuevo valor con el que se van a firmar las entregas.",
+        "confirmacion": "Ya guardé el secreto en un lugar seguro",
+        "errorCopiar": "No pudimos copiarlo. Seleccionalo a mano y copialo antes de cerrar: no se puede volver a pedir."
+      },
+      "probar": {
+        "accion": "Probar",
+        "aclaracion": "Envía un mensaje de prueba firmado a la URL real. Que llegue no marca al endpoint como sano: solo agrega una entrega al historial.",
+        "titulo": "Probar {{nombre}}",
+        "resultadoAclaracion": "Este es el resultado de la entrega de prueba. El endpoint no queda marcado como sano por haberla recibido."
+      },
+      "firma": {
+        "titulo": "Firma HMAC",
+        "descripcion": "Cada entrega viaja firmada. Quien recibe tiene que validar las tres cosas: el timestamp, la firma y el identificador del evento.",
+        "stringCanonico": "Cadena firmada",
+        "tolerancia": "Tolerancia del timestamp",
+        "toleranciaPendiente": "—",
+        "headerSignature": "La firma HMAC del cuerpo del mensaje.",
+        "headerEventId": "Identificador único del evento. Usalo para descartar duplicados.",
+        "headerEventType": "Tipo de evento, con su nombre público.",
+        "headerTimestamp": "Momento del envío. Sirve para rechazar mensajes reenviados.",
+        "rawBody": "Se firma el cuerpo tal cual viaja, sin volver a serializarlo. El prefijo v1= es parte del valor del header.",
+        "validacionTriple": "Quien recibe tiene que validar las tres cosas: que el timestamp esté dentro de tolerancia, que la firma coincida y que el identificador del evento no se haya procesado antes.",
+        "huellaDe": "Huella del secreto de {{nombre}}",
+        "rotar": "Rotar secreto",
+        "sinEndpoint": "Configurá un webhook para ver su huella y poder rotar el secreto."
+      },
+      "eventos": {
+        "titulo": "Eventos disponibles",
+        "noDisponible": "No disponible",
+        "aclaracionSinSuscripciones": "Este catálogo describe los eventos del sistema. Todavía no se puede suscribir un endpoint a ninguno."
+      },
+      "sinEnviosAun": "Todavía no se envió nada a este endpoint.",
+      "ultimaEntrega": "Última entrega: {{estado}} · {{fecha}}",
+      "lista": {
+        "titulo": "Webhooks configurados"
+      },
+      "sinAcceso": {
+        "titulo": "No tenés acceso a las integraciones",
+        "descripcion": "Necesitás el permiso {{permiso}} para ver los webhooks de tu organización.",
+        "volver": "Volver al inicio"
+      },
+      "acciones": {
+        "abrir": "Acciones de {{nombre}}",
+        "sinPermiso": "Necesitás el permiso {{permiso}}."
+      },
+      "accion": {
+        "editar": "Editar",
+        "probar": "Probar",
+        "verEntregas": "Ver entregas",
+        "pausar": "Pausar",
+        "activar": "Activar",
+        "eliminar": "Eliminar"
+      },
+      "filtros": {
+        "busqueda": "Buscar",
+        "busquedaPlaceholder": "Nombre o URL",
+        "estado": "Estado",
+        "estadoTodos": "Todos",
+        "estadoPrevalece": "Al elegir un estado, se muestran también los pausados.",
+        "soloActivos": "Solo activos",
+        "soloEstaPagina": "Se está filtrando sobre los {{cargados}} webhooks cargados, de {{total}} en la organización."
+      },
+      "salud": {
+        "titulo": "Estado de las integraciones",
+        "activos": "Webhooks activos",
+        "activosDetalle_one": "de {{total}} configurado",
+        "activosDetalle_other": "de {{total}} configurados",
+        "entregas": "Entregas 24 h",
+        "entregasDetalle": "todavía no está definido cómo se cuenta",
+        "fallos": "Fallos abiertos",
+        "fallosDetalle": "todavía no está definido cómo se cuenta",
+        "sinDato": "—",
+        "deLaPagina": "Estos números son de los webhooks de esta página, no de toda la organización."
+      },
+      "entregas": {
+        "titulo": "Últimas entregas",
+        "evento": "Evento",
+        "endpoint": "Endpoint",
+        "endpointNoCargado": "No está en esta página",
+        "estado": "Estado",
+        "intentos": "Intentos",
+        "status": "Status",
+        "sinStatus": "Sin respuesta",
+        "proximoIntento": "Próximo intento",
+        "error": "No pudimos cargar las entregas",
+        "filtradoPor": "Mostrando solo las entregas de {{nombre}} que ya estaban cargadas.",
+        "quitarFiltro": "Ver todas",
+        "soloEstaPagina": "Se cargaron las {{cargadas}} más recientes, de {{total}} en la organización. No hay forma de traer las anteriores."
+      },
+      "modal": {
+        "tituloAlta": "Nuevo webhook",
+        "tituloEditar": "Editar webhook",
+        "subtitulo": "Orbi va a firmar cada entrega con HMAC hacia la URL que indiques.",
+        "nombre": "Nombre",
+        "url": "URL",
+        "urlAyuda": "Tiene que ser https y apuntar a un servidor público.",
+        "activo": "Webhook activo",
+        "activoAyuda": "Un webhook pausado no recibe entregas, ni siquiera las de prueba.",
+        "guardar": "Guardar webhook"
+      },
+      "eliminar": {
+        "titulo": "Eliminar {{nombre}}",
+        "descripcion": "El endpoint deja de recibir entregas. El historial de lo que ya se envió se conserva.",
+        "confirmar": "Eliminar webhook"
+      },
+      "rotar": {
+        "titulo": "Rotar el secreto de {{nombre}}",
+        "confirmar": "Rotar secreto"
+      },
+      "vacioSinEntregasDelEndpoint": {
+        "titulo": "Ninguna de las entregas cargadas es de {{nombre}}",
+        "verTodas": "Ver todas las entregas"
+      }
+    },
+    "submenu": {
+      "vistas": "Vistas",
+      "configurar": "Configurar",
+      "sala": "Sala de operaciones",
+      "timeline": "Línea de tiempo",
+      "reglas": "Reglas",
+      "integraciones": "Integraciones",
+      "sinPermiso": "Necesitás el permiso {{permiso}} para entrar acá.",
+      "alternar": "Mostrar u ocultar el menú del Centro",
+      "kanban": "Kanban por estado"
+    },
+    "sala": {
+      "cola": {
+        "titulo": "Cola priorizada",
+        "aclaracionOrden": "Ordenada por prioridad, como la resuelve el servidor.",
+        "aclaracionSinFiltros": "Se muestran todos los problemas de la organización, abiertos y cerrados: todavía no se puede filtrar ni ordenar esta bandeja.",
+        "senales_one": "{{count}} señal",
+        "senales_other": "{{count}} señales",
+        "sinPatente": "Sin patente",
+        "sinResponsable": "Sin responsable"
+      },
+      "detalle": {
+        "titulo": "Detalle",
+        "vacio": "Elegí un problema de la cola para ver su detalle.",
+        "quePaso": "Qué pasó",
+        "sinDescripcion": "El problema no trae descripción.",
+        "accionSugerida": "Acción sugerida",
+        "detectado": "Detectado",
+        "vehiculo": "Vehículo",
+        "conductor": "Conductor",
+        "responsable": "Responsable",
+        "senales": "Señales agrupadas",
+        "senalSinDetalle": "Sin detalle",
+        "errorTitulo": "No pudimos cargar el detalle del problema",
+        "abrirTicket": "Abrir ticket completo"
+      },
+      "acciones": {
+        "sinPermiso": "Necesitás el permiso {{permiso}}.",
+        "asignarBloqueado": "Todavía no se puede elegir un responsable: no existe la lista de personas asignables de tu organización."
+      },
+      "sla": {
+        "enPlazo_one": "Vence en {{count}} minuto",
+        "enPlazo_other": "Vence en {{count}} minutos",
+        "vencido_one": "Venció hace {{count}} minuto",
+        "vencido_other": "Venció hace {{count}} minutos",
+        "sinPlazo": "Sin plazo",
+        "sinDato": "Sin dato"
+      },
+      "contexto": {
+        "titulo": "Contexto",
+        "operativo": "Estado en vivo del vehículo",
+        "ignicion": "Ignición",
+        "ignicionSi": "Puesta",
+        "ignicionNo": "Cortada",
+        "velocidad": "Velocidad",
+        "velocidadValor": "{{valor}} km/h",
+        "ultimaSenal": "Última señal",
+        "sinVehiculo": "Este problema no cuelga de un vehículo, así que no tiene estado en vivo.",
+        "otrosDelVehiculo": "Otros problemas de este vehículo",
+        "otrosDelVehiculoAclaracion": "Solo los que están en esta página de la bandeja.",
+        "otrosDelVehiculoVacio": "Ningún otro problema de este vehículo en esta página."
+      }
+    },
+    "timeline": {
+      "titulo": "Línea de tiempo",
+      "ventana": "Del {{desde}} al {{hasta}}",
+      "ventanaAclaracion": "Es el período que cubren los problemas de esta página. Todavía no se puede elegir otro rango.",
+      "ahora": "Ahora",
+      "leyenda": "Severidad",
+      "aclaracionOrigenes": "Un problema con más de un origen aparece en cada carril que le corresponde: es el mismo caso, no varios.",
+      "fueraDeLosCarriles_one": "{{count}} problema de esta página no tiene origen conocido, así que no aparece en ningún carril.",
+      "fueraDeLosCarriles_other": "{{count}} problemas de esta página no tienen origen conocido, así que no aparecen en ningún carril.",
+      "carril": {
+        "eventos_one": "{{count}} problema",
+        "eventos_other": "{{count}} problemas",
+        "criticos_one": "{{count}} crítico",
+        "criticos_other": "{{count}} críticos",
+        "vacio": "Sin problemas de este origen",
+        "geozonaDiferido": "Las zonas todavía no generan problemas."
+      },
+      "evento": {
+        "abrir": "Ver el detalle de {{titulo}}"
+      },
+      "insight": {
+        "ajustarRegla": "Ajustar reglas"
+      }
+    },
+    "silenciar": {
+      "titulo": "Silenciar problema",
+      "descripcion": "Usalo solo cuando exista una justificación operativa.",
+      "motivo": "Motivo",
+      "motivoAyuda": "Queda registrado en el historial del problema.",
+      "ventana": "Ventana",
+      "ventana30": "30 minutos",
+      "ventana120": "2 horas",
+      "ventanaFinDeTurnoPendiente": "Todavía no se puede silenciar “hasta fin de turno”: falta definir la jornada de tu organización.",
+      "notificaciones": "Silenciar notificaciones",
+      "webhooks": "Silenciar envíos a integraciones",
+      "aclaracion": "El silencio empieza ahora. No borra señales, no detiene la detección y no pausa el plazo: el problema puede vencer igual.",
+      "confirmar": "Silenciar",
+      "webhooksAclaracion": "Todavía no sale ningún envío por un problema, así que por ahora esta opción se guarda y no cambia nada."
+    },
+    "resolver": {
+      "titulo": "Resolver problema",
+      "descripcion": "Registrá el cierre antes de cambiar el estado.",
+      "resultado": "Resultado",
+      "resuelto": "Resuelto",
+      "resueltoAyuda": "Se atendió y el caso queda cerrado.",
+      "descartado": "Descartado",
+      "descartadoAyuda": "No requería acción.",
+      "evidencia": "Evidencia",
+      "evidenciaAyuda": "Qué se hizo, o por qué se descarta. Queda en el historial.",
+      "aclaracion": "Es un cierre definitivo: no hay forma de reabrir el problema desde acá.",
+      "aclaracionIntegracion": "El cierre no se envía a tus integraciones: esa conexión todavía no está construida.",
+      "confirmar": "Cerrar problema"
+    },
+    "kanban": {
+      "aclaracionPagina": "El tablero agrupa los problemas de esta página de la bandeja, no todos los de la organización: todavía no se puede filtrar ni ordenar.",
+      "columnaVacia": "Sin problemas en esta columna",
+      "verMas_one": "Ver 1 más de esta página",
+      "verMas_other": "Ver {{count}} más de esta página",
+      "fueraDelTableroSilenciados_one": "1 problema silenciado no entra en ninguna columna. Sigue abierto y su plazo corre.",
+      "fueraDelTableroSilenciados_other": "{{count}} problemas silenciados no entran en ninguna columna. Siguen abiertos y su plazo corre.",
+      "fueraDelTableroCerrados_one": "1 problema ya cerrado queda fuera de “Resuelto hoy”: su última actualización no es de hoy.",
+      "fueraDelTableroCerrados_other": "{{count}} problemas ya cerrados quedan fuera de “Resuelto hoy”: su última actualización no es de hoy.",
+      "columna": {
+        "detectado": "Detectado",
+        "en_analisis": "En análisis",
+        "esperando_externo": "Esperando externo",
+        "resuelto_hoy": "Resuelto hoy"
+      },
+      "columnaAyuda": {
+        "detectado": "Detectados, priorizados y ya asignados a alguien.",
+        "en_analisis": "Alguien los está trabajando.",
+        "esperando_externo": "Todavía no está definido qué problemas van acá, así que la columna queda vacía.",
+        "resuelto_hoy": "Resueltos y descartados cuya última actualización es de hoy, según la fecha de tu equipo."
+      }
+    },
+    "ticket": {
+      "volver": "Volver",
+      "noExiste": "No encontramos este problema",
+      "actualizado": "Última actualización",
+      "sinAcciones": "Este problema está cerrado: no quedan acciones para aplicarle.",
+      "tipoDeProblema": "Tipo: {{tipo}}",
+      "sinSenales": "Este problema no tiene señales asociadas.",
+      "porUsuario": "Por {{nombre}}",
+      "tabs": {
+        "resumen": "Resumen",
+        "timeline": "Línea de tiempo",
+        "regla": "Contexto regla",
+        "integraciones": "Integraciones"
+      },
+      "timelineVacio": {
+        "titulo": "Todavía no hay actividad",
+        "descripcion": "Acá van a quedar registradas las acciones que se apliquen sobre el problema."
+      },
+      "regla": {
+        "titulo": "Contexto de la regla",
+        "descripcion": "Cómo viene comportándose la regla que abrió este problema.",
+        "sinVinculo": "Todavía no se guarda qué regla abrió cada problema, así que no podemos mostrar su comportamiento acá. Podés revisar tus reglas desde su pantalla."
+      },
+      "integraciones": {
+        "titulo": "Envíos a tus sistemas",
+        "sinEntregas": "Este problema todavía no generó ningún envío.",
+        "sinCorrelacion": "Todavía no se guarda qué envío corresponde a cada problema, así que acá no podemos mostrarlos. El historial completo de envíos está en Integraciones.",
+        "configurar": "Ir a Integraciones",
+        "intentos_one": "{{count}} intento",
+        "intentos_other": "{{count}} intentos"
+      }
+    }
+  },
+  "senales": {
+    "badge": {
+      "conConteo_one": "{{severidad}} · {{count}}",
+      "conConteo_other": "{{severidad}} · {{count}}"
+    },
+    "celda": {
+      "sinConectar": "—",
+      "sinSenales": "Sin señales"
+    },
+    "ayuda": {
+      "sinConectar": "Todavía no se detectan señales: la detección no está conectada. Que esta celda esté vacía no significa que el vehículo esté bien.",
+      "sinSenales": "No hay señales abiertas para este vehículo.",
+      "indiceParcial": "Hay más señales de las que se trajeron: este vehículo puede tener alguna que no se ve acá."
+    },
+    "aviso": {
+      "deteccion_sin_conectar": {
+        "titulo": "La detección de señales todavía no está conectada",
+        "descripcion": "Ningún vehículo puede mostrar señales todavía. Que no aparezca ninguna NO significa que la flota esté revisada: significa que nadie está mirando aún."
+      },
+      "indice_parcial": {
+        "titulo": "Se están mostrando solo las señales más recientes",
+        "descripcion": "Hay más señales de las que entran en una página. Un vehículo sin marca acá puede igual tener alguna abierta."
+      },
+      "sin_fuente": {
+        "titulo": "No pudimos leer las señales",
+        "descripcion": "El resto de la información está completa y actualizada. Lo único que falta es la capa de señales, así que ningún vehículo se puede dar por revisado."
+      }
+    },
+    "panel": {
+      "titulo": "Señales",
+      "subtitulo": "Activas y recientes · solo lectura",
+      "sinFecha": "Sin fecha",
+      "sinCorrelacion": "Todavía no se puede saber a qué problema pertenece cada señal, así que el enlace abre el Centro de Problemas sin preseleccionar ninguno.",
+      "irAlCentro": "Ir al Centro de Problemas"
+    }
   }
 }

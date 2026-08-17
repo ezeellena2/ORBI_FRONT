@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { flotaKeys } from '../query-keys'
 import { dispositivosService } from '@/services/flota/dispositivos-service'
-import type { DispositivoDetalleDto } from '@/services/contracts/flota'
 
 /**
  * Baja del dispositivo — `POST .../baja`, NO `DELETE` (el `DELETE` es hard-delete y no tiene
@@ -14,20 +13,29 @@ import type { DispositivoDetalleDto } from '@/services/contracts/flota'
  * Con asignacion activa el backend BLOQUEA con 409 `flota.dispositivo.baja_con_asignacion_activa`:
  * primero hay que desasociar el dispositivo del vehiculo.
  *
- * A diferencia de la baja de vehiculo, este endpoint devuelve el detalle actualizado en vez de 204:
- * la pantalla NO navega a ningun lado, se queda mostrando el dispositivo dado de baja con su boton
- * "Reactivar". Por eso se escribe la cache con la respuesta.
+ * ⚠️ **RESPONDE 204 SIN CUERPO.** El docblock anterior afirmaba lo contrario —"este endpoint
+ * devuelve el detalle actualizado en vez de 204"— y por eso el hook hacia
+ * `setQueryData(dispositivoDetalle(id), respuesta.data)`: con axios, el cuerpo de un 204 es el
+ * **string vacio**, asi que lo que quedaba sembrado en la cache del detalle era `''`. Verificado
+ * contra `DispositivosController.DarDeBaja` → `NoContent()`.
+ *
+ * ⚠️ **Y despues de la baja el detalle NO SE PUEDE VOLVER A LEER**: `GET /dispositivos/{id}` sale
+ * por `ObtenerConCatalogos`, que no levanta el query filter global (`x => x.Activo`), asi que
+ * responde **404**. Por eso acá solo se invalida el prefijo —que ya alcanza al listado y al
+ * detalle— y la PANTALLA de detalle es la que tiene que sacar al usuario de una URL que a partir de
+ * ahora es 404 (mismo criterio que D-S4F-7 con el hard-delete del conductor).
  */
 export function useBajaDispositivo(dispositivoId: string) {
   const queryClient = useQueryClient()
 
-  return useMutation<DispositivoDetalleDto, unknown, void>({
+  return useMutation<void, unknown, void>({
     mutationFn: async () => {
-      const respuesta = await dispositivosService.darDeBaja(dispositivoId)
-      return respuesta.data
+      await dispositivosService.darDeBaja(dispositivoId)
     },
-    onSuccess: (detalle) => {
-      queryClient.setQueryData(flotaKeys.dispositivoDetalle(dispositivoId), detalle)
+    onSuccess: () => {
+      // 204 sin cuerpo: no hay detalle con el que sembrar la cache, solo se invalida el prefijo.
+      // `flotaKeys.dispositivos()` es `['flota','dispositivos']` y ya cubre `dispositivoDetalle(id)`
+      // y su historial de stock, asi que no hace falta enumerarlos.
       void queryClient.invalidateQueries({ queryKey: flotaKeys.dispositivos() })
     },
   })

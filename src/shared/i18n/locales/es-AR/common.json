@@ -629,7 +629,8 @@
         "datos_canonicos_invalidos": "Alguno de los datos del vehículo no es válido. Revisalos y probá de nuevo.",
         "conflicto_canonico": "Los datos del vehículo chocan con un registro ya existente en la plataforma.",
         "transicion_invalida": "No se puede pasar de {{estadoActual}} a {{estadoDestino}}.",
-        "ya_tiene_dispositivo": "Este vehículo ya tiene un dispositivo GPS asociado. Desasocialo antes de instalar otro."
+        "ya_tiene_dispositivo": "Este vehículo ya tiene un dispositivo GPS asociado. Desasocialo antes de instalar otro.",
+        "ya_tiene_principal": "Este vehículo ya tiene un conductor principal. Quitalo antes de asignar otro, o asigná al nuevo como secundario."
       },
       "modulo": {
         "no_activo": "Tu organización no tiene el módulo Flota activo."
@@ -662,6 +663,36 @@
       },
       "catalogo": {
         "nombre_duplicado": "Tu organización ya tiene una opción con el nombre {{nombre}}."
+      },
+      "conductor": {
+        "no_existe": "El conductor no existe o no pertenece a tu organización.",
+        "persona_no_existe": "No encontramos esa persona en tu organización.",
+        "persona_ya_es_conductor": "Esa persona ya es conductor activo en tu organización.",
+        "transicion_invalida": "No se puede pasar de {{estadoActual}} a {{estadoDestino}}.",
+        "documento_vencido": "El conductor tiene documentación obligatoria vencida o sin cargar ({{tipoDocumento}}). Actualizala antes de ponerlo en servicio.",
+        "suspendido_no_asignable": "El conductor está suspendido y no se puede asignar.",
+        "licencia_vencida": "La licencia del conductor está vencida.",
+        "licencia_vencida_no_aceptada": "La licencia venció el {{fechaVencimiento}}.",
+        "baja_con_asignacion_activa": "El conductor tiene un vehículo o un dispositivo asignado. Desvinculalos antes de desactivarlo.",
+        "canonico_no_creable": "No se pudo registrar la persona en la plataforma. Volvé a intentar en unos minutos.",
+        "datos_canonicos_invalidos": "Los datos de identidad no son válidos. Revisá el tipo y el número de documento."
+      },
+      "documento": {
+        "no_existe": "El documento no existe o ya fue eliminado.",
+        "tipo_invalido": "El tipo de documento {{tipo}} no está disponible en tu organización.",
+        "url_no_permitida": "Ese enlace no se puede usar. Tiene que ser una URL https accesible desde internet."
+      },
+      "problema": {
+        "no_existe": "El problema no existe o no pertenece a tu organización.",
+        "transicion_invalida": "No se puede pasar el problema de {{estadoActual}} a {{estadoDestino}}."
+      },
+      "regla": {
+        "no_existe": "La regla no existe o no pertenece a tu organización.",
+        "condicion_invalida": "La condición de la regla no es válida."
+      },
+      "webhook": {
+        "no_existe": "El webhook no existe o no pertenece a tu organización.",
+        "url_no_permitida": "La URL {{url}} no está permitida: tiene que ser https y apuntar a un servidor público."
       }
     },
     "auth": {
@@ -761,7 +792,8 @@
       "confSeguridad": "Seguridad",
       "confApariencia": "Apariencia",
       "confRoles": "Roles y permisos",
-      "usuarios": "Usuarios"
+      "usuarios": "Usuarios",
+      "flotaProblemas": "Problemas"
     },
     "sidebar": {
       "collapse": "Colapsar menú",

@@ -4,13 +4,51 @@
     "vehiculoDetalle": "Vehicle",
     "vehiculosOnboarding": "New vehicle",
     "dispositivosListado": "Devices",
-    "dispositivoDetalle": "Device"
+    "dispositivoDetalle": "Device",
+    "conductoresListado": "Drivers",
+    "conductorDetalle": "Driver"
   },
   "estadoConexion": {
     "en_linea": "Online",
     "desconectado": "Disconnected",
     "incompleto": "Incomplete",
     "sin_dato": "No data"
+  },
+  "conexion": {
+    "ayuda": {
+      "en_linea": "The GPS unit is reporting right now.",
+      "desconectado": "The GPS unit was reporting and stopped more than 5 minutes ago.",
+      "incompleto": "This vehicle still needs setup before it can report.",
+      "sin_dato": "No signal has arrived for this vehicle. It does not mean it is disconnected: it may have no GPS installed, or the position service may not be responding."
+    },
+    "ayudaEquipo": {
+      "sinDato": "No signal has arrived from this unit. It does not mean it is disconnected: it may not have reported yet, or the position service may not be responding.",
+      "sinDatoNoInstalado": "This unit is not installed in any vehicle, so it has nothing to report from. Having no signal is expected: it is not a fault."
+    },
+    "filtro": {
+      "etiqueta": "Connection",
+      "todos": "Any connection"
+    },
+    "vacio": {
+      "sinFuente": "No vehicle is in that connection state right now. Either none is, or the signal is not arriving: the vehicles are still there.",
+      "incompleto": "This filter returns nothing yet: Fleet does not flag vehicles as “Incomplete” so far."
+    },
+    "vacioEquipo": {
+      "sinFuente": "No unit is in that connection state right now. Either none is, or the signal is not arriving: the units are still in your inventory.",
+      "incompleto": "This filter does not apply to units: “Incomplete” describes a vehicle without a device. To find units without a vehicle, use Assignment."
+    },
+    "datosParciales": {
+      "titulo": "No connection data",
+      "descripcion_one": "No signal for the only row on this page. It may have no GPS installed, or the position service may not be responding. Everything else is up to date.",
+      "descripcion_other": "No signal for any of the {{count}} rows on this page. They may have no GPS installed, or the position service may not be responding. Everything else is up to date.",
+      "parcial": "{{sinFuente}} of {{total}} without connection data"
+    }
+  },
+  "situacionVehiculo": {
+    "con_dispositivo_gps": "With GPS unit",
+    "sin_dispositivo_gps": "Without GPS unit",
+    "con_conductor": "With driver",
+    "sin_conductor": "Without driver"
   },
   "tipoVehiculo": {
     "auto": "Car",
@@ -35,6 +73,11 @@
     },
     "soloActivos": "Active only",
     "limpiar": "Clear filters",
+    "filtros": {
+      "situacion": "Situation",
+      "situacionTodos": "Whole fleet",
+      "situacionAyuda": "It comes from the current Fleet assignments, not from the GPS signal: it stays accurate even with no connection data."
+    },
     "columnas": {
       "patente": "Plate",
       "vehiculo": "Vehicle",
@@ -43,17 +86,17 @@
       "estado": "Status",
       "ultimaSenal": "Last signal",
       "creado": "Created",
-      "acciones": "Actions"
+      "acciones": "Actions",
+      "senales": "Signals"
     },
     "celda": {
       "sinDato": "—",
-      "sinDispositivo": "No device",
-      "sinConductor": "No driver",
       "conductoresAsignados_one": "{{count}} assigned",
       "conductoresAsignados_other": "{{count}} assigned",
       "conductoresExtra": "+{{count}}",
-      "sinSenal": "No signal yet",
-      "velocidad": "{{velocidad}} km/h"
+      "velocidad": "{{velocidad}} km/h",
+      "dispositivoSinComponer": "Fleet does not show the GPS from the vehicle yet. The installed device is visible in the device inventory.",
+      "conductorSinComponer": "Fleet does not show the driver from the vehicle yet. The current assignment is visible on the driver profile."
     },
     "acciones": {
       "abrirMenu": "Vehicle actions",
@@ -61,14 +104,15 @@
       "eliminar": "Delete"
     },
     "paginacion": {
-      "rango": "Showing {{desde}}–{{hasta}} of {{total}} vehicles",
+      "rango_one": "Showing {{desde}}–{{hasta}} of {{total}} vehicle",
+      "rango_other": "Showing {{desde}}–{{hasta}} of {{total}} vehicles",
       "porPagina": "Per page",
       "anterior": "Previous page",
       "siguiente": "Next page"
     },
     "vacioSinDatos": {
       "titulo": "You have not added any vehicles yet",
-      "descripcion": "Start by adding your first vehicle. You can do it manually or import a CSV with your current fleet.",
+      "descripcion": "Start by adding your first vehicle from the setup wizard.",
       "cta": "Add first vehicle"
     },
     "vacioSinResultados": {
@@ -78,7 +122,8 @@
     },
     "error": {
       "titulo": "The vehicles could not be loaded",
-      "reintentar": "Retry"
+      "reintentar": "Retry",
+      "tituloRefresco": "The list could not be refreshed. You are seeing the last result that loaded correctly."
     },
     "sinAcceso": {
       "titulo": "No access",
@@ -104,7 +149,9 @@
     "volverAVehiculos": "Back to vehicles",
     "volverADispositivos": "Back to devices",
     "noSePuedeBorrar": "Clearing a field does not delete it yet: {{campos}} will stay as they were. The rest of your changes are saved.",
-    "separadorLista": ", "
+    "separadorLista": ", ",
+    "volverAConductores": "Back to drivers",
+    "cerrar": "Close"
   },
   "forbidden": {
     "titulo": "No access",
@@ -128,7 +175,6 @@
     "cargando": "Loading vehicle…",
     "identidadNoDisponible": "Vehicle identity not available",
     "ultimaSenal": "Last signal: {{valor}}",
-    "sinConductor": "No driver assigned",
     "noEncontrado": {
       "titulo": "Vehicle not found",
       "descripcion": "It may have been deleted, or the link may no longer be valid."
@@ -144,8 +190,7 @@
       "cambiarDispositivo": "Change device",
       "gestionarConductores": "Manage drivers",
       "darDeBaja": "Delete vehicle",
-      "sinPermiso": "You need the {{permiso}} permission",
-      "llegaEnOtroSlice": "Device and driver assignments are not available yet."
+      "sinPermiso": "You need the {{permiso}} permission"
     },
     "miniStats": {
       "titulo": "Vehicle status",
@@ -183,25 +228,35 @@
     },
     "ubicacion": {
       "titulo": "Current location",
-      "sinSenal": "No signal",
-      "sinSenalDescripcion": "There is no telemetry data for this vehicle yet.",
+      "ultimaSenal": "Last signal",
+      "mapaPendiente": "This card does not draw the map: it shows when the last signal arrived.",
       "enFlotaDesde": "In the fleet since {{fecha}}",
       "abrirMapa": "Open in full map"
     },
     "conductor": {
       "titulo": "Assigned drivers",
-      "vacioTitulo": "No driver assigned",
-      "vacioDescripcion": "You will be able to assign a driver to this vehicle from here once driver management is available.",
+      "vacioTitulo": "We cannot show this vehicle's drivers",
+      "vacioDescripcion": "Fleet does not compose this information on the vehicle side yet, so it stays empty even when the vehicle has an assigned driver. The current assignment is visible on the driver page.",
       "dni": "ID number",
       "licencia": "License",
       "telefono": "Phone",
-      "asignadoDesde": "Assigned since"
+      "asignadoDesde": "Assigned since",
+      "irAConductores": "Go to drivers",
+      "asignar": "Assign driver",
+      "cambiar": "Change driver",
+      "quitar": "Remove driver",
+      "quitarSinId": "Removing the driver needs the assignment made in this session. If someone else assigned it, remove it from the driver profile.",
+      "verPerfil": "View profile",
+      "recienAsignadoTitulo": "Driver assigned in this session",
+      "recienAsignadoDescripcion": "The assignment was saved. The person details are on their profile: Fleet does not compose them on the vehicle side yet.",
+      "pillAlMenos": "{{cantidad}}+",
+      "pillSinDato": "—"
     },
     "dispositivo": {
       "titulo": "Linked GPS device",
       "alias": "Alias",
       "imei": "IMEI",
-      "snapshotPendiente": "Live technical status (connection, battery, last position) has no available source yet.",
+      "snapshotPendiente": "Live technical status (connection, battery, last signal) is shown on the device page, not here.",
       "asociar": "Link device",
       "desasociar": "Unlink",
       "desasociarSinId": "Unlinking needs the link identifier, and today it only arrives in the response of linking: it is available if you linked it in this session. In the meantime, use Change device.",
@@ -256,7 +311,8 @@
       "bloqueadaPorAsignaciones": "The vehicle cannot be deleted: it still has a driver or a device assigned. Unassign them first.",
       "etiquetaTipeo": "To confirm, type the plate",
       "confirmar": "Delete vehicle"
-    }
+    },
+    "conductorNoDisponible": "Driver not available"
   },
   "onboarding": {
     "bienvenida": "Welcome to {{organizacion}}",
@@ -273,6 +329,7 @@
       "marca": "Make",
       "marcaPlaceholder": "Pick a make",
       "modelo": "Model",
+      "modeloPlaceholder": "Pick a model",
       "anio": "Year",
       "anioAyuda": "Between {{min}} and {{max}}.",
       "tipo": "Type",
@@ -290,15 +347,17 @@
       "vacio": "Catalog has no options",
       "fallo": "The catalog could not be loaded. Try again in a few seconds.",
       "marcasVacias": "The make catalog is still empty: no makes have been loaded into the platform.",
-      "tiposVacios": "The vehicle type catalog is still empty."
+      "tiposVacios": "The vehicle type catalog is still empty.",
+      "modelosVacios": "This make has no models loaded in the catalog yet.",
+      "modeloTextoLibre": "The catalog has no models for this make yet: type it as it appears on the registration.",
+      "modeloSinMarca": "Pick a make first to see its models, or type it manually."
     },
     "errores": {
       "sinFilaFantasma": "No vehicle was created: you can retry without risk of duplicating it."
     },
     "pasos": {
-      "accionNoDisponible": "Not available yet",
       "saltarAlSiguiente": "Skip this step",
-      "finalizar": "Finish and go to vehicles",
+      "finalizar": "Finish and go to the dashboard",
       "vehiculo": {
         "etiqueta": "First vehicle"
       },
@@ -315,7 +374,11 @@
         "etiqueta": "Driver",
         "titulo": "Assign a driver",
         "descripcion": "Optional. You can skip it and do it later.",
-        "hint": "You will be able to assign a driver from the vehicle record once driver management is available."
+        "continuar": "Assign and finish",
+        "asignando": "Assigning…",
+        "asignado": "You assigned {{nombre}} to this vehicle.",
+        "vacio": "There are no drivers in your organization yet. You can skip this step and assign one later from the vehicle detail.",
+        "vacioCta": "Go to drivers"
       }
     },
     "importar": {
@@ -377,10 +440,94 @@
     },
     "motivo": {
       "max_length": "The reason cannot exceed 500 characters.",
-      "invalid": "That closing reason is not valid."
+      "invalid": "That closing reason is not valid.",
+      "required": "The reason is required."
     },
     "dispositivo_flota_id": {
       "required": "Pick a device from the list."
+    },
+    "persona_id": {
+      "required": "The person identifier is required",
+      "invalid": "The person identifier is not valid"
+    },
+    "tipo_documento": {
+      "required": "The document type is required"
+    },
+    "numero_documento": {
+      "required": "The document number is required"
+    },
+    "apellido": {
+      "required": "The last name is required"
+    },
+    "telefono": {
+      "max_length": "The phone cannot exceed 30 characters."
+    },
+    "numero_legajo": {
+      "max_length": "The employee number cannot exceed 50 characters."
+    },
+    "notas": {
+      "max_length": "Notes cannot exceed 500 characters."
+    },
+    "conductor_flota_id": {
+      "required": "Pick a driver"
+    },
+    "rol": {
+      "invalid": "That assignment role is not valid."
+    },
+    "estado_nuevo": {
+      "invalid": "That target status is not valid."
+    },
+    "url_externa": {
+      "invalid": "The link is not valid",
+      "https_required": "The link must start with https"
+    },
+    "fecha_vencimiento": {
+      "invalid": "The expiry date is not valid"
+    },
+    "fecha_emision": {
+      "invalid": "The issue date is not valid"
+    },
+    "documento": {
+      "max_length": "The document type and number cannot exceed 50 characters together."
+    },
+    "numero": {
+      "max_length": "The number cannot exceed 100 characters."
+    },
+    "vehiculo_flota_id": {
+      "required": "Pick a vehicle from the list."
+    },
+    "persona": {
+      "modo_invalido": "Pick a single way to add the driver: an existing person or a new document."
+    },
+    "licencia": {
+      "sin_destino": "The license is not loaded when creating the driver: upload it as a document from the driver page."
+    },
+    "enviar_invitacion": {
+      "no_soportado": "Email invitations to drivers cannot be sent yet."
+    },
+    "evidencia": {
+      "required": "Closure evidence is required.",
+      "max_length": "Evidence cannot exceed 2000 characters."
+    },
+    "resultado": {
+      "required": "Pick a closure result."
+    },
+    "silenciar_hasta_utc": {
+      "required": "Pick a mute window."
+    },
+    "url": {
+      "required": "The URL is required."
+    },
+    "sla_minutos": {
+      "invalid": "The target time must be greater than zero.",
+      "max": "The target time cannot exceed one year."
+    },
+    "accion_sugerida": {
+      "required": "The suggested action is required.",
+      "max_length": "The suggested action cannot exceed 500 characters."
+    },
+    "condicion_json": {
+      "required": "Complete the condition: field, operator and value."
     }
   },
   "estadoStockDispositivo": {
@@ -401,12 +548,15 @@
       "modelo": "Model",
       "modeloTodos": "All models",
       "asignacion": "Assignment",
-      "asignacionTodos": "Assigned and unassigned"
+      "asignacionTodos": "Assigned and unassigned",
+      "asignacionAyuda": "Comes from Fleet's current assignments, not from the GPS signal: it stays accurate even with no connection data.",
+      "conexionAyuda": "Depends on the position service. If it is not responding, every unit shows as “No data” and filtering by “Online” returns nothing."
     },
     "columnas": {
       "aliasImei": "Alias / IMEI",
       "modelo": "Model",
       "vehiculo": "Vehicle",
+      "conexion": "Connection",
       "stock": "Stock",
       "ultimaSenal": "Last signal",
       "acciones": "Actions"
@@ -428,7 +578,8 @@
       "sinPermiso": "You need the {{permiso}} permission"
     },
     "paginacion": {
-      "rango": "Showing {{desde}}–{{hasta}} of {{total}} devices",
+      "rango_one": "Showing {{desde}}–{{hasta}} of {{total}} device",
+      "rango_other": "Showing {{desde}}–{{hasta}} of {{total}} devices",
       "porPagina": "Per page",
       "anterior": "Previous page",
       "siguiente": "Next page"
@@ -554,8 +705,17 @@
       "asociar": "Choose a vehicle"
     },
     "telemetria": {
-      "sinFuenteTitulo": "Live telemetry not available yet",
-      "sinFuenteDescripcion": "Position, speed, ignition and battery levels are composed from Telemetry, and that integration is not connected yet. It does not mean this device is not transmitting."
+      "errorTitulo": "The unit's telemetry could not be read",
+      "actualizar": "Refresh",
+      "ultimaSenal": "Last signal",
+      "velocidad": "Speed",
+      "velocidadValor": "{{velocidad}} km/h",
+      "bateriaInterna": "Unit battery",
+      "bateriaVehiculo": "Vehicle battery",
+      "porcentaje": "{{valor}}%",
+      "notaInstalado": "Empty values are the ones the unit has not reported yet, or the ones the position service is not returning right now.",
+      "notaSinVehiculo": "Battery readings come through the vehicle. This unit is not installed in one, so there is nowhere to take them from: it is not a unit fault.",
+      "compuestoEn": "Composed on {{fecha}}"
     },
     "eventos": {
       "sinFuenteTitulo": "Event history not available",
@@ -586,7 +746,8 @@
       "vacioDescripcion": "There are no stock status transitions for this device yet.",
       "errorTitulo": "The history could not be loaded",
       "transicion": "State change",
-      "rango": "Showing {{desde}}–{{hasta}} of {{total}} movements"
+      "rango_one": "Showing {{desde}}–{{hasta}} of {{total}} movement",
+      "rango_other": "Showing {{desde}}–{{hasta}} of {{total}} movements"
     }
   },
   "filtroAsignacion": {
@@ -672,5 +833,1293 @@
     "reparacion": "Repair",
     "baja": "Decommission",
     "otro": "Other"
+  },
+  "conductoresAndamio": {
+    "descripcion": "We are building this screen. You will be able to manage your organization drivers from here."
+  },
+  "estadoConductor": {
+    "pendiente_documentacion": "Pending paperwork",
+    "disponible": "Available",
+    "en_servicio": "On duty",
+    "pausado": "Paused",
+    "suspendido": "Suspended"
+  },
+  "estadoConductorBadge": {
+    "activo": "Active",
+    "inactivo": "Inactive",
+    "pendiente": "Pending"
+  },
+  "estadoDocumento": {
+    "vigente": "Valid",
+    "por_vencer": "Expiring soon",
+    "vencido": "Expired",
+    "sin_cargar": "Not uploaded"
+  },
+  "tipoDocumentoConductor": {
+    "licencia": "Driver's license",
+    "dni": "ID document",
+    "psicofisico": "Medical check",
+    "art": "Work insurance",
+    "defensivo": "Defensive driving",
+    "contrato": "Contract"
+  },
+  "filtroEstadoConductor": {
+    "activo": "Active",
+    "inactivo": "Inactive",
+    "licencia_proxima_a_vencer": "License expiring soon",
+    "licencia_vencida": "License expired"
+  },
+  "filtroAsignacionConductor": {
+    "con_vehiculo": "With vehicle",
+    "sin_vehiculo": "Without vehicle"
+  },
+  "conductoresListado": {
+    "titulo": "Drivers",
+    "subtitulo": "The operational drivers of your organization.",
+    "nuevoConductor": "New driver",
+    "sinPermisoCrear": "You need the flota.conductores.crear permission",
+    "filtros": {
+      "estado": "Status",
+      "estadoTodos": "All statuses",
+      "asignacion": "Assignment",
+      "asignacionTodos": "All",
+      "soloActivos": "Active only",
+      "limpiar": "Clear filters"
+    },
+    "columnas": {
+      "conductor": "Driver",
+      "dni": "ID",
+      "telefono": "Phone",
+      "asignaciones": "Assignments",
+      "licencia": "License",
+      "estado": "Status",
+      "acciones": "Actions"
+    },
+    "celda": {
+      "sinDato": "—",
+      "sinNombre": "No name on file",
+      "identidadNoDisponible": "Personal data is managed by the platform and is not available to your organization yet.",
+      "sinLicencia": "No license on file",
+      "sinCategoria": "Class not available",
+      "sinAsignar": "Unassigned",
+      "vehiculosAsignados_one": "{{count}} vehicle",
+      "vehiculosAsignados_other": "{{count}} vehicles",
+      "licenciaVence": "Expires on {{fecha}}",
+      "licenciaVencida": "Expired",
+      "licenciaVenceEnDias_one": "Expires in {{count}} day",
+      "licenciaVenceEnDias_other": "Expires in {{count}} days",
+      "legajo": "Employee no. {{valor}}",
+      "sinLegajo": "No employee number",
+      "licenciaVencidaHace_one": "Expired {{count}} day ago",
+      "licenciaVencidaHace_other": "Expired {{count}} days ago"
+    },
+    "acciones": {
+      "abrirMenu": "Driver actions",
+      "verDetalle": "View details",
+      "editar": "Edit",
+      "cambiarEstado": "Change status",
+      "asignarVehiculo": "Assign vehicle",
+      "asignarDispositivo": "Link device",
+      "gestionarDocumentos": "Documents",
+      "desactivar": "Deactivate",
+      "reactivar": "Reactivate",
+      "eliminar": "Delete permanently",
+      "sinPermiso": "You need the {{permiso}} permission"
+    },
+    "paginacion": {
+      "rango": "Showing {{desde}}-{{hasta}} of {{total}}",
+      "porPagina": "Per page",
+      "anterior": "Previous",
+      "siguiente": "Next"
+    },
+    "vacioSinDatos": {
+      "titulo": "You have not added any drivers yet",
+      "descripcion": "Once you register them you can assign vehicles and track their license expiry.",
+      "cta": "Create first driver"
+    },
+    "vacioSinResultados": {
+      "titulo": "No driver matches your filters",
+      "descripcion": "Try adjusting the active filters.",
+      "cta": "Clear filters"
+    },
+    "error": {
+      "titulo": "We could not load the drivers",
+      "reintentar": "Retry",
+      "tituloRefresco": "We could not refresh the list"
+    },
+    "sinAcceso": {
+      "titulo": "No access",
+      "descripcion": "You need the flota.conductores.leer permission to view this screen.",
+      "volver": "Back to dashboard"
+    }
+  },
+  "conductorAlta": {
+    "titulo": "New driver",
+    "subtitulo": "Enter the driver details. You can assign a vehicle and a device later.",
+    "modo": "How do we add them?",
+    "modoExistente": "Already a person known to the organization",
+    "modoNuevo": "Add by document",
+    "modoAyuda": "If you do not have the person identifier, add them by document: the platform looks them up and creates them if they do not exist.",
+    "personaId": "Person identifier",
+    "personaIdAyuda": "Only works for people your organization has registered before.",
+    "tipoDocumento": "Document type",
+    "numeroDocumento": "Document number",
+    "nombre": "First name",
+    "apellido": "Last name",
+    "telefono": "Phone",
+    "telefonoAyuda": "Optional. Stored on the driver operational record.",
+    "numeroLegajo": "Employee number",
+    "notas": "Notes",
+    "licenciaAparte": "The license is uploaded later, from the driver record, as a document.",
+    "invitacionNoDisponible": "Email invitations to drivers are not sent yet.",
+    "estadoInicial": "The driver stays as Pending paperwork until you upload the required documents.",
+    "guardar": "Create driver",
+    "guardando": "Creating…"
+  },
+  "conductorEditar": {
+    "titulo": "Edit driver",
+    "guardar": "Save changes",
+    "numeroLegajo": "Employee number",
+    "notas": "Notes",
+    "leyendaCanonicos": "Name, document, email and phone are managed on the person record, outside Fleet.",
+    "licenciaAparte": "License details are edited from the documents tab.",
+    "campos": {
+      "numeroLegajo": "employee number",
+      "notas": "notes"
+    },
+    "errorCarga": "We could not load the driver data"
+  },
+  "conductorEstado": {
+    "titulo": "Change driver status",
+    "estadoActual": "Current status",
+    "nuevoEstado": "New status",
+    "sinDestinos": "There is no available change from this status.",
+    "suspendidoSinVuelta": "A suspended driver cannot be reinstated from here. Check with your organization administrator.",
+    "motivo": "Reason",
+    "motivoAyuda": "Optional. It is recorded on the change event, not on the driver record.",
+    "confirmar": "Change status"
+  },
+  "conductorBaja": {
+    "titulo": "Deactivate driver",
+    "descripcion": "You are about to deactivate {{nombre}}. All history is kept and you can reactivate them any time.",
+    "noDesasigna": "Deactivating does not unassign anything on its own: if they have a vehicle or a device linked, unlink those first.",
+    "bloqueadaPorAsignaciones": "This driver has active assignments. Unlink them before deactivating.",
+    "etiquetaTipeo": "Type {{valor}} to confirm",
+    "confirmar": "Deactivate"
+  },
+  "conductorReactivar": {
+    "titulo": "Reactivate driver",
+    "descripcion": "You are about to reactivate {{nombre}}.",
+    "noResetaEstado": "They come back with the same operational status they had before. Check their paperwork before assigning a vehicle.",
+    "confirmar": "Reactivate"
+  },
+  "conductorEliminar": {
+    "titulo": "Delete permanently",
+    "descripcion": "You are about to delete {{nombre}} for good. This cannot be undone.",
+    "etiquetaTipeo": "Type {{valor}} to confirm",
+    "confirmar": "Delete permanently",
+    "cancelar": "Cancel"
+  },
+  "conductorDetalle": {
+    "cargando": "Loading driver…",
+    "noEncontrado": {
+      "titulo": "Driver not found",
+      "descripcion": "This driver does not exist or does not belong to your organization."
+    },
+    "error": {
+      "titulo": "We could not load the driver",
+      "descripcion": "Try again in a few seconds.",
+      "tituloRefresco": "We could not refresh this driver"
+    },
+    "sinAcceso": {
+      "descripcion": "You need the flota.conductores.leer permission to view this record."
+    },
+    "hero": {
+      "legajo": "Employee no. {{valor}}",
+      "sinLegajo": "No employee number",
+      "dni": "ID {{valor}}",
+      "telefono": "Phone {{valor}}",
+      "conduce": "Drives {{patente}}",
+      "sinVehiculo": "No vehicle assigned",
+      "altaOperativa": "In the fleet since {{fecha}}",
+      "identidadNoDisponible": "Personal data not available"
+    },
+    "acciones": {
+      "editar": "Edit",
+      "masAcciones": "More actions",
+      "cambiarEstado": "Change status",
+      "asignarVehiculo": "Assign vehicle",
+      "asignarDispositivo": "Link device",
+      "desactivar": "Deactivate",
+      "reactivar": "Reactivate",
+      "eliminar": "Delete permanently",
+      "sinPermiso": "You need the {{permiso}} permission",
+      "asignarOtroVehiculo": "Assign another vehicle"
+    },
+    "tabs": {
+      "info": "Overview",
+      "asignaciones": "Assignments",
+      "documentos": "License and documents",
+      "actividad": "Activity"
+    },
+    "miniStats": {
+      "titulo": "Activity for the period",
+      "kmTotales": "Total km",
+      "horas": "Hours driving",
+      "viajes": "Trips",
+      "score": "Driving score",
+      "sinFuente": "No telemetry data"
+    },
+    "info": {
+      "titulo": "Driver details",
+      "nombre": "Name",
+      "dni": "ID",
+      "email": "Email",
+      "telefono": "Phone",
+      "legajo": "Employee number",
+      "estado": "Status",
+      "alta": "Operational start",
+      "notas": "Notes",
+      "creado": "Created",
+      "modificado": "Modified",
+      "porUsuario": "by {{usuario}}",
+      "identidadCanonica": "Name, document and contact details are managed outside Fleet, on the person record.",
+      "identidadNoDisponible": "Not available to your organization yet.",
+      "emailSinFuente": "The driver email is not stored in Fleet."
+    },
+    "licencia": {
+      "titulo": "Driver's license",
+      "categoria": "Class",
+      "categoriaSinDato": "The license class cannot be stored yet.",
+      "numero": "Number",
+      "emision": "Issued",
+      "vencimiento": "Expires",
+      "diasParaVencer_one": "in {{count}} day",
+      "diasParaVencer_other": "in {{count}} days",
+      "vencidaHace_one": "expired {{count}} day ago",
+      "vencidaHace_other": "expired {{count}} days ago",
+      "vacioTitulo": "No license on file",
+      "vacioDescripcion": "Upload the license as a document so you can assign a vehicle.",
+      "cargar": "Upload license"
+    },
+    "asignaciones": {
+      "vehiculoTitulo": "Assigned vehicle",
+      "vehiculoVacioTitulo": "No vehicle assigned",
+      "vehiculoVacioDescripcion": "Assign a vehicle so they can operate.",
+      "verVehiculo": "View vehicle",
+      "asignarVehiculo": "Assign vehicle",
+      "desasignar": "Unassign",
+      "desasignarSinId": "To unassign you need to open the assignment history.",
+      "rol": "Role",
+      "desde": "Since",
+      "dispositivoTitulo": "Linked devices",
+      "dispositivoVacioTitulo": "No devices linked",
+      "dispositivoVacioDescripcion": "The link is used to attribute trips and events.",
+      "asignarDispositivo": "Link device",
+      "desvincular": "Unlink",
+      "atribucionNota": "This link is for attribution: the driver location always comes from the vehicle they drive.",
+      "historialTitulo": "Assignment history",
+      "historialColumnas": {
+        "vehiculo": "Vehicle",
+        "rol": "Role",
+        "desde": "From",
+        "hasta": "To",
+        "motivo": "Closing reason"
+      },
+      "historialVigente": "Current",
+      "historialVacioTitulo": "No assignments",
+      "historialVacioDescripcion": "This driver has not been assigned to any vehicle yet.",
+      "historialErrorTitulo": "We could not load the history",
+      "motivoSinEspecificar": "Not specified",
+      "masVigentes_one": "This driver has {{count}} more open assignment. It is in the history below.",
+      "masVigentes_other": "This driver has {{count}} more open assignments. They are in the history below."
+    },
+    "documentos": {
+      "titulo": "Documents",
+      "agregar": "Add document",
+      "renovarLicencia": "Renew license",
+      "columnas": {
+        "documento": "Document",
+        "numero": "Number",
+        "estado": "Status",
+        "vencimiento": "Expiry",
+        "archivo": "File",
+        "acciones": "Actions"
+      },
+      "verArchivo": "View file",
+      "sinArchivo": "No file",
+      "eliminar": "Delete",
+      "vacioTitulo": "No documents uploaded",
+      "vacioDescripcion": "Upload the license and the required paperwork so they can go on duty.",
+      "errorTitulo": "We could not load the documents",
+      "sinPermisoTitulo": "No access to documents",
+      "sinPermisoDescripcion": "You need the flota.conductores.gestionar-documentos permission to view this section.",
+      "obligatoriosTitulo": "Required paperwork",
+      "obligatoriosDescripcion": "While a required document is expired or missing, the driver cannot go On duty.",
+      "subir": "Upload"
+    },
+    "actividad": {
+      "sinFuenteTitulo": "No telemetry data",
+      "sinFuenteDescripcion": "Trips per driver do not have an available data source yet."
+    },
+    "ubicacion": {
+      "titulo": "Current location",
+      "sinFuenteTitulo": "No location data",
+      "sinFuenteDescripcion": "The driver's location comes from the vehicle they drive and has no data source available yet."
+    },
+    "auditoria": {
+      "titulo": "Audit",
+      "sinNombreUsuario": "We cannot show which user made each change yet."
+    }
+  },
+  "documentoConductor": {
+    "titulo": "Upload document",
+    "tipo": "Document type",
+    "tipoPlaceholder": "Pick a type",
+    "numero": "Number",
+    "fechaEmision": "Issue date",
+    "fechaVencimiento": "Expiry date",
+    "urlExterna": "Link to the file",
+    "urlExternaAyuda": "It must start with https. Optional: you can save the details now and add the file later.",
+    "sinBinariosAviso": "Files are not uploaded for now: we store the link to wherever it is already published.",
+    "guardar": "Upload document",
+    "guardando": "Uploading…",
+    "cancelar": "Cancel",
+    "eliminarTitulo": "Delete document",
+    "eliminarDescripcion": "You are about to delete {{documento}} from the driver record.",
+    "eliminarNoBorraArchivo": "The original file is untouched: only the record in Fleet is deleted.",
+    "eliminarConfirmar": "Delete"
+  },
+  "asignacionConductor": {
+    "titulo": "Assign driver",
+    "descripcion": "Pick a driver from your organization for this vehicle.",
+    "conductor": "Driver",
+    "conductorPlaceholder": "Pick a driver",
+    "rol": "Role",
+    "rolPrincipal": "Primary",
+    "rolSecundario": "Secondary",
+    "rolAyuda": "A vehicle has a single primary driver at a time.",
+    "sinDisponibles": "There are no drivers available to assign.",
+    "sinDisponiblesCta": "Go to drivers",
+    "cambiarTitulo": "Change driver",
+    "cambiarDescripcion": "You are about to replace the driver assigned to this vehicle.",
+    "cambiarNoAtomico": "The change takes two steps: the current driver is removed first and the new one is assigned after. If the second step fails, the vehicle is left without a driver.",
+    "asignar": "Assign",
+    "asignando": "Assigning…",
+    "exitoAsignar": "Driver assigned.",
+    "desasignarTitulo": "Remove driver",
+    "desasignarDescripcion": "You are about to remove {{nombre}} from this vehicle. History is kept.",
+    "desasignar": "Remove driver",
+    "desasignando": "Removing…",
+    "exitoDesasignar": "Driver unassigned.",
+    "motivo": "Reason",
+    "motivoAyuda": "It is recorded in the assignment history.",
+    "cancelar": "Cancel",
+    "sinPermiso": "You need the flota.vehiculos.asignar-conductor permission",
+    "sinPermisoLectura": "You need the flota.conductores.leer permission to see the list.",
+    "buscar": "Search driver",
+    "buscarPlaceholder": "Search by name or document",
+    "limpiarBusqueda": "Clear search",
+    "sinResultados": "No driver matches the search.",
+    "cargando": "Loading drivers…",
+    "soloPrimeros": "Showing the first {{cantidad}}. If you cannot find the driver, look them up from the list.",
+    "actualizar": "Refresh list",
+    "noAvisaAlConductor": "The assignment does not notify the driver.",
+    "errorElegirOtro": "That driver cannot be assigned right now. Pick another one or review their status and license.",
+    "errorConflicto": "The assignment changed while you were filling the form. Refresh and try again.",
+    "errorNoEncontrado": "We could not find that driver or assignment. Refresh the screen.",
+    "errorGenerico": "We could not complete the operation. Check the current state before retrying.",
+    "identidadNoDisponible": "Identity not available",
+    "cambioAMediasTitulo": "The vehicle was left without a driver",
+    "cambioAMedias": "{{nombre}} was removed but the new driver was not assigned. Try the assignment again: the removal step is not repeated."
+  },
+  "vinculoDispositivoConductor": {
+    "titulo": "Link device",
+    "descripcion": "The link is used to attribute trips and events to this driver.",
+    "dispositivo": "Device",
+    "dispositivoPlaceholder": "Pick a device",
+    "notas": "Notes",
+    "sinDisponibles": "There are no devices to link.",
+    "sinDisponiblesCta": "Go to devices",
+    "atribucionAviso": "Linking a device does not install it on a vehicle nor change its inventory status.",
+    "asignar": "Link",
+    "asignando": "Linking…",
+    "exitoAsignar": "Device linked.",
+    "cerrarTitulo": "Unlink device",
+    "cerrarDescripcion": "You are about to close the link with {{dispositivo}}. History is kept.",
+    "cerrar": "Unlink",
+    "cerrando": "Unlinking…",
+    "exitoCerrar": "Device unlinked.",
+    "motivo": "Reason",
+    "motivoAyuda": "It is recorded in the link history.",
+    "cancelar": "Cancel",
+    "sinPermiso": "You need the flota.conductores.asignar-dispositivo permission"
+  },
+  "licenciaVisible": {
+    "sin_cargar": "Not on file",
+    "sin_vencimiento": "No expiry date",
+    "vencida": "Expired",
+    "vigente": "Valid"
+  },
+  "asignacionVehiculo": {
+    "titulo": "Assign vehicle",
+    "descripcion": "Pick a vehicle from your organization for this driver.",
+    "vehiculo": "Vehicle",
+    "cargando": "Loading vehicles…",
+    "sinDisponibles": "There are no active vehicles in your organization.",
+    "sinDisponiblesCta": "Go to vehicles",
+    "sinPatente": "No plate",
+    "buscar": "Search vehicle",
+    "buscarPlaceholder": "Search by plate, alias, make or model",
+    "limpiarBusqueda": "Clear search",
+    "sinResultados": "No vehicle matches your search.",
+    "soloPrimeros": "Showing the first {{cantidad}} of {{total}}. If you cannot find the vehicle, look it up from the list.",
+    "sinPermisoLectura": "You need the {{permiso}} permission to see the vehicle list.",
+    "asignar": "Assign vehicle",
+    "noLiberaElActual": "This does NOT release the vehicle they already drive: it adds an assignment. To close the previous one, use \"Remove\" on the Assignments tab.",
+    "listaSinFiltrar": "Every active vehicle is listed, including those that already have a driver: one with a secondary driver can still take a primary. If the one you pick already has a primary driver, the assignment is rejected on save.",
+    "sinDisponiblesSinDispositivo": "Every active vehicle already has a GPS unit installed. You can unlink one, or add the vehicle that is missing.",
+    "listaFiltradaSinDispositivo": "Only active vehicles with no GPS installed are listed. The server resolves that filter over the current links: if the one you want is missing, it already has a unit."
+  },
+  "asignacionAVehiculo": {
+    "titulo": "Assign to a vehicle",
+    "descripcion": "Pick the vehicle this unit will be installed in. It moves to «Installed» and its positions start counting for that vehicle.",
+    "vehiculo": "Vehicle",
+    "asignar": "Install in vehicle",
+    "asignando": "Installing…",
+    "cancelar": "Cancel"
+  },
+  "mapa": {
+    "titulo": "Live map",
+    "subtitulo": "Where each vehicle that is reporting its position is.",
+    "actualizando": "Refreshing…",
+    "sinPatente": "No plate",
+    "sinAcceso": {
+      "titulo": "You can't see this organization's map",
+      "descripcion": "You are missing the {{permiso}} permission. Ask whoever manages access for this organization.",
+      "volver": "Back to home"
+    },
+    "panel": {
+      "titulo": "Vehicles on the map",
+      "colapsar": "Collapse panel",
+      "expandir": "Show panel",
+      "buscarEtiqueta": "Search",
+      "buscar": "Plate or driver",
+      "enElMapa_one": "{{count}} vehicle on the map",
+      "enElMapa_other": "{{count}} vehicles on the map",
+      "vacioSinResultados": "No vehicle matches your filters.",
+      "limpiar": "Clear filters",
+      "coinciden_one": "{{visibles}} of {{total}} matches your filters",
+      "coinciden_other": "{{visibles}} of {{total}} match your filters",
+      "quizaFueraDelMapa_one": "It may be the vehicle that is not on the map. You can still find it in the vehicle list.",
+      "quizaFueraDelMapa_other": "It may be among the {{count}} vehicles that are not on the map. You can still find them in the vehicle list."
+    },
+    "chip": {
+      "sinConductor": "No driver",
+      "conductorSinNombre": "Driver assigned"
+    },
+    "fueraDelMapa": {
+      "siempre": "The map only draws vehicles with a known position.",
+      "titulo_one": "1 vehicle of {{total}} is not on the map",
+      "titulo_other": "{{fuera}} vehicles of {{total}} are not on the map",
+      "descripcion": "They may have no GPS installed, the device may not have reported yet, or the position service may not be responding. The vehicles are still there.",
+      "cta": "See all vehicles"
+    },
+    "vacioSinDatos": {
+      "titulo": "No vehicles to show on the map yet",
+      "descripcion": "Once you register vehicles with GPS devices assigned, you will see them here in real time.",
+      "ctaVehiculos": "Go to vehicles",
+      "ctaAlta": "Add first vehicle"
+    },
+    "vacioSinPosicion": {
+      "titulo_one": "Your only vehicle has no known position",
+      "titulo_other": "None of your {{count}} vehicles has a known position",
+      "descripcion": "They may have no GPS installed, the devices may not have reported yet, or the position service may not be responding. The vehicles are still there: it is the map that cannot place them.",
+      "cta": "See all vehicles"
+    },
+    "error": {
+      "titulo": "We could not load the map",
+      "tituloRefresco": "We could not refresh the map",
+      "reintentar": "Retry"
+    },
+    "enlace": {
+      "titulo": "The linked vehicle is not on the map",
+      "descripcion": "It has no known position, or it no longer belongs to this organization. The rest of the fleet shows normally.",
+      "entendido": "Got it"
+    },
+    "detalle": {
+      "cerrar": "Close panel",
+      "abrirFicha": "Open full record",
+      "snapshot": "Data composed on {{momento}}",
+      "tabs": {
+        "actual": "Current",
+        "recorrido": "Route"
+      },
+      "ubicacion": {
+        "titulo": "Current location",
+        "coordenadas": "Coordinates",
+        "altitud": "Altitude",
+        "reportada": "Position reported"
+      },
+      "telemetria": {
+        "titulo": "Telemetry",
+        "velocidad": "Speed",
+        "rumbo": "Heading",
+        "motor": "Engine",
+        "ignicion": "Ignition",
+        "odometro": "Odometer"
+      },
+      "conductor": {
+        "titulo": "Driver"
+      },
+      "error": {
+        "titulo": "We could not load this vehicle",
+        "reintentar": "Retry"
+      }
+    },
+    "recorrido": {
+      "titulo": "Route history is not available yet",
+      "descripcion": "A vehicle’s past positions are not stored yet, so there is no route to replay. Once that information exists, the day’s route will show up here."
+    },
+    "motor": {
+      "encendido": "Running",
+      "apagado": "Off",
+      "ralenti": "Idling"
+    },
+    "ignicion": {
+      "si": "On",
+      "no": "Off"
+    },
+    "unidades": {
+      "kmh": "{{valor}} km/h",
+      "km": "{{valor}} km",
+      "grados": "{{valor}}°",
+      "metros": "{{valor}} m"
+    },
+    "vacioTotalDesconocido": {
+      "titulo": "No vehicle has a known position right now",
+      "descripcion": "They may have no GPS installed, the devices may not have reported yet, or the position service may not be responding. We could not count how many vehicles the organization has yet, so we do not know that number.",
+      "cta": "See all vehicles"
+    }
+  },
+  "estadoProblema": {
+    "detectado": "Detected",
+    "priorizado": "Prioritized",
+    "asignado": "Assigned",
+    "en_analisis": "Under review",
+    "silenciado": "Muted",
+    "resuelto": "Resolved",
+    "descartado": "Dismissed"
+  },
+  "severidadProblema": {
+    "critica": "Critical",
+    "alta": "High",
+    "media": "Medium",
+    "baja": "Low"
+  },
+  "tipoProblema": {
+    "dtc_critico": "Critical engine fault",
+    "dispositivo_sin_senal": "Device not reporting",
+    "gps_desconectado_ignicion_activa": "GPS disconnected while running",
+    "salida_geozona_critica": "Left a critical zone",
+    "entrada_zona_restringida": "Entered a restricted zone",
+    "exceso_velocidad_sostenido": "Sustained speeding",
+    "movimiento_sin_conductor": "Vehicle moving with no driver assigned",
+    "licencia_vencida": "Expired licence",
+    "vehiculo_incompleto": "Incomplete vehicle data",
+    "mantenimiento_vencido": "Overdue maintenance",
+    "bateria_baja": "Low battery",
+    "manipulacion_dispositivo": "Possible device tampering"
+  },
+  "origenSenal": {
+    "telemetria": "Telemetry",
+    "diagnostico": "Diagnostics",
+    "geozona": "Geofences",
+    "conductor": "Driver",
+    "dispositivo": "Device",
+    "calidad_datos": "Data quality",
+    "mantenimiento": "Maintenance",
+    "operacion": "Operations"
+  },
+  "tipoTimelineProblema": {
+    "detectado": "Detected",
+    "prioridad_cambiada": "Priority changed",
+    "asignado": "Assigned",
+    "comentario": "Comment",
+    "silenciado": "Muted",
+    "webhook": "Sent to integration",
+    "resuelto": "Resolved",
+    "descartado": "Dismissed"
+  },
+  "estadoSlaProblema": {
+    "vigente": "On time",
+    "por_vencer": "Due soon",
+    "vencido": "Overdue",
+    "sin_sla": "No target"
+  },
+  "slaAyuda": {
+    "vigente": "Still within the target time set by its rule.",
+    "por_vencer": "Close to missing the target time.",
+    "vencido": "Past the target time set by its rule.",
+    "sin_sla": "This problem has no target time: nobody is measuring how long it takes to resolve."
+  },
+  "factorPrioridad": {
+    "severidad_base": "Rule severity",
+    "contexto_operativo": "Operating context",
+    "urgencia": "Urgency",
+    "recurrencia": "Recurrence",
+    "criticidad_activo": "Vehicle criticality",
+    "impacto_potencial": "Potential impact",
+    "sla_restante": "Time left",
+    "ayuda": {
+      "severidad_base": "Starting point set by the severity of the rule that opened the problem.",
+      "contexto_operativo": "What the vehicle was doing when it was detected.",
+      "urgencia": "How long ago it was detected and how fast new signals arrive.",
+      "recurrencia": "How many times the same thing happened on this vehicle.",
+      "criticidad_activo": "Always adds 0: there is still no way to mark a vehicle as critical, so this factor cannot contribute points.",
+      "impacto_potencial": "What can happen if the problem is not handled.",
+      "sla_restante": "How much of the target time is left."
+    }
+  },
+  "prioridadDesglose": {
+    "titulo": "How the priority was calculated",
+    "aclaracionSuma": "The breakdown explains where the priority comes from, but it may not add up exactly to the number in the header: some factors are recalculated when the problem is opened and are not stored.",
+    "suma": "Sum of factors",
+    "desfasaje": "The factors add up to less than the stored priority: part of the calculation is redone when reading and was not recorded when the case was prioritised."
+  },
+  "accionProblema": {
+    "asignar": "Assign",
+    "silenciar": "Mute",
+    "resolver": "Resolve",
+    "ver_mapa": "View on map",
+    "ver_vehiculo": "View vehicle"
+  },
+  "tipoRegla": {
+    "telemetria": "Telemetry",
+    "diagnostico": "Diagnostics",
+    "geozona": "Geofences",
+    "conductor": "Driver",
+    "dispositivo": "Device",
+    "calidad_datos": "Data quality",
+    "mantenimiento": "Maintenance",
+    "operacion": "Operations"
+  },
+  "estadoEntregaWebhook": {
+    "pendiente": "Pending",
+    "enviado": "Delivered",
+    "fallido": "Failed",
+    "reintentando": "Retrying",
+    "agotado": "No attempts left"
+  },
+  "estadoWebhook": {
+    "inactivo": "Inactive",
+    "sin_envios": "No deliveries",
+    "activo": "Active",
+    "pendiente": "Pending",
+    "con_errores": "With errors",
+    "fallando": "Failing"
+  },
+  "estadoAlerta": {
+    "abierta": "Open",
+    "gestionada": "Handled",
+    "cerrada": "Closed"
+  },
+  "severidadAlerta": {
+    "alta": "High",
+    "media": "Medium",
+    "baja": "Low"
+  },
+  "condicionInvalida": {
+    "titulo": "Check the condition",
+    "enCondicion": "Condition {{indice}}",
+    "sinIndice": "In the overall rule condition",
+    "motivo": {
+      "version_no_soportada": "The condition format version is not supported.",
+      "combinador_no_soportado": "Conditions can only be combined with \"and\": all of them must be met.",
+      "cantidad_de_condiciones_invalida": "A rule needs between 1 and 10 conditions.",
+      "campo_desconocido": "That field cannot be used in a condition.",
+      "operador_no_admitido": "That operator cannot be used with that field.",
+      "tipo_de_valor_incompatible": "The value does not have the type that field and operator expect.",
+      "umbral_minutos_invalido": "Sustained minutes are required with \"sustained for\" and cannot be used with any other operator.",
+      "lista_in_invalida": "The value list must have between 1 and 50 items, with no duplicates.",
+      "json_no_parseable": "We could not read the condition.",
+      "desconocido": "The condition is not valid."
+    }
+  },
+  "centroError": {
+    "transicionBloqueada": "Moving problems between states is not enabled yet. This is not a temporary glitch: trying again gives the same result.",
+    "problemaCerrado": "This problem is already closed, so the action cannot be applied. Refresh to see its current state.",
+    "condicionInvalida": "Check the highlighted condition. Nothing was saved.",
+    "urlNoPermitida": "Fix the URL: it must be https and point to a public server.",
+    "conflicto": "Something changed while you were working. Refresh and choose again.",
+    "noEncontrado": "We could not find it: it may no longer exist or may not belong to your organization.",
+    "sinPermiso": "You do not have the permission required for this action.",
+    "moduloNoActivo": "Your organization does not have the Fleet module active.",
+    "validacion": "Check the highlighted fields.",
+    "red": "We could not reach the server. We do not know whether the change was saved: refresh before trying again.",
+    "generico": "We could not complete the action."
+  },
+  "centroBloqueado": {
+    "cambiarEstado": "Moving problems between statuses is not enabled yet: which transitions are allowed has not been defined, so no change can be saved. This is not a temporary failure — trying again gives the same result.",
+    "comentar": "Commenting is not available yet: the note cannot be recorded in the problem history. Assigning, muting and resolving are recorded.",
+    "exportar": "Exporting problems is not available yet.",
+    "filtros": "Filtering and sorting this list is not available yet. The full list is shown, ordered by priority.",
+    "alcanceRegla": "A rule cannot be narrowed down to specific vehicles, drivers or zones yet: this rule applies to the whole organization.",
+    "suscripciones": "You cannot choose which events an endpoint subscribes to yet, so it will not receive automatic deliveries. You can send a manual test with \"Test\".",
+    "reintentarEntregas": "Requeuing deliveries does not send them again yet: they would sit waiting without going out. That is why the action is unavailable.",
+    "ventanaDeGracia": "When you rotate, the system starts signing with the new secret immediately and the previous one stops working. Coordinate the change with the receiver before rotating.",
+    "gestionarAlerta": "Handling a signal is not available yet.",
+    "deteccionAlertas": "Signal detection is not connected yet: none can be recorded for now. An empty list does not mean there is nothing to review."
+  },
+  "centro": {
+    "problemas": {
+      "titulo": "Problem Center",
+      "subtitulo": "Open operational cases across your fleet, ordered by priority.",
+      "vacioSinResultados": {
+        "titulo": "No matches for the applied filters",
+        "limpiar": "Clear"
+      },
+      "error": {
+        "titulo": "We could not load the problems",
+        "reintentar": "Retry",
+        "tituloRefresco": "We could not refresh the queue"
+      },
+      "datosParciales": {
+        "titulo": "Context data is missing",
+        "descripcion": "We could not fetch the live state of the vehicle. The problem and its own data are still shown."
+      },
+      "sinValor": "—",
+      "sinAcceso": {
+        "titulo": "No access",
+        "descripcion": "You need the {{permiso}} permission to see this screen.",
+        "volver": "Back to dashboard"
+      },
+      "paginacion": {
+        "anterior": "Previous page",
+        "siguiente": "Next page",
+        "porPagina": "Per page",
+        "rango": "{{desde}}–{{hasta}} of {{total}}"
+      },
+      "actualizando": "Refreshing…",
+      "total_one": "{{count}} problem in your organization",
+      "total_other": "{{count}} problems in your organization",
+      "resumen": {
+        "linea": "On this page: {{enPagina}} problems · {{criticos}} critical · {{plazoVencido}} past their target time · {{sinResponsable}} unassigned",
+        "aclaracion": "These counts cover the problems on this page, not the whole organization: there is no summary of the total yet."
+      },
+      "vacioDeLaBandeja": {
+        "titulo": "No problems in this list",
+        "descripcion": "A problem is only opened when an active rule detects it and the signal that triggers it arrives. An empty list does not mean there is nothing to review: check your rules before assuming everything is fine."
+      }
+    },
+    "reglas": {
+      "titulo": "Problem rules",
+      "subtitulo": "Which signals become a problem, with what priority and what target time.",
+      "vacioSinDatos": {
+        "titulo": "No rules configured yet",
+        "descripcion": "Rules turn signals from your vehicles and drivers into actionable problems with a priority and a target time.",
+        "cta": "New rule"
+      },
+      "vacioSinResultados": {
+        "titulo": "No rule matches your filters",
+        "limpiar": "Clear"
+      },
+      "error": {
+        "titulo": "We could not load the rules",
+        "reintentar": "Retry",
+        "tituloRefresco": "We could not refresh the list",
+        "tituloAlternar": "We could not change the rule status"
+      },
+      "alcanceTodaLaOrganizacion": "Whole organization",
+      "conWebhook": "With webhook",
+      "sinWebhook": "No webhook",
+      "activa": "Active",
+      "inactiva": "Inactive",
+      "ordenFijo": "Sorted by name. Sorting and filtering this list is not available yet.",
+      "condicionSinTexto": "No readable description. The stored condition is the one that counts.",
+      "duplicarSufijo": " (copy)",
+      "vacioSinSeed": "If you expected to find rules already set up: starter rules are not loaded automatically into a new organization yet. You have not lost anything.",
+      "sinAcceso": {
+        "titulo": "You do not have access to rules",
+        "descripcion": "You need the {{permiso}} permission to view problem rules.",
+        "volver": "Back to home"
+      },
+      "acciones": {
+        "abrir": "Actions for {{nombre}}",
+        "sinPermiso": "You need the {{permiso}} permission."
+      },
+      "accion": {
+        "editar": "Edit",
+        "duplicar": "Duplicate",
+        "pausar": "Pause",
+        "activar": "Activate",
+        "probarWebhook": "Test webhook",
+        "verConductores": "View drivers"
+      },
+      "columnas": {
+        "regla": "Rule",
+        "estado": "Status",
+        "severidad": "Severity",
+        "condicion": "Condition",
+        "operacion": "Scope",
+        "plazo": "Target time",
+        "webhook": "Webhook",
+        "acciones": "Actions"
+      },
+      "plazo": {
+        "minutos_one": "{{count}} min",
+        "minutos_other": "{{count}} min",
+        "horas_one": "{{count}} h",
+        "horas_other": "{{count}} h"
+      },
+      "paginacion": {
+        "rango_one": "Showing {{desde}}–{{hasta}} of {{total}} rule",
+        "rango_other": "Showing {{desde}}–{{hasta}} of {{total}} rules",
+        "porPagina": "Per page",
+        "anterior": "Previous page",
+        "siguiente": "Next page"
+      },
+      "resumen": {
+        "titulo": "Rules summary",
+        "activas": "Active",
+        "activasDetalle_one": "of {{total}} rule",
+        "activasDetalle_other": "of {{total}} rules",
+        "criticas": "Critical",
+        "criticasDetalle": "active with critical severity",
+        "activaciones": "Triggers",
+        "activacionesDetalle": "which rule opened each problem is not recorded yet",
+        "conWebhook": "With webhook",
+        "conWebhookDetalle": "have an endpoint stored; they do not receive deliveries yet",
+        "sinDato": "—",
+        "deLaPagina": "These numbers cover the rules on this page, not the whole organization."
+      },
+      "campo": {
+        "velocidad_kmh": "Speed (km/h)",
+        "ignicion": "Ignition",
+        "en_movimiento": "Moving",
+        "minutos_sin_senal": "Minutes without signal",
+        "bateria_pct": "Device battery (%)",
+        "manipulacion_detectada": "Device tampering",
+        "dtc_criticidad": "Fault criticality",
+        "dtc_codigo": "Fault code (DTC)",
+        "conductor_asignado": "Has an assigned driver",
+        "dias_para_vencer": "Days to expiry",
+        "documento_vencido": "Expired document",
+        "vehiculo_incompleto": "Vehicle with incomplete data",
+        "mantenimiento_vencido": "Overdue maintenance"
+      },
+      "campoAyuda": {
+        "velocidad_kmh": "Speed reported by the GPS in the last signal.",
+        "ignicion": "Whether the engine is on according to the last GPS signal.",
+        "en_movimiento": "Whether the vehicle is moving according to the last GPS signal.",
+        "minutos_sin_senal": "Minutes elapsed since the last signal from the device.",
+        "bateria_pct": "Device battery charge, as a percentage.",
+        "manipulacion_detectada": "No source fills this field in yet: a rule using it is saved but never triggers.",
+        "dtc_criticidad": "Criticality of the diagnostic case that raised the fault.",
+        "dtc_codigo": "Code reported by the vehicle computer, for example P0300.",
+        "conductor_asignado": "Whether the vehicle currently has an assigned driver.",
+        "dias_para_vencer": "Days left before a required document expires. It is only checked when a signal arrives from the vehicle: nothing monitors it on its own.",
+        "documento_vencido": "Whether a required document has expired. It is only checked when a signal arrives from the vehicle: nothing monitors it on its own.",
+        "vehiculo_incompleto": "Whether the vehicle is missing data. It is only checked when a signal arrives from the vehicle: nothing monitors it on its own.",
+        "mantenimiento_vencido": "Reported by the Operations module, which does not exist yet: until then this field is never true."
+      },
+      "operador": {
+        "mayor": "is greater than",
+        "mayorIgual": "is greater than or equal to",
+        "menor": "is less than",
+        "menorIgual": "is less than or equal to",
+        "igual": "equals",
+        "en": "is any of",
+        "sostenidoPor": "stays for"
+      },
+      "modal": {
+        "tituloAlta": "New problem rule",
+        "tituloEditar": "Edit problem rule",
+        "subtitulo": "Define which signal opens a problem, with what severity and within what target time.",
+        "nombre": "Name",
+        "tipo": "Type",
+        "tipoAyuda": "Where the signal evaluated by this rule comes from.",
+        "tipoFijo": "The type is set when the rule is created and cannot be changed afterwards.",
+        "severidad": "Severity",
+        "plazo": "Target time",
+        "plazoAyuda": "Time to resolve the problem. It is suggested by severity and you can change it.",
+        "condicion": "Condition",
+        "condicionAyuda": "Every condition must be met for the rule to open a problem.",
+        "combinadorFijo": "and",
+        "campo": "Field",
+        "operador": "Operator",
+        "valor": "Value",
+        "valorPlaceholder": "Choose a value",
+        "umbral": "Minutes",
+        "umbralAyuda": "Minutes the condition must hold without interruption. Signal history is not stored yet, so a sustained condition may never be met.",
+        "listaAyuda": "Separate values with commas.",
+        "verdadero": "Yes",
+        "falso": "No",
+        "agregarCondicion": "Add condition",
+        "quitarCondicion": "Remove condition {{indice}}",
+        "minimoCondiciones": "A rule needs at least one condition.",
+        "maximoCondiciones": "A rule allows up to {{maximo}} conditions.",
+        "webhook": "Webhook",
+        "webhookAyuda": "The rule stores the endpoint, but it does not notify it when it opens a problem yet: automatic delivery is not built. For now the only thing that produces a delivery is the \"Test\" button in Integrations.",
+        "webhookNinguno": "No webhook",
+        "webhookCargando": "Loading webhooks…",
+        "webhookSinPermiso": "To choose a webhook you need the {{permiso}} permission. Whatever the rule already has stays as it is.",
+        "webhookYaConfigurado": "Webhook already configured",
+        "webhookNoSeDesvincula": "Switching back to \"No webhook\" does not unlink the current one yet: the rule keeps the same stored endpoint. Every other change is saved.",
+        "accionSugerida": "Suggested action",
+        "accionSugeridaAyuda": "What the person handling the problem should do. It is shown on the ticket.",
+        "activa": "Rule active",
+        "activaAyuda": "A paused rule does not evaluate signals and does not open new problems.",
+        "guardar": "Save rule"
+      }
+    },
+    "integraciones": {
+      "titulo": "Integrations",
+      "subtitulo": "Outgoing webhooks signed with HMAC towards your systems.",
+      "vacioSinDatos": {
+        "titulo": "No webhooks configured yet",
+        "descripcion": "Connect Orbi to your systems (ERP, TMS, service desk) by receiving events signed with HMAC.",
+        "cta": "New webhook"
+      },
+      "vacioSinResultados": {
+        "titulo": "No webhook matches your filters",
+        "limpiar": "Clear filters"
+      },
+      "vacioSinEntregas": {
+        "titulo": "No deliveries recorded yet",
+        "descripcion": "An endpoint cannot subscribe to events yet, so the only thing that produces a delivery is the “Test” button."
+      },
+      "error": {
+        "titulo": "We could not load the integrations",
+        "tituloAlternar": "We could not change the webhook status"
+      },
+      "entregasDeTodaLaOrganizacion": "The most recent deliveries across the whole organization are shown; the endpoint filter applies to what has already been loaded.",
+      "secreto": {
+        "titulo": "Save the secret now",
+        "descripcion": "This is the only time it is shown in full. Afterwards you will only see its prefix.",
+        "copiar": "Copy",
+        "copiado": "Copied",
+        "entendido": "I saved it",
+        "subtituloAlta": "The webhook was created. This is the secret used to sign its deliveries.",
+        "subtituloRotacion": "The secret was rotated. This is the new value deliveries will be signed with.",
+        "confirmacion": "I saved the secret somewhere safe",
+        "errorCopiar": "We could not copy it. Select it manually and copy it before closing: it cannot be requested again."
+      },
+      "probar": {
+        "accion": "Test",
+        "aclaracion": "Sends a signed test message to the real URL. A successful test does not mark the endpoint as healthy: it only adds one delivery to the history.",
+        "titulo": "Test {{nombre}}",
+        "resultadoAclaracion": "This is the result of the test delivery. Receiving it does not mark the endpoint as healthy."
+      },
+      "firma": {
+        "titulo": "HMAC signature",
+        "descripcion": "Every delivery is signed. The receiver must validate all three: the timestamp, the signature and the event id.",
+        "stringCanonico": "Signed string",
+        "tolerancia": "Timestamp tolerance",
+        "toleranciaPendiente": "—",
+        "headerSignature": "The HMAC signature of the message body.",
+        "headerEventId": "Unique event identifier. Use it to discard duplicates.",
+        "headerEventType": "Event type, with its public name.",
+        "headerTimestamp": "Time of the delivery. Use it to reject replayed messages.",
+        "rawBody": "The body is signed exactly as it is transmitted, without re-serializing it. The v1= prefix is part of the header value.",
+        "validacionTriple": "The receiver must validate all three: that the timestamp is within tolerance, that the signature matches, and that the event id has not been processed before.",
+        "huellaDe": "Secret fingerprint for {{nombre}}",
+        "rotar": "Rotate secret",
+        "sinEndpoint": "Set up a webhook to see its fingerprint and rotate its secret."
+      },
+      "eventos": {
+        "titulo": "Available events",
+        "noDisponible": "Not available",
+        "aclaracionSinSuscripciones": "This catalog describes the system events. An endpoint cannot subscribe to any of them yet."
+      },
+      "sinEnviosAun": "Nothing has been sent to this endpoint yet.",
+      "ultimaEntrega": "Last delivery: {{estado}} · {{fecha}}",
+      "lista": {
+        "titulo": "Configured webhooks"
+      },
+      "sinAcceso": {
+        "titulo": "You do not have access to integrations",
+        "descripcion": "You need the {{permiso}} permission to view your organization webhooks.",
+        "volver": "Back to home"
+      },
+      "acciones": {
+        "abrir": "Actions for {{nombre}}",
+        "sinPermiso": "You need the {{permiso}} permission."
+      },
+      "accion": {
+        "editar": "Edit",
+        "probar": "Test",
+        "verEntregas": "View deliveries",
+        "pausar": "Pause",
+        "activar": "Activate",
+        "eliminar": "Delete"
+      },
+      "filtros": {
+        "busqueda": "Search",
+        "busquedaPlaceholder": "Name or URL",
+        "estado": "Status",
+        "estadoTodos": "All",
+        "estadoPrevalece": "When you pick a status, paused endpoints are shown too.",
+        "soloActivos": "Active only",
+        "soloEstaPagina": "Filtering over the {{cargados}} webhooks loaded, out of {{total}} in the organization."
+      },
+      "salud": {
+        "titulo": "Integrations status",
+        "activos": "Active webhooks",
+        "activosDetalle_one": "of {{total}} configured",
+        "activosDetalle_other": "of {{total}} configured",
+        "entregas": "Deliveries 24 h",
+        "entregasDetalle": "how this is counted is not defined yet",
+        "fallos": "Open failures",
+        "fallosDetalle": "how this is counted is not defined yet",
+        "sinDato": "—",
+        "deLaPagina": "These numbers cover the webhooks on this page, not the whole organization."
+      },
+      "entregas": {
+        "titulo": "Latest deliveries",
+        "evento": "Event",
+        "endpoint": "Endpoint",
+        "endpointNoCargado": "Not on this page",
+        "estado": "Status",
+        "intentos": "Attempts",
+        "status": "HTTP status",
+        "sinStatus": "No response",
+        "proximoIntento": "Next attempt",
+        "error": "We could not load the deliveries",
+        "filtradoPor": "Showing only the already loaded deliveries for {{nombre}}.",
+        "quitarFiltro": "Show all",
+        "soloEstaPagina": "The {{cargadas}} most recent ones were loaded, out of {{total}} in the organization. There is no way to fetch older ones."
+      },
+      "modal": {
+        "tituloAlta": "New webhook",
+        "tituloEditar": "Edit webhook",
+        "subtitulo": "Orbi will sign every delivery with HMAC to the URL you provide.",
+        "nombre": "Name",
+        "url": "URL",
+        "urlAyuda": "It must be https and point to a public server.",
+        "activo": "Webhook active",
+        "activoAyuda": "A paused webhook receives no deliveries, not even test ones.",
+        "guardar": "Save webhook"
+      },
+      "eliminar": {
+        "titulo": "Delete {{nombre}}",
+        "descripcion": "The endpoint stops receiving deliveries. The history of what was already sent is kept.",
+        "confirmar": "Delete webhook"
+      },
+      "rotar": {
+        "titulo": "Rotate the secret for {{nombre}}",
+        "confirmar": "Rotate secret"
+      },
+      "vacioSinEntregasDelEndpoint": {
+        "titulo": "None of the loaded deliveries belongs to {{nombre}}",
+        "verTodas": "Show all deliveries"
+      }
+    },
+    "submenu": {
+      "vistas": "Views",
+      "configurar": "Configure",
+      "sala": "Operations room",
+      "timeline": "Timeline",
+      "reglas": "Rules",
+      "integraciones": "Integrations",
+      "sinPermiso": "You need the {{permiso}} permission to open this.",
+      "alternar": "Show or hide the Center menu",
+      "kanban": "Kanban by status"
+    },
+    "sala": {
+      "cola": {
+        "titulo": "Prioritized queue",
+        "aclaracionOrden": "Ordered by priority, as resolved by the server.",
+        "aclaracionSinFiltros": "Every problem in the organization is shown, open and closed: this queue cannot be filtered or sorted yet.",
+        "senales_one": "{{count}} signal",
+        "senales_other": "{{count}} signals",
+        "sinPatente": "No plate",
+        "sinResponsable": "Unassigned"
+      },
+      "detalle": {
+        "titulo": "Details",
+        "vacio": "Pick a problem from the queue to see its details.",
+        "quePaso": "What happened",
+        "sinDescripcion": "This problem has no description.",
+        "accionSugerida": "Suggested action",
+        "detectado": "Detected",
+        "vehiculo": "Vehicle",
+        "conductor": "Driver",
+        "responsable": "Owner",
+        "senales": "Grouped signals",
+        "senalSinDetalle": "No detail",
+        "errorTitulo": "We could not load the problem details",
+        "abrirTicket": "Open full ticket"
+      },
+      "acciones": {
+        "sinPermiso": "You need the {{permiso}} permission.",
+        "asignarBloqueado": "An owner cannot be picked yet: there is no list of assignable people for your organization."
+      },
+      "sla": {
+        "enPlazo_one": "Due in {{count}} minute",
+        "enPlazo_other": "Due in {{count}} minutes",
+        "vencido_one": "Overdue by {{count}} minute",
+        "vencido_other": "Overdue by {{count}} minutes",
+        "sinPlazo": "No target time",
+        "sinDato": "No data"
+      },
+      "contexto": {
+        "titulo": "Context",
+        "operativo": "Live vehicle state",
+        "ignicion": "Ignition",
+        "ignicionSi": "On",
+        "ignicionNo": "Off",
+        "velocidad": "Speed",
+        "velocidadValor": "{{valor}} km/h",
+        "ultimaSenal": "Last signal",
+        "sinVehiculo": "This problem is not tied to a vehicle, so it has no live state.",
+        "otrosDelVehiculo": "Other problems of this vehicle",
+        "otrosDelVehiculoAclaracion": "Only the ones on this page of the queue.",
+        "otrosDelVehiculoVacio": "No other problem of this vehicle on this page."
+      }
+    },
+    "timeline": {
+      "titulo": "Timeline",
+      "ventana": "From {{desde}} to {{hasta}}",
+      "ventanaAclaracion": "This is the period covered by the problems on this page. Another range cannot be chosen yet.",
+      "ahora": "Now",
+      "leyenda": "Severity",
+      "aclaracionOrigenes": "A problem with more than one source shows up in every matching lane: it is the same case, not several.",
+      "fueraDeLosCarriles_one": "{{count}} problem on this page has no known source, so it does not show up in any lane.",
+      "fueraDeLosCarriles_other": "{{count}} problems on this page have no known source, so they do not show up in any lane.",
+      "carril": {
+        "eventos_one": "{{count}} problem",
+        "eventos_other": "{{count}} problems",
+        "criticos_one": "{{count}} critical",
+        "criticos_other": "{{count}} critical",
+        "vacio": "No problems from this source",
+        "geozonaDiferido": "Zones do not raise problems yet."
+      },
+      "evento": {
+        "abrir": "See the details of {{titulo}}"
+      },
+      "insight": {
+        "ajustarRegla": "Adjust rules"
+      }
+    },
+    "silenciar": {
+      "titulo": "Mute problem",
+      "descripcion": "Use it only when there is an operational reason.",
+      "motivo": "Reason",
+      "motivoAyuda": "It is recorded in the problem history.",
+      "ventana": "Window",
+      "ventana30": "30 minutes",
+      "ventana120": "2 hours",
+      "ventanaFinDeTurnoPendiente": "Muting “until end of shift” is not available yet: your organization working hours are not defined.",
+      "notificaciones": "Mute notifications",
+      "webhooks": "Mute deliveries to integrations",
+      "aclaracion": "Muting starts now. It does not delete signals, does not stop detection and does not pause the target time: the problem can still go overdue.",
+      "confirmar": "Mute",
+      "webhooksAclaracion": "No delivery goes out for a problem yet, so for now this option is stored and changes nothing."
+    },
+    "resolver": {
+      "titulo": "Resolve problem",
+      "descripcion": "Record the closure before changing the state.",
+      "resultado": "Result",
+      "resuelto": "Resolved",
+      "resueltoAyuda": "It was handled and the case is closed.",
+      "descartado": "Dismissed",
+      "descartadoAyuda": "No action was needed.",
+      "evidencia": "Evidence",
+      "evidenciaAyuda": "What was done, or why it is dismissed. It stays in the history.",
+      "aclaracion": "This is a final closure: the problem cannot be reopened from here.",
+      "aclaracionIntegracion": "The closure is not sent to your integrations: that connection is not built yet.",
+      "confirmar": "Close problem"
+    },
+    "kanban": {
+      "aclaracionPagina": "The board groups the problems on this page of the inbox, not every problem in the organisation: filtering and sorting are not available yet.",
+      "columnaVacia": "No problems in this column",
+      "verMas_one": "Show 1 more from this page",
+      "verMas_other": "Show {{count}} more from this page",
+      "fueraDelTableroSilenciados_one": "1 muted problem does not fit in any column. It is still open and its deadline is running.",
+      "fueraDelTableroSilenciados_other": "{{count}} muted problems do not fit in any column. They are still open and their deadlines are running.",
+      "fueraDelTableroCerrados_one": "1 closed problem falls outside “Resolved today”: it was not last updated today.",
+      "fueraDelTableroCerrados_other": "{{count}} closed problems fall outside “Resolved today”: they were not last updated today.",
+      "columna": {
+        "detectado": "Detected",
+        "en_analisis": "Under analysis",
+        "esperando_externo": "Waiting on third party",
+        "resuelto_hoy": "Resolved today"
+      },
+      "columnaAyuda": {
+        "detectado": "Detected, prioritised and already assigned to someone.",
+        "en_analisis": "Someone is working on them.",
+        "esperando_externo": "Which problems belong here is not defined yet, so the column stays empty.",
+        "resuelto_hoy": "Resolved and dismissed problems last updated today, based on your device date."
+      }
+    },
+    "ticket": {
+      "volver": "Back",
+      "noExiste": "We could not find this problem",
+      "actualizado": "Last updated",
+      "sinAcciones": "This problem is closed: there are no actions left to apply.",
+      "tipoDeProblema": "Type: {{tipo}}",
+      "sinSenales": "This problem has no associated signals.",
+      "porUsuario": "By {{nombre}}",
+      "tabs": {
+        "resumen": "Summary",
+        "timeline": "Timeline",
+        "regla": "Rule context",
+        "integraciones": "Integrations"
+      },
+      "timelineVacio": {
+        "titulo": "No activity yet",
+        "descripcion": "Actions applied to this problem will be recorded here."
+      },
+      "regla": {
+        "titulo": "Rule context",
+        "descripcion": "How the rule that opened this problem has been behaving.",
+        "sinVinculo": "Which rule opened each problem is not stored yet, so we cannot show its behaviour here. You can review your rules from their own screen."
+      },
+      "integraciones": {
+        "titulo": "Deliveries to your systems",
+        "sinEntregas": "This problem has not produced any delivery yet.",
+        "sinCorrelacion": "Which delivery belongs to each problem is not stored yet, so we cannot show them here. The full delivery log lives in Integrations.",
+        "configurar": "Go to Integrations",
+        "intentos_one": "{{count}} attempt",
+        "intentos_other": "{{count}} attempts"
+      }
+    }
+  },
+  "senales": {
+    "badge": {
+      "conConteo_one": "{{severidad}} · {{count}}",
+      "conConteo_other": "{{severidad}} · {{count}}"
+    },
+    "celda": {
+      "sinConectar": "—",
+      "sinSenales": "No signals"
+    },
+    "ayuda": {
+      "sinConectar": "Signal detection is not connected yet. An empty cell here does not mean the vehicle is fine.",
+      "sinSenales": "There are no open signals for this vehicle.",
+      "indiceParcial": "There are more signals than were loaded: this vehicle may have one that is not shown here."
+    },
+    "aviso": {
+      "deteccion_sin_conectar": {
+        "titulo": "Signal detection is not connected yet",
+        "descripcion": "No vehicle can show signals yet. Seeing none does NOT mean the fleet has been checked: it means nothing is watching yet."
+      },
+      "indice_parcial": {
+        "titulo": "Only the most recent signals are shown",
+        "descripcion": "There are more signals than fit on one page. A vehicle with no mark here may still have an open one."
+      },
+      "sin_fuente": {
+        "titulo": "We could not load the signals",
+        "descripcion": "Everything else is complete and up to date. Only the signal layer is missing, so no vehicle can be considered checked."
+      }
+    },
+    "panel": {
+      "titulo": "Signals",
+      "subtitulo": "Active and recent · read only",
+      "sinFecha": "No date",
+      "sinCorrelacion": "Which problem each signal belongs to is not available yet, so the link opens the Problem Center without preselecting one.",
+      "irAlCentro": "Go to the Problem Center"
+    }
   }
 }

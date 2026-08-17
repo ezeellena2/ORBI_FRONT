@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { flotaKeys } from '../query-keys'
 import { dispositivosService } from '@/services/flota/dispositivos-service'
-import type { CambiarEstadoStockRequest, DispositivoDetalleDto } from '@/services/contracts/flota'
+import type { CambiarEstadoStockRequest } from '@/services/contracts/flota'
 
 /**
  * Transicion de estado de STOCK del dispositivo (`POST .../estado-stock`).
@@ -13,17 +13,23 @@ import type { CambiarEstadoStockRequest, DispositivoDetalleDto } from '@/service
  *
  * La UI ofrece solo los destinos que la maquina admite desde el estado actual, pero eso es
  * ergonomia: quien decide sigue siendo el servidor.
+ *
+ * ⚠️ **RESPONDE 204 SIN CUERPO** (`DispositivosController.CambiarEstadoStock` → `NoContent()`, y su
+ * docstring lo dice literal: *"204 sin cuerpo, a proposito: es un cambio de estado, no una
+ * lectura"*). Este hook tipaba la respuesta como `DispositivoDetalleDto` y sembraba `respuesta.data`
+ * en la cache del detalle: con axios eso es el **string vacio**, o sea que la ficha se quedaba
+ * renderizando un DTO inexistente hasta que aterrizaba el refetch de la invalidacion.
  */
 export function useCambiarEstadoStockDispositivo(dispositivoId: string) {
   const queryClient = useQueryClient()
 
-  return useMutation<DispositivoDetalleDto, unknown, CambiarEstadoStockRequest>({
+  return useMutation<void, unknown, CambiarEstadoStockRequest>({
     mutationFn: async (data) => {
-      const respuesta = await dispositivosService.cambiarEstadoStock(dispositivoId, data)
-      return respuesta.data
+      await dispositivosService.cambiarEstadoStock(dispositivoId, data)
     },
-    onSuccess: (detalle) => {
-      queryClient.setQueryData(flotaKeys.dispositivoDetalle(dispositivoId), detalle)
+    onSuccess: () => {
+      // 204 sin cuerpo: solo se invalida el prefijo. `['flota','dispositivos']` alcanza al listado,
+      // al detalle y al historial de stock, que es justo lo que esta transicion acaba de mover.
       void queryClient.invalidateQueries({ queryKey: flotaKeys.dispositivos() })
     },
   })

@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import {
   aQueryDispositivos,
   useFlotaDispositivosFiltersStore,
+  type EntradaQueryDispositivos,
   type FlotaFiltrosDispositivos,
 } from './flota-dispositivos-filters-store'
 
@@ -64,6 +65,7 @@ describe('aQueryDispositivos', () => {
     stock: '',
     modelo: '',
     asignacion: '',
+    conexion: '',
     soloActivos: true,
     page: 1,
     pageSize: 20,
@@ -79,11 +81,34 @@ describe('aQueryDispositivos', () => {
     expect(query).not.toHaveProperty('stock')
     expect(query).not.toHaveProperty('modelo')
     expect(query).not.toHaveProperty('asignacion')
+    expect(query).not.toHaveProperty('conexion')
   })
 
-  it('no manda `conexion`: el server no declara el parámetro y lo descartaría en silencio', () => {
-    // D-S3-33. Un query param que el binder no conoce se ignora SIN ERROR: el usuario creería estar
-    // filtrando y recibiría la lista entera.
-    expect(aQueryDispositivos({ ...base, stock: 'instalado' })).not.toHaveProperty('conexion')
+  it('SÍ manda `conexion` cuando hay valor: el server lo declara desde slice-05 `f-03`', () => {
+    // Este test decía lo contrario ("el server no declara el parámetro", D-S3-33) y quedó viejo el
+    // 2026-08-12: `DispositivosPageQuery` lo declara y filtra ANTES de paginar. Dejarlo como estaba
+    // anclaba la ausencia de un filtro que ya existe.
+    expect(aQueryDispositivos({ ...base, conexion: 'desconectado' })).toHaveProperty(
+      'conexion',
+      'desconectado',
+    )
+  })
+
+  it('la pantalla que todavía no lee `conexion` sigue mandando lo mismo que antes', () => {
+    // `EntradaQueryDispositivos` lo deja opcional a propósito: omitirlo es "sin filtro", no `''`.
+    // Sin esto, agregar el filtro al store rompía el typecheck de la página en el mismo commit.
+    const sinConexion: EntradaQueryDispositivos = {
+      stock: 'en_stock',
+      modelo: '',
+      asignacion: '',
+      soloActivos: true,
+      page: 1,
+      pageSize: 20,
+      sortBy: 'FechaCreacion',
+      sortDirection: 'Desc',
+    }
+
+    expect(aQueryDispositivos(sinConexion)).not.toHaveProperty('conexion')
+    expect(aQueryDispositivos(sinConexion)).toHaveProperty('stock', 'en_stock')
   })
 })

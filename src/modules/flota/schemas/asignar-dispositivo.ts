@@ -44,6 +44,31 @@ export function aAsignarDispositivoRequest(
   return { dispositivoFlotaId: valores.dispositivoFlotaId }
 }
 
+/**
+ * El MISMO endpoint, visto desde el otro lado: en el inventario el GPS ya esta elegido y lo que falta
+ * es el vehiculo (`f-07` §6 — kebab "Asignar a vehiculo").
+ *
+ * Por eso el unico campo del formulario es `vehiculoFlotaId`, que **va a la URL** y no al body: el
+ * request que viaja sigue siendo `{ dispositivoFlotaId }`, armado con `aAsignarDispositivoRequest`.
+ * No es un endpoint nuevo ni un permiso nuevo — es `flota.vehiculos.asignar-dispositivo`, del grupo
+ * VEHICULOS, igual que desde la ficha del vehiculo.
+ *
+ * La clave del requerido es `validation.vehiculo_flota_id.required`, la misma que ya usa el modal de
+ * conductor: es una eleccion de UI (el server no valida ese id como campo — lo recibe en la ruta),
+ * asi que las dos pantallas dicen literalmente lo mismo, "Elegi un vehiculo de la lista".
+ */
+export const asignarVehiculoADispositivoSchema = z.object({
+  vehiculoFlotaId: z.string().min(1, 'validation.vehiculo_flota_id.required'),
+})
+
+export type AsignarVehiculoADispositivoFormulario = z.infer<
+  typeof asignarVehiculoADispositivoSchema
+>
+
+export const VALORES_INICIALES_ASIGNAR_VEHICULO: AsignarVehiculoADispositivoFormulario = {
+  vehiculoFlotaId: '',
+}
+
 export const desasignarDispositivoSchema = z.object({
   motivo: z.enum(['reasignacion', 'reparacion', 'baja', 'otro']),
 })

@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Eye, LinkIcon, MoreVertical, PackageCheck, Pencil, Trash2 } from 'lucide-react'
 import { DispositivoBadgeStock } from './DispositivoBadgeStock'
+import { BadgeConexion } from '../BadgeConexion'
+import { claveDeAyudaDeConexionDeEquipo } from '../../vocabulario-conexion'
 import type { DispositivoListItemDto } from '@/services/contracts/flota'
 import { BotonIcono } from '@/shared/ui/BotonIcono'
 import { MenuAcciones, type ItemMenuAcciones } from '@/shared/ui/MenuAcciones'
@@ -14,10 +16,10 @@ import { MenuAcciones, type ItemMenuAcciones } from '@/shared/ui/MenuAcciones'
  * de cada celda, que es lo unico especifico de Flota. `TablaDispositivos` las ensambla.
  *
  * Lo que NO se renderiza en ninguna celda, y no es un olvido:
- *  - **Conexion**: compone Telemetria y su fuente batch para el listado es PENDIENTE (ficha §12).
- *    La columna entra en slice-05. El campo existe en el DTO; la columna no.
  *  - **Senal GSM, satelites, hdop, red movil**: NO EXISTEN en ninguna capa de Telemetria (B-6).
  *    El mockup los dibuja; upstream no los captura. No se piden ni se muestran.
+ *  - **Bateria del equipo**: existe, pero por VEHICULO (`resumen-tecnico`) y no en el listado. Vive
+ *    en el tab Telemetria de la ficha, que es una llamada por dispositivo.
  */
 
 /** Fallback unico de dato ausente. Se resuelve por i18n para no hardcodear el guion. */
@@ -108,13 +110,45 @@ export function CeldaStock({ dispositivo }: CeldaDispositivoProps) {
 }
 
 /**
+ * Estado de CONEXION del equipo. Es la columna que este slice destraba: `conexion` se compone en el
+ * backend desde la fuente batch de Telemetria indexada por **dispositivo canonico** (D-S3-27), en la
+ * MISMA llamada que trae `ultimaSenal` — 1 request upstream por listado, nunca uno por fila (C-17).
+ *
+ * ── LO QUE ESTA CELDA NO PUEDE DECIR MAL ──────────────────────────────────────────────────────
+ * `sin_dato` NO es `desconectado`, y en un INVENTARIO la diferencia es todavia mas grande que en la
+ * flota: un GPS en stock **nunca aparece** en la fuente batch, asi que su `sin_dato` es por AUSENCIA
+ * y es **lo esperable**. Pintarlo rojo convertiria un deposito sano en una pantalla de alarmas.
+ *
+ * Por eso la ayuda sale de `claveDeAyudaDeConexionDeEquipo(conexion, instalado)`: con el equipo sin
+ * vehiculo el tooltip lo dice explicito. Y `instalado` se lee de `vehiculoInstalado` —no de
+ * `estadoOperativo`— porque el que no tiene de donde reportar es el equipo **sin vehiculo**, sea
+ * `en_stock`, `en_reparacion` o `dado_de_baja`.
+ *
+ * Con Telemetria caida (partial-data D-C1 a) TODAS las filas caen en `sin_dato` y el resto de la
+ * fila —alias, IMEI, modelo, vehiculo, stock— sigue completo. El aviso de la pagina lo explica.
+ */
+export function CeldaConexion({ dispositivo }: CeldaDispositivoProps) {
+  return (
+    <BadgeConexion
+      estado={dispositivo.conexion}
+      claveAyuda={claveDeAyudaDeConexionDeEquipo(
+        dispositivo.conexion,
+        dispositivo.vehiculoInstalado !== null,
+      )}
+    />
+  )
+}
+
+/**
  * `ultimaSenal` YA NO ES una proyeccion persistida (**D-S3-27**, 2026-08-11): la columna
  * `proyeccion_dispositivos_canonicos_flota.ultima_senal_utc` se BORRO con migracion porque no tenia
- * ningun escritor, o sea que servia `null` para siempre disfrazada de dato guardado. Ahora se compone
- * al LEER desde Telemetria, y hasta que exista ese cliente (slice-05) viaja `null`.
+ * ningun escritor, o sea que servia `null` para siempre disfrazada de dato guardado. Se compone al
+ * LEER desde Telemetria, ✅ **con dato real desde slice-05 `f-03`**.
  *
- * Ese `null` ES el comportamiento contratado —200 partial-data, sin flag nuevo en el DTO (D-C1 a)—,
- * asi que la celda muestra `—` y no se rellena con "ahora" ni con ningun calculo local (`f-05` §5).
+ * `null` sigue siendo un desenlace normal —200 partial-data, sin flag nuevo en el DTO (D-C1 a)— y en
+ * ese caso la celda muestra `—`: no se rellena con "ahora" ni con ningun calculo local (`f-07` §5).
+ * La ficha declara ademas que esta columna **degrada** junto con la conexion; el "no degrada" que
+ * decia la §9 quedo viejo con D-S3-27, cuando el dato dejo de estar persistido.
  */
 export function CeldaUltimaSenal({ dispositivo }: CeldaDispositivoProps) {
   const { i18n } = useTranslation('flota')
@@ -142,12 +176,18 @@ export interface CeldaAccionesProps extends CeldaDispositivoProps {
   onCambiarEstadoStock: (dispositivo: DispositivoListItemDto) => void
   onEliminar: (dispositivo: DispositivoListItemDto) => void
   /**
-   * Flujo de asignacion DESDE EL LISTADO, que es el sentido INVERSO al de `f-07`: acá el
-   * dispositivo esta elegido y falta elegir el VEHICULO. Ese selector necesita "vehiculos sin
-   * dispositivo", y el filtro `situacion` de `GET /vehiculos` **no esta implementado**
-   * (**D-S3-33**): declararlo devuelve la lista entera sin filtrar. Mientras llegue `undefined` el
-   * item se dibuja DESHABILITADO con su motivo, que manda a la ficha del vehiculo — donde la
-   * operacion si existe.
+   * Flujo de asignacion DESDE EL LISTADO: acá el dispositivo esta elegido y falta el VEHICULO.
+   *
+   * ⚠️ **Este bloque decia que el filtro `situacion` de `GET /vehiculos` no estaba implementado
+   * (D-S3-33), y quedo FALSO el 2026-08-12**: slice-05 `f-02` lo construyo con sus 4 valores
+   * (`EXISTS`/`NOT EXISTS` intra-schema, sin depender de Telemetria). El selector que este flujo
+   * necesita —"vehiculos sin dispositivo"— es `situacion=sin_dispositivo_gps`, y describe **exacto**
+   * a los candidatos porque el vinculo vehiculo↔GPS es 1:1. La accion esta viva desde entonces:
+   * `ModalAsociarAVehiculo`, cableado en `DispositivosListPage`.
+   *
+   * Sigue siendo OPCIONAL porque el mismo componente se usa donde no hay modal que abrir; mientras
+   * llegue `undefined` el item se dibuja DESHABILITADO con su motivo, que manda a la ficha del
+   * vehiculo — donde la operacion tambien existe.
    */
   onAsignarVehiculo?: (dispositivo: DispositivoListItemDto) => void
 }

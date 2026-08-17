@@ -6,8 +6,12 @@ import { AccionConMotivo } from '../AccionConMotivo'
 import { usePermisos } from '../../hooks/usePermisos'
 
 /**
- * Alt-CTA "Importar CSV" — gateada con `flota.vehiculos.importar` y FUERA de este slice
- * (import/export llega en slice-05).
+ * Alt-CTA "Importar CSV" — gateada con `flota.vehiculos.importar` y **sin endpoint que la cumpla**.
+ *
+ * ⚠️ Este bloque decia "import/export llega en slice-05". Slice-05 CERRO el 2026-08-12 **sin
+ * construir ninguno de los dos**: el import sigue en **P4** (no estan definidos el shape del
+ * resultado, el `code` por fila ni el transporte del CSV, que en v1 no puede ser binario por D-C2) y
+ * el export en **B-34**. No hay slice dueno: lo que falta es una decision del PO, no un paso.
  *
  * Se muestra DESHABILITADA con su motivo, no con el toast "Próximamente" del mockup: un toast que
  * aparece y se va no se puede leer dos veces ni copiar, y no dice si el problema es el permiso o la

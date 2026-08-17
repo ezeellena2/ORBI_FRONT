@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import {
   CeldaAcciones,
   CeldaAliasImei,
+  CeldaConexion,
   CeldaModelo,
   CeldaStock,
   CeldaUltimaSenal,
@@ -20,8 +21,15 @@ import { Tabla } from '@/shared/ui/Tabla'
  * ordenado y el backend devuelve otro orden.
  *
  * **Alias/IMEI es la UNICA columna ordenable** (`sortBy=Imei`, ficha §4). "Ultima senal" dejo de
- * serlo en B-17: no esta en el enum `sortBy`, asi que un header clickeable ahi seria una promesa
- * que el backend no puede cumplir.
+ * serlo en B-17 y **"Conexion" tampoco lo es**: los dos se componen desde Telemetria despues de
+ * paginar en el server, asi que no estan en el enum `sortBy` (convencion 3). Un header clickeable
+ * ahi seria una promesa que el backend no puede cumplir.
+ *
+ * El ORDEN de las columnas es el de la ficha §4: Alias/IMEI · Modelo · Vehiculo · **Conexion** ·
+ * Stock · Ultima senal · kebab. Conexion y Stock quedan pegadas a proposito y son ejes DISTINTOS:
+ * Stock dice que hace la organizacion con el equipo (`en_stock`, `instalado`, …) y Conexion dice si
+ * reporta. Un equipo `instalado` puede estar `desconectado`, y uno `en_stock` esta siempre en
+ * `sin_dato` sin que eso sea un problema.
  *
  * No hay columna de seleccion: la bulk bar no tiene endpoints bulk en el contrato (ficha §12), y un
  * checkbox que no habilita nada es ruido.
@@ -88,6 +96,13 @@ export function TablaDispositivos({
       tipo: 'nodo',
       ancho: 136,
       render: (dispositivo) => <CeldaVehiculo dispositivo={dispositivo} />,
+    },
+    {
+      clave: 'conexion',
+      titulo: t('dispositivosListado.columnas.conexion'),
+      tipo: 'nodo',
+      ancho: 152,
+      render: (dispositivo) => <CeldaConexion dispositivo={dispositivo} />,
     },
     {
       clave: 'stock',

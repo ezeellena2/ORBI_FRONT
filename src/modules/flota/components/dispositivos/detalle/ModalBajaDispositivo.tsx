@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { DialogoConfirmacion } from '@/shared/ui/DialogoConfirmacion'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
 import type { DispositivoDetalleDto } from '@/services/contracts/flota'
@@ -22,6 +23,17 @@ import { useBajaDispositivo } from '../../../hooks/useBajaDispositivo'
  * que separa "cancelar por error" de "cancelar a proposito". ⚠️ El alias es NULLABLE (D-S3-12) y NO
  * es unico (D-S3-34, B-15): sin alias no hay valor exacto que pedir, asi que el dialogo se degrada a
  * la confirmacion simple en vez de pedir que el usuario escriba "—".
+ *
+ * ── POR QUE, DESPUES DE LA BAJA, SE VUELVE AL LISTADO ─────────────────────────────────────────
+ * Este componente decia que la ficha "se queda mostrando el dispositivo dado de baja con su boton
+ * Reactivar". **Es falso contra el backend que corre**: el detalle se lee por `ObtenerConCatalogos`,
+ * que no levanta el query filter global (`x => x.Activo`), asi que `GET /dispositivos/{id}` responde
+ * **404** apenas la baja se aplica. Lo que el usuario veia despues de una baja EXITOSA era
+ * "Dispositivo no encontrado" sobre un equipo que acababa de dar de baja a proposito — y que sigue
+ * existiendo. Se navega al listado por el mismo criterio de **D-S4F-7** (hard-delete del conductor):
+ * la ficha saca al usuario de una URL que a partir de ahora es 404; el listado no lo hace, porque
+ * ahi ver la fila salir de la tabla ES el resultado de la accion.
+ * ─────────────────────────────────────────────────────────────────────────────────────────────
  */
 export function ModalBajaDispositivo({
   dispositivo,
@@ -33,6 +45,7 @@ export function ModalBajaDispositivo({
   onCerrar: () => void
 }) {
   const { t } = useTranslation(['flota', 'common'])
+  const navigate = useNavigate()
   const mutacion = useBajaDispositivo(dispositivo.id)
 
   const apiError = mutacion.error ? parseApiError(mutacion.error) : null
@@ -52,10 +65,17 @@ export function ModalBajaDispositivo({
         mutacion.reset()
         onCerrar()
       }}
-      // No se navega a ningun lado despues de la baja, a diferencia del vehiculo: el dispositivo
-      // sigue existiendo y la ficha se queda mostrandolo en `dado_de_baja`, con "Reactivar"
-      // disponible en el kebab. Sacar al usuario de la pantalla le escondería el resultado.
-      onConfirmar={() => mutacion.mutate(undefined, { onSuccess: onCerrar })}
+      // Se navega al listado: `GET /dispositivos/{id}` responde 404 en cuanto `activo` pasa a
+      // false, asi que quedarse en la ficha significa quedarse leyendo "Dispositivo no encontrado".
+      // Ver el bloque de la clase.
+      onConfirmar={() =>
+        mutacion.mutate(undefined, {
+          onSuccess: () => {
+            onCerrar()
+            void navigate('/app/flota/dispositivos')
+          },
+        })
+      }
       // `alias` es nullable (D-S3-12) y sin el no hay valor exacto que pedir tipear: se degrada a
       // la confirmacion simple en vez de pedir que el usuario escriba "—".
       variante={dispositivo.alias === null ? 'peligro' : 'peligro-con-tipeo'}

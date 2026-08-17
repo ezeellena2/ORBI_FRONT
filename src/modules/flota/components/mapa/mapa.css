@@ -1,0 +1,189 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * Estilos del MAPA EN VIVO
+ *
+ * ── POR QUE ESTE ARCHIVO EXISTE (y no son clases de Tailwind) ──────────────
+ * Leaflet dibuja parte del DOM el mismo, FUERA del arbol de React: los
+ * marcadores (`L.divIcon`), la barra de atribucion, los controles de zoom y el
+ * fondo del contenedor. A esos nodos no se les pueden pasar props, asi que el
+ * unico canal de estilo es la clase CSS. Lo que si renderiza React (paneles,
+ * chips, avisos) va con utilidades semanticas de Tailwind, como el resto del
+ * modulo — aca solo esta lo que Tailwind no puede alcanzar.
+ *
+ * ── LA REGLA DE ORO SIGUE VIGENTE ─────────────────────────────────────────
+ * CERO valores de color. El unico archivo con permiso de tener un hex es
+ * `src/styles/primitivas.css`; aca todo entra por token semantico (`--s-*`).
+ * `verificar-tokens.mjs` lo verifica sobre TODOS los `.css` de `src/`, este
+ * incluido, y ademas prohibe `z-index` literal fuera de `src/styles/`: por eso
+ * las capas se piden con `--z-*`.
+ *
+ * ⚠️ `leaflet/dist/leaflet.css` (la dependencia) SI trae colores propios. Eso
+ * esta bien y no se toca: es CSS de un paquete, no nuestro. Lo que pintamos
+ * nosotros encima es lo que tiene que salir de los tokens — y es lo que esta
+ * en este archivo.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/* ── Contenedor ───────────────────────────────────────────────────────────
+ * Leaflet pinta su propio fondo gris claro mientras los tiles cargan. Sobre un
+ * tema oscuro eso es un flash blanco en cada paneo. `--s-mapa` es el token que
+ * el sistema ya declara para esto (`--p-mapa` es una decision de PRODUCTO, no
+ * de estetica: es el color de la cartografia). */
+.mapa-flota .leaflet-container {
+  background: var(--s-mapa);
+  font-family: var(--s-fuente-ui);
+  outline-color: var(--s-foco);
+}
+
+/* ── Marcador de vehiculo ─────────────────────────────────────────────────
+ * La caja es transparente y mide 36px para dar un area de click razonable con
+ * el dedo; el punto visible es de 18px. No se llega a los 44px del checklist de
+ * accesibilidad a proposito: con 44 los marcadores de dos vehiculos en la misma
+ * cuadra se tapan entre si y el de arriba se roba los clicks del de abajo. 36 es
+ * el punto donde el area sigue siendo usable sin canibalizar al vecino. */
+.marcador-vehiculo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  /* Ancla del anillo de severidad de abajo, que es un ::after posicionado. */
+  position: relative;
+}
+
+.marcador-vehiculo__punto {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--s-radio-full);
+  /* El anillo del color del fondo del mapa despega el punto de la cartografia:
+     sin el, un marcador gris sobre una calle gris desaparece. */
+  box-shadow:
+    0 0 0 3px var(--s-mapa),
+    var(--s-sombra-sm);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.marcador-vehiculo:hover .marcador-vehiculo__punto {
+  transform: scale(1.15);
+}
+
+/* Los 4 estados de conexion. Son LAS MISMAS variantes que el badge del listado
+   (`varianteDeConexion`), y eso es deliberado: si `sin_dato` es gris en la tabla
+   tiene que ser gris en el mapa. `sin_dato` NEUTRO y no rojo — pintar de rojo la
+   ausencia de dato manda a llamar al proveedor de GPS por una flota que esta
+   bien. */
+.marcador-vehiculo--exito .marcador-vehiculo__punto {
+  background: var(--s-exito);
+}
+
+.marcador-vehiculo--peligro .marcador-vehiculo__punto {
+  background: var(--s-peligro);
+}
+
+.marcador-vehiculo--advertencia .marcador-vehiculo__punto {
+  background: var(--s-advertencia);
+}
+
+.marcador-vehiculo--neutro .marcador-vehiculo__punto {
+  background: var(--s-fg-terciario);
+}
+
+/* Seleccionado: anillo de marca. Es la unica diferencia visual entre el marcador
+   elegido y el resto, y se corresponde 1:1 con el chip resaltado del panel. */
+.marcador-vehiculo--seleccionado .marcador-vehiculo__punto {
+  transform: scale(1.25);
+  box-shadow:
+    0 0 0 3px var(--s-mapa),
+    0 0 0 6px var(--s-marca),
+    var(--s-sombra-md);
+}
+
+/* ── Anillo de SEVERIDAD DE SEÑALES (slice-06, f-12 paso 5) ───────────────
+ * SE SUPERPONE al color de conexion, no lo reemplaza: el punto sigue diciendo
+ * si el vehiculo reporta y el anillo dice si tiene señales abiertas. Son dos
+ * preguntas distintas y pisar el relleno borraria la primera.
+ *
+ * Va como `::after` sobre el contenedor de 36px —y no como `box-shadow` del
+ * punto— para no pelearse con el anillo de SELECCION, que ya usa `box-shadow`
+ * de 6px sobre ese mismo elemento. Con `inset: 2px` el circulo mide 32px, o sea
+ * queda POR FUERA del anillo de seleccion (30px) y los dos se leen a la vez.
+ *
+ * ⚠️ Hoy ninguna de estas 3 clases se aplica nunca: no hay escritor de alertas
+ * (B-38 / GATE 2). No es codigo muerto — es la capa que el dia que el PO cierre
+ * el catalogo se enciende sin tocar el componente — pero **el mapa no puede
+ * quedarse solo con esto**: la ausencia de anillo la explica el panel izquierdo,
+ * porque un pin sin anillo no afirma nada por si mismo. */
+.marcador-vehiculo--senal-peligro::after,
+.marcador-vehiculo--senal-advertencia::after,
+.marcador-vehiculo--senal-neutro::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: var(--s-radio-full);
+  border-width: 2px;
+  border-style: solid;
+  pointer-events: none;
+}
+
+.marcador-vehiculo--senal-peligro::after {
+  border-color: var(--s-peligro);
+}
+
+.marcador-vehiculo--senal-advertencia::after {
+  border-color: var(--s-advertencia);
+}
+
+/* `baja` es neutro: una señal de severidad baja no merece color de alarma en un
+   mapa donde el color ya esta ocupado por el estado de conexion. */
+.marcador-vehiculo--senal-neutro::after {
+  border-color: var(--s-fg-terciario);
+}
+
+/* Leaflet hace focusable al marcador cuando `keyboard: true` (su default). El
+   anillo tiene que verse: es la unica forma de operar el mapa con teclado. */
+.marcador-vehiculo:focus-visible {
+  outline: 2px solid var(--s-foco);
+  outline-offset: 2px;
+  border-radius: var(--s-radio-full);
+}
+
+/* ── Chrome de Leaflet ────────────────────────────────────────────────────
+ * Controles y atribucion vienen con el look default (blanco, bordes grises).
+ * Sin esto, el mapa tiene dos sistemas de diseno a la vez. */
+.mapa-flota .leaflet-control-zoom a {
+  background: var(--s-superficie-1);
+  color: var(--s-fg-primario);
+  border-color: var(--s-borde);
+}
+
+.mapa-flota .leaflet-control-zoom a:hover {
+  background: var(--s-superficie-2);
+  color: var(--s-fg-primario);
+}
+
+.mapa-flota .leaflet-control-zoom a:focus-visible {
+  outline: 2px solid var(--s-foco);
+  outline-offset: 2px;
+}
+
+/* La atribucion de OpenStreetMap y CARTO es OBLIGATORIA por licencia: se
+   integra al tema, no se esconde ni se achica hasta ser ilegible. */
+.mapa-flota .leaflet-control-attribution {
+  background: var(--s-vidrio);
+  color: var(--s-fg-secundario);
+  font-size: var(--s-texto-xs);
+}
+
+.mapa-flota .leaflet-control-attribution a {
+  color: var(--s-marca);
+}
+
+/* ── Movimiento reducido ──────────────────────────────────────────────────
+ * El reset global de `base.css` ya neutraliza las animaciones CSS, pero el
+ * paneo animado de Leaflet lo hace por JS: eso se apaga del lado del componente
+ * (`animate: false` en `setView`/`flyTo`). Aca queda la parte CSS. */
+@media (prefers-reduced-motion: reduce) {
+  .marcador-vehiculo__punto {
+    transition: none;
+  }
+}

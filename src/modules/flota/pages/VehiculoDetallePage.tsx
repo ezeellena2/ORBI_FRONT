@@ -10,10 +10,17 @@ import { SinAccesoOverlay } from '@/shared/ui/SinAccesoOverlay'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/base/tabs'
 import { parseApiError } from '@/shared/errors/parse-api-error'
 import type {
+  AsignacionVehiculoConductorDto,
   AsignacionVehiculoDispositivoDto,
   VehiculoDetalleDto,
 } from '@/services/contracts/flota'
+import { useSenales } from '../hooks/useSenales'
 import { useVehiculo } from '../hooks/useVehiculo'
+import { QUERY_DE_SENALES, indiceDeSenales } from '../vocabulario-senales'
+import { SenalesIndicador } from '../components/senales/SenalesIndicador'
+import { ModalAsignarConductor } from '../components/conductores/ModalAsignarConductor'
+import { ModalDesasignarVehiculo } from '../components/conductores/ModalesCierreConductor'
+import { pillDeConductores } from '../components/conductores/vocabulario-conductor-asignacion'
 import { ModalAsociarDispositivo } from '../components/dispositivos/ModalAsociarDispositivo'
 import { ModalDesasociarDispositivo } from '../components/dispositivos/ModalDesasociarDispositivo'
 import { DetalleCargando } from '../components/detalle/DetalleCargando'
@@ -111,7 +118,7 @@ export default function VehiculoDetallePage() {
 }
 
 /**
- * Lee la asignación que el wizard de alta deja en el `state` de la navegación.
+ * Lee las asignaciones que el wizard de alta deja en el `state` de la navegación.
  *
  * Se VALIDA la forma en vez de castear: `location.state` lo puede escribir cualquier navegación (o
  * un `history.pushState` de otra pestaña de la misma app), así que no es un dato de confianza. Si no
@@ -129,12 +136,38 @@ function asignacionDeState(state: unknown): AsignacionVehiculoDispositivoDto | n
   return candidata as AsignacionVehiculoDispositivoDto
 }
 
+/** Gemelo del anterior para el conductor que asignó el paso 3 del wizard. Misma desconfianza. */
+function asignacionConductorDeState(state: unknown): AsignacionVehiculoConductorDto | null {
+  if (typeof state !== 'object' || state === null) return null
+  const candidata = (state as { asignacionConductor?: unknown }).asignacionConductor
+  if (typeof candidata !== 'object' || candidata === null) return null
+
+  const { asignacionId, conductorFlotaId, rol } = candidata as Record<string, unknown>
+  if (typeof asignacionId !== 'string' || typeof conductorFlotaId !== 'string') return null
+  if (rol !== 'principal' && rol !== 'secundario') return null
+
+  return candidata as AsignacionVehiculoConductorDto
+}
+
+/** La identidad del conductor tampoco viaja en el DTO: el wizard la manda al lado, o no viene. */
+function identidadConductorDeState(state: unknown): string | null {
+  if (typeof state !== 'object' || state === null) return null
+  const candidata = (state as { identidadConductor?: unknown }).identidadConductor
+  return typeof candidata === 'string' && candidata.trim().length > 0 ? candidata : null
+}
+
 function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
   const { t } = useTranslation(['flota', 'common'])
   const location = useLocation()
-  const [modal, setModal] = useState<'ninguno' | 'editar' | 'baja' | 'asociar' | 'desasociar'>(
-    'ninguno',
-  )
+  const [modal, setModal] = useState<
+    | 'ninguno'
+    | 'editar'
+    | 'baja'
+    | 'asociar'
+    | 'desasociar'
+    | 'asignar-conductor'
+    | 'quitar-conductor'
+  >('ninguno')
 
   /**
    * LA ASIGNACION DE ESTA SESION — y por qué vive acá y no en el DTO.
@@ -152,7 +185,8 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
    * ── SE GUARDA EL DTO ENTERO, NO SOLO EL `asignacionId` ────────────────────────────────────────
    * Antes se guardaba el id suelto Y ADEMÁS se lo anulaba con
    * `vehiculo.dispositivo === null ? null : asignacionId`. Como el backend hardcodea
-   * `Dispositivo = null` hasta slice-05 (ver `TabDispositivo`), esa guarda daba `null` SIEMPRE: el
+   * `Dispositivo = null` (ver `TabDispositivo`: no lo compone nadie todavía, y ⚠️ **no es de
+   * slice-05**, que cerró sin tomarlo), esa guarda daba `null` SIEMPRE: el
    * `ModalDesasociarDispositivo` era código muerto —no había ninguna forma de llegar a renderizarlo,
    * o sea que el `DELETE` no tenía un solo camino en la UI— y el aviso "vas a desinstalar el equipo
    * actual" (`reasigna`) nunca se mostraba, ni siquiera reasignando.
@@ -170,10 +204,51 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
     () => asignacionDeState(location.state),
   )
 
-  // El vehículo tiene GPS si el DTO lo dice (slice-05 en adelante) o si lo asociamos recién.
+  /**
+   * LA ASIGNACION DE CONDUCTOR DE ESTA SESION — gemela exacta de la de arriba, y por la misma causa.
+   *
+   * `DELETE .../asignaciones/conductor/{asignacionId}` pide el id en la URL y del lado del vehículo
+   * NADA lo expone: `GET /vehiculos/{id}/asignaciones` no está implementado (B-19) y
+   * `VehiculoDetalleDto.conductoresAsignados` viene `[]` en el 100% de las respuestas. Su única
+   * fuente acá es la respuesta del `POST` — la de esta sesión, o la que el wizard trae en el `state`.
+   *
+   * NO se persiste en un store ni en `localStorage`: sería un id que sobrevive a cambios hechos desde
+   * otra pestaña o por otro usuario, y el `DELETE` con un id ya cerrado responde 404. Recordarlo de
+   * más es peor que no tenerlo: convierte un botón honestamente apagado en uno que falla.
+   *
+   * Va con su identidad al lado porque el DTO de la asignación trae ids, rol y fechas — no el nombre
+   * de la persona (y `nombreCompleto` puede ser `null` por el gate de PII de todos modos).
+   */
+  const [asignacionConductorDeSesion, setAsignacionConductorDeSesion] =
+    useState<AsignacionVehiculoConductorDto | null>(() => asignacionConductorDeState(location.state))
+  const [identidadConductorDeSesion, setIdentidadConductorDeSesion] = useState<string | null>(() =>
+    identidadConductorDeState(location.state),
+  )
+
+  // El vehículo tiene GPS si el DTO lo dice (hoy nunca: el campo no se compone) o si lo asociamos
+  // recién. La segunda rama es la única viva.
   const tieneDispositivo = vehiculo.dispositivo !== null || asignacionDeSesion !== null
 
   const identificacionVehiculo = vehiculo.patente ?? vehiculo.alias ?? vehiculo.id
+
+  /**
+   * El pill del tab NO pinta `conductoresCount` crudo: ese campo viene `0` SIEMPRE, también con
+   * conductores asignados, así que un "0" ahí afirma algo que Flota no sabe — y contradice a la
+   * tarjeta de abajo justo después de asignar. Ver `pillDeConductores`.
+   */
+  const pill = pillDeConductores(vehiculo.conductoresCount, asignacionConductorDeSesion !== null)
+
+  /*
+    ── SEÑALES EMBEBIDAS (`f-12` paso 4) ─────────────────────────────────────────────────────────
+    Es un PANEL, no una tab nueva: la ficha declara 4 tabs y ninguna es de señales. Va después de la
+    tira de mini-stats y antes de los tabs, que es donde el operador ya está mirando el estado del
+    vehículo.
+
+    Se lee del MISMO endpoint que el listado (`GET /alertas`, sin filtros: no acepta `?vehiculoId=`)
+    y se indexa en cliente. Un fallo acá **no rompe la ficha**: el panel se degrada a su aviso.
+  */
+  const senales = useSenales(QUERY_DE_SENALES)
+  const indice = indiceDeSenales(senales.data)
 
   return (
     <div className="flex flex-col gap-6">
@@ -181,19 +256,40 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
 
       <HeroVehiculo
         vehiculo={vehiculo}
+        identidadConductorDeSesion={identidadConductorDeSesion}
         onEditar={() => setModal('editar')}
         onDarDeBaja={() => setModal('baja')}
         onCambiarDispositivo={() => setModal('asociar')}
+        onGestionarConductores={() => setModal('asignar-conductor')}
       />
 
       <MiniStatsVehiculo vehiculo={vehiculo} />
+
+      {/*
+        `isLoading` y NO `isPending`: con la consulta apagada (`enabled: DETECCION_DE_SENALES_
+        CONECTADA`) el status queda en `pending` para siempre, así que `isPending` dejaría el panel
+        en skeleton eterno. `isLoading` es `isPending && isFetching`, o sea "de verdad está pidiendo
+        ahora", que es lo que este prop significa.
+      */}
+      <SenalesIndicador
+        indice={indice}
+        vehiculoFlotaId={vehiculo.id}
+        cargando={senales.isLoading}
+        fallo={senales.isError}
+      />
 
       <Tabs defaultValue="info">
         <TabsList variant="line" className="flex-wrap">
           <TabsTrigger value="info">{t('flota:detalle.tabs.info')}</TabsTrigger>
           <TabsTrigger value="conductor">
             {t('flota:detalle.tabs.conductor')}
-            <Badge variante="neutro">{vehiculo.conductoresCount}</Badge>
+            <Badge variante="neutro">
+              {pill.tipo === 'conteo'
+                ? pill.valor
+                : pill.tipo === 'al_menos'
+                  ? t('flota:detalle.conductor.pillAlMenos', { cantidad: pill.valor })
+                  : t('flota:detalle.conductor.pillSinDato')}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="dispositivo">{t('flota:detalle.tabs.dispositivo')}</TabsTrigger>
           <TabsTrigger value="historial">{t('flota:detalle.tabs.historial')}</TabsTrigger>
@@ -203,7 +299,13 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
           <TabInfoGeneral vehiculo={vehiculo} />
         </TabsContent>
         <TabsContent value="conductor" className="pt-4">
-          <TabConductor vehiculo={vehiculo} />
+          <TabConductor
+            vehiculo={vehiculo}
+            asignacionDeSesion={asignacionConductorDeSesion}
+            identidadDeSesion={identidadConductorDeSesion}
+            onAsignar={() => setModal('asignar-conductor')}
+            onQuitar={() => setModal('quitar-conductor')}
+          />
         </TabsContent>
         <TabsContent value="dispositivo" className="pt-4">
           <TabDispositivo
@@ -214,12 +316,14 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
           />
         </TabsContent>
         {/*
-          El panel del Historial se monta solo cuando el tab está activo: su request es la superficie
-          DEGRADADA (500 `flota.telemetria.no_disponible`), y dispararlo al abrir la ficha metería un
-          error en la consola de todos los usuarios que nunca miran ese tab.
+          El Historial (recorridos) es la superficie DEGRADADA de este vehículo: 500
+          `flota.telemetria.no_disponible` por contrato (B-9). El tab **ya no emite ese request** —
+          lo declara, como el tab Eventos del dispositivo y el tab Actividad del conductor. El
+          `keepMounted={false}` se conserva igual: no hay request que gatear, pero desmontar el panel
+          inactivo sigue siendo lo correcto para los otros 3 tabs de esta misma lista.
         */}
         <TabsContent value="historial" className="pt-4" keepMounted={false}>
-          <TabHistorial vehiculoFlotaId={vehiculo.id} />
+          <TabHistorial />
         </TabsContent>
       </Tabs>
 
@@ -277,6 +381,57 @@ function FichaVehiculo({ vehiculo }: { vehiculo: VehiculoDetalleDto }) {
           abierto
           onCerrar={() => setModal('ninguno')}
           onDesasignado={() => setAsignacionDeSesion(null)}
+        />
+      ) : null}
+
+      {/*
+        Un solo modal para asignar y para cambiar, pero —a diferencia del de dispositivo— cambiar NO
+        es la misma request: el `POST` de conductor no cierra la vigente, así que el modal emite
+        `DELETE` + `POST` cuando conoce la asignación vigente (`f-07` §2, no atómico). Que la conozca
+        depende de que se haya hecho en esta sesión: no hay `GET` que la exponga (B-19).
+      */}
+      {modal === 'asignar-conductor' ? (
+        <ModalAsignarConductor
+          vehiculoFlotaId={vehiculo.id}
+          identificacionVehiculo={identificacionVehiculo}
+          asignacionVigente={asignacionConductorDeSesion}
+          identidadVigente={identidadConductorDeSesion}
+          abierto
+          onCerrar={() => setModal('ninguno')}
+          onAsignado={(nueva, identidad) => {
+            setAsignacionConductorDeSesion(nueva)
+            setIdentidadConductorDeSesion(identidad)
+          }}
+          /*
+            El cierre salió bien: la asignación vieja ya NO existe. Se olvida en el acto aunque el
+            `POST` de la nueva todavía no haya vuelto — si falla, el tab tiene que quedar en su
+            estado honesto ("no sabemos") y NO ofreciendo un "Quitar" que apuntaría a una asignación
+            cerrada y devolvería 404.
+          */
+          onVigenteCerrada={() => {
+            setAsignacionConductorDeSesion(null)
+            setIdentidadConductorDeSesion(null)
+          }}
+        />
+      ) : null}
+
+      {/*
+        Sin `asignacionConductorDeSesion` no hay `asignacionId`, y sin él la URL del `DELETE` no se
+        puede construir: por eso el modal ni se monta y el botón queda deshabilitado CON SU MOTIVO en
+        el tab. La condición NO exige `conductoresAsignados.length > 0`, que viene vacío siempre.
+      */}
+      {modal === 'quitar-conductor' && asignacionConductorDeSesion !== null ? (
+        <ModalDesasignarVehiculo
+          asignacion={asignacionConductorDeSesion}
+          nombreConductor={
+            identidadConductorDeSesion ?? t('flota:asignacionConductor.identidadNoDisponible')
+          }
+          abierto
+          onCerrar={() => setModal('ninguno')}
+          onDesasignado={() => {
+            setAsignacionConductorDeSesion(null)
+            setIdentidadConductorDeSesion(null)
+          }}
         />
       ) : null}
     </div>

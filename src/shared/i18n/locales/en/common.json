@@ -629,7 +629,8 @@
         "datos_canonicos_invalidos": "Some of the vehicle data is not valid. Review it and try again.",
         "conflicto_canonico": "The vehicle data conflicts with a record that already exists in the platform.",
         "transicion_invalida": "It is not possible to go from {{estadoActual}} to {{estadoDestino}}.",
-        "ya_tiene_dispositivo": "This vehicle already has a GPS device linked. Unlink it before installing another one."
+        "ya_tiene_dispositivo": "This vehicle already has a GPS device linked. Unlink it before installing another one.",
+        "ya_tiene_principal": "This vehicle already has a primary driver. Remove them before assigning another one, or assign the new one as secondary."
       },
       "modulo": {
         "no_activo": "Your organization does not have the Fleet module active."
@@ -662,6 +663,36 @@
       },
       "catalogo": {
         "nombre_duplicado": "Your organization already has an option named {{nombre}}."
+      },
+      "conductor": {
+        "no_existe": "The driver does not exist or does not belong to your organization.",
+        "persona_no_existe": "We could not find that person in your organization.",
+        "persona_ya_es_conductor": "That person is already an active driver in your organization.",
+        "transicion_invalida": "It is not possible to go from {{estadoActual}} to {{estadoDestino}}.",
+        "documento_vencido": "The driver has required paperwork expired or missing ({{tipoDocumento}}). Update it before putting them on duty.",
+        "suspendido_no_asignable": "The driver is suspended and cannot be assigned.",
+        "licencia_vencida": "The driver license has expired.",
+        "licencia_vencida_no_aceptada": "The license expired on {{fechaVencimiento}}.",
+        "baja_con_asignacion_activa": "The driver has a vehicle or a device assigned. Unlink them before deactivating.",
+        "canonico_no_creable": "The person could not be registered in the platform. Try again in a few minutes.",
+        "datos_canonicos_invalidos": "The identity data is not valid. Review the document type and number."
+      },
+      "documento": {
+        "no_existe": "The document does not exist or has already been deleted.",
+        "tipo_invalido": "The document type {{tipo}} is not available in your organization.",
+        "url_no_permitida": "That link cannot be used. It must be an https URL reachable from the internet."
+      },
+      "problema": {
+        "no_existe": "The problem does not exist or does not belong to your organization.",
+        "transicion_invalida": "The problem cannot move from {{estadoActual}} to {{estadoDestino}}."
+      },
+      "regla": {
+        "no_existe": "The rule does not exist or does not belong to your organization.",
+        "condicion_invalida": "The rule condition is not valid."
+      },
+      "webhook": {
+        "no_existe": "The webhook does not exist or does not belong to your organization.",
+        "url_no_permitida": "The URL {{url}} is not allowed: it must be https and point to a public server."
       }
     },
     "auth": {
@@ -761,7 +792,8 @@
       "confSeguridad": "Security",
       "confApariencia": "Appearance",
       "confRoles": "Roles and permissions",
-      "usuarios": "Users"
+      "usuarios": "Users",
+      "flotaProblemas": "Problems"
     },
     "sidebar": {
       "collapse": "Collapse menu",

@@ -16,8 +16,11 @@ import { ParDato } from './ParDato'
  * Dispositivo GPS asociado + las 2 operaciones de asignacion (`f-07`).
  *
  * La identificacion (`alias`/`imei`) sale del propio `VehiculoDetalleDto`: este tab no pide el
- * detalle del dispositivo. El snapshot tecnico en vivo sigue sin fuente (slice-05) y se DICE, no se
- * dibuja con placeholders que parezcan dato.
+ * detalle del dispositivo. El snapshot tecnico en vivo se DICE, no se dibuja con placeholders que
+ * parezcan dato. ⚠️ **El motivo cambio**: ya no es "sin fuente" —`GET /dispositivos/{id}/telemetria`
+ * existe desde slice-05 `f-04`— sino que este tab **no tiene el id del equipo**: su unica fuente
+ * seria `vehiculo.dispositivo`, que viene `null` en el 100% de las respuestas (ver el bloque 🔴 de
+ * abajo). Sin id no hay a quien preguntarle, y adivinarlo no es una opcion.
  *
  * Del mockup NO se portan tres cosas, y ninguna es un olvido:
  *  - "Señal GSM": eliminada del contrato (B-6). Telemetría no captura intensidad de señal,
@@ -38,10 +41,12 @@ import { ParDato } from './ParDato'
  * deshabilitada **con ese motivo** cuando no — en vez de llamar a una ruta con un id inventado.
  * **Cambiar dispositivo** no tiene ese problema: el `POST` cierra la anterior por su cuenta.
  *
- * ── 🔴 `vehiculo.dispositivo` VIENE `null` SIEMPRE EN SLICE-03. NO ES "NO TIENE GPS" ──────────
- * `VehiculoFlotaService.MapearItem` lo hardcodea `Dispositivo = null` y lo declara alcance de
- * **slice-05** (componer el GPS instalado dentro del vehiculo va junto con la composicion de
- * Telemetria). O sea que este campo NO distingue "el vehiculo no tiene GPS" de "Flota todavia no
+ * ── 🔴 `vehiculo.dispositivo` VIENE `null` SIEMPRE. NO ES "NO TIENE GPS" ──────────────────────
+ * `VehiculoFlotaService.MapearItem` lo hardcodea `Dispositivo = null`. ⚠️ **DUENIO ACTUALIZADO**:
+ * este comentario decia que componerlo era alcance de **slice-05**, y slice-05 **cerro el
+ * 2026-08-12 sin tomarlo** — es composicion **intra-schema** (no depende de Telemetria, que es lo
+ * unico que ese slice cableo), asi que no tiene slice dueno y su dueno declarado en `ESTADO.md` es
+ * el **PO**. O sea que este campo NO distingue "el vehiculo no tiene GPS" de "Flota todavia no
  * arma ese bloque": es exactamente el caso de **partial-data** de la convencion (200 exitoso con un
  * bloque sin componer), NO el estado **empty**.
  *
