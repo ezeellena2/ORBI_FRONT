@@ -1,4 +1,3 @@
-import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type {
   ActualizarDispositivoRequest,
@@ -42,19 +41,16 @@ import type {
 
 const BASE = '/api/flota/dispositivos'
 
-const configFlota = { baseURL: appConfig.flotaApiBaseUrl } as const
-
 export const dispositivosService = {
   /** GET /api/flota/dispositivos -> 200 PagedResult<DispositivoListItemDto> */
   listar: (query: DispositivosPageQuery = {}) =>
     httpClient.get<PagedResult<DispositivoListItemDto>>(BASE, {
-      ...configFlota,
       params: query,
     }),
 
   /** GET /api/flota/dispositivos/{dispositivoId} -> 200 | 404 (404 tambien es cross-tenant) */
   obtener: (dispositivoId: string) =>
-    httpClient.get<DispositivoDetalleDto>(`${BASE}/${dispositivoId}`, configFlota),
+    httpClient.get<DispositivoDetalleDto>(`${BASE}/${dispositivoId}`),
 
   /**
    * POST /api/flota/dispositivos -> 201 DispositivoDetalleDto.
@@ -69,7 +65,7 @@ export const dispositivosService = {
    *    destino. Es REINTENTABLE; nada quedo escrito.
    */
   registrar: (data: RegistrarDispositivoRequest) =>
-    httpClient.post<DispositivoDetalleDto>(BASE, data, configFlota),
+    httpClient.post<DispositivoDetalleDto>(BASE, data),
 
   /**
    * PATCH /api/flota/dispositivos/{dispositivoId} -> 200 | 404 `flota.dispositivo.no_existe` |
@@ -79,7 +75,7 @@ export const dispositivosService = {
    * `alias`. No ramificar por ese `code` hasta que el PO cierre B-15.
    */
   actualizar: (dispositivoId: string, data: ActualizarDispositivoRequest) =>
-    httpClient.patch<DispositivoDetalleDto>(`${BASE}/${dispositivoId}`, data, configFlota),
+    httpClient.patch<DispositivoDetalleDto>(`${BASE}/${dispositivoId}`, data),
 
   /**
    * POST /api/flota/dispositivos/{dispositivoId}/estado-stock -> **204 SIN CUERPO** | 404 |
@@ -93,7 +89,7 @@ export const dispositivosService = {
    * Verificado contra `DispositivosController` (`CambiarEstadoStock`, `DarDeBaja`, `Reactivar`).
    */
   cambiarEstadoStock: (dispositivoId: string, data: CambiarEstadoStockRequest) =>
-    httpClient.post<void>(`${BASE}/${dispositivoId}/estado-stock`, data, configFlota),
+    httpClient.post<void>(`${BASE}/${dispositivoId}/estado-stock`, data),
 
   /**
    * POST /api/flota/dispositivos/{dispositivoId}/baja -> **204 SIN CUERPO** | 404 |
@@ -106,7 +102,7 @@ export const dispositivosService = {
    * el equipo dado de baja. Quien llame a esto desde el detalle tiene que sacar al usuario de ahi.
    */
   darDeBaja: (dispositivoId: string) =>
-    httpClient.post<void>(`${BASE}/${dispositivoId}/baja`, undefined, configFlota),
+    httpClient.post<void>(`${BASE}/${dispositivoId}/baja`, undefined),
 
   /**
    * POST /api/flota/dispositivos/{dispositivoId}/reactivar -> **204 SIN CUERPO** | 404 |
@@ -122,7 +118,7 @@ export const dispositivosService = {
    * "Reactivar" cuelga del kebab de la FILA del listado, que solo necesita el id.
    */
   reactivar: (dispositivoId: string) =>
-    httpClient.post<void>(`${BASE}/${dispositivoId}/reactivar`, undefined, configFlota),
+    httpClient.post<void>(`${BASE}/${dispositivoId}/reactivar`, undefined),
 
   /**
    * GET /api/flota/dispositivos/{dispositivoId}/historial-stock ->
@@ -133,7 +129,6 @@ export const dispositivosService = {
    */
   listarHistorialStock: (dispositivoId: string, query: HistorialStockQuery = {}) =>
     httpClient.get<PagedResult<TransicionStockDto>>(`${BASE}/${dispositivoId}/historial-stock`, {
-      ...configFlota,
       params: query,
     }),
 
@@ -160,7 +155,6 @@ export const dispositivosService = {
   obtenerTelemetria: (dispositivoId: string) =>
     httpClient.get<DispositivoTelemetriaSnapshotDto>(
       `${BASE}/${dispositivoId}/telemetria`,
-      configFlota,
     ),
 
   /**
@@ -171,5 +165,5 @@ export const dispositivosService = {
    * (`flota.dispositivo.baja_con_asignacion_activa` si esta instalado en un vehiculo).
    */
   eliminar: (dispositivoId: string) =>
-    httpClient.delete<void>(`${BASE}/${dispositivoId}`, configFlota),
+    httpClient.delete<void>(`${BASE}/${dispositivoId}`),
 }

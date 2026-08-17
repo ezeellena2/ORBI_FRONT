@@ -1,4 +1,3 @@
-import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type { MapaResponseDto, VehiculoEnVivoDto } from '@/services/contracts/flota'
 
@@ -32,8 +31,6 @@ import type { MapaResponseDto, VehiculoEnVivoDto } from '@/services/contracts/fl
 
 const BASE = '/api/flota/mapa'
 
-const configFlota = { baseURL: appConfig.flotaApiBaseUrl } as const
-
 export const mapaService = {
   /**
    * GET /api/flota/mapa/vehiculos -> 200 `MapaResponseDto`. Permiso `flota.vehiculos.leer`.
@@ -46,7 +43,7 @@ export const mapaService = {
    * la flota, y esa diferencia es informacion que la pantalla debe decir ("N sin ubicacion"), no un
    * error a esconder.
    */
-  obtenerMapa: () => httpClient.get<MapaResponseDto>(`${BASE}/vehiculos`, configFlota),
+  obtenerMapa: () => httpClient.get<MapaResponseDto>(`${BASE}/vehiculos`),
 
   /**
    * GET /api/flota/mapa/vehiculos/{vehiculoFlotaId}/en-vivo -> 200 `VehiculoEnVivoDto` |
@@ -63,6 +60,5 @@ export const mapaService = {
   obtenerEnVivo: (vehiculoFlotaId: string) =>
     httpClient.get<VehiculoEnVivoDto>(
       `${BASE}/vehiculos/${vehiculoFlotaId}/en-vivo`,
-      configFlota,
     ),
 }

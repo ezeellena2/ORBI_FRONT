@@ -1,4 +1,3 @@
-import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type {
   ActualizarWebhookEndpointRequest,
@@ -55,8 +54,6 @@ import type {
 
 const BASE = '/api/flota/integraciones/webhooks'
 
-const configFlota = { baseURL: appConfig.flotaApiBaseUrl } as const
-
 export const integracionesService = {
   /**
    * GET /api/flota/integraciones/webhooks -> 200 `PagedResult<WebhookEndpointDto>`.
@@ -67,7 +64,6 @@ export const integracionesService = {
    */
   listarEndpoints: (query: WebhooksPageQuery = {}) =>
     httpClient.get<PagedResult<WebhookEndpointDto>>(BASE, {
-      ...configFlota,
       params: query,
     }),
 
@@ -84,7 +80,7 @@ export const integracionesService = {
    * pantalla: va al input de la URL.
    */
   crearEndpoint: (data: CrearWebhookEndpointRequest) =>
-    httpClient.post<SecretoWebhookDto>(BASE, data, configFlota),
+    httpClient.post<SecretoWebhookDto>(BASE, data),
 
   /**
    * PATCH /api/flota/integraciones/webhooks/{webhookId} -> **204 SIN CUERPO** |
@@ -95,7 +91,7 @@ export const integracionesService = {
    * la revalida anti-SSRF. No borra campos (B-18): lo ausente se preserva.
    */
   actualizarEndpoint: (webhookId: string, data: ActualizarWebhookEndpointRequest) =>
-    httpClient.patch<void>(`${BASE}/${webhookId}`, data, configFlota),
+    httpClient.patch<void>(`${BASE}/${webhookId}`, data),
 
   /**
    * DELETE /api/flota/integraciones/webhooks/{webhookId} -> **204** | 404.
@@ -106,7 +102,7 @@ export const integracionesService = {
    * payload. El copy de la confirmacion no debe decir "se borra el historial".
    */
   eliminarEndpoint: (webhookId: string) =>
-    httpClient.delete<void>(`${BASE}/${webhookId}`, configFlota),
+    httpClient.delete<void>(`${BASE}/${webhookId}`),
 
   /**
    * POST /api/flota/integraciones/webhooks/{webhookId}/probar -> 200 `ResultadoPruebaWebhookDto` |
@@ -125,7 +121,7 @@ export const integracionesService = {
    * Ramificar por status HTTP de la llamada perderia el unico caso interesante.
    */
   probar: (webhookId: string) =>
-    httpClient.post<ResultadoPruebaWebhookDto>(`${BASE}/${webhookId}/probar`, undefined, configFlota),
+    httpClient.post<ResultadoPruebaWebhookDto>(`${BASE}/${webhookId}/probar`, undefined),
 
   /**
    * POST /api/flota/integraciones/webhooks/{webhookId}/reintentar -> 200
@@ -146,7 +142,6 @@ export const integracionesService = {
     httpClient.post<ResultadoReintentoWebhookDto>(
       `${BASE}/${webhookId}/reintentar`,
       undefined,
-      configFlota,
     ),
 
   /**
@@ -161,7 +156,7 @@ export const integracionesService = {
    * acto. El aviso correcto es "coordina el despliegue del receptor", no "tenes una ventana".
    */
   rotarSecreto: (webhookId: string) =>
-    httpClient.post<SecretoWebhookDto>(`${BASE}/${webhookId}/rotar-secreto`, undefined, configFlota),
+    httpClient.post<SecretoWebhookDto>(`${BASE}/${webhookId}/rotar-secreto`, undefined),
 
   /**
    * GET /api/flota/integraciones/webhooks/entregas -> 200 `PagedResult<WebhookEntregaDto>`.
@@ -176,7 +171,6 @@ export const integracionesService = {
    */
   listarEntregas: (query: WebhooksPageQuery = {}) =>
     httpClient.get<PagedResult<WebhookEntregaDto>>(`${BASE}/entregas`, {
-      ...configFlota,
       params: query,
     }),
 }

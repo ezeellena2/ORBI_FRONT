@@ -1,4 +1,3 @@
-import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type {
   ActualizarConductorRequest,
@@ -58,8 +57,6 @@ import type {
 
 const BASE = '/api/flota/conductores'
 
-const configFlota = { baseURL: appConfig.flotaApiBaseUrl } as const
-
 export const conductoresService = {
   /**
    * GET /api/flota/conductores -> 200 PagedResult<ConductorListItemDto>.
@@ -67,7 +64,6 @@ export const conductoresService = {
    */
   listar: (query: ConductoresPageQuery = {}) =>
     httpClient.get<PagedResult<ConductorListItemDto>>(BASE, {
-      ...configFlota,
       params: query,
     }),
 
@@ -78,7 +74,7 @@ export const conductoresService = {
    * filtro por `OrganizacionId` va en el WHERE). Nunca 403 para cross-tenant.
    */
   obtener: (conductorId: string) =>
-    httpClient.get<ConductorDetalleDto>(`${BASE}/${conductorId}`, configFlota),
+    httpClient.get<ConductorDetalleDto>(`${BASE}/${conductorId}`),
 
   /**
    * POST /api/flota/conductores -> 201 ConductorDetalleDto.
@@ -96,14 +92,14 @@ export const conductoresService = {
    *    reintentable y NO quedo nada escrito.
    */
   crear: (data: CrearConductorRequest) =>
-    httpClient.post<ConductorDetalleDto>(BASE, data, configFlota),
+    httpClient.post<ConductorDetalleDto>(BASE, data),
 
   /**
    * PATCH /api/flota/conductores/{conductorId} -> 200 ConductorDetalleDto | 404.
    * Solo datos operativos: la identidad de la Persona es proyeccion canonica read-only (P-A).
    */
   actualizar: (conductorId: string, data: ActualizarConductorRequest) =>
-    httpClient.patch<ConductorDetalleDto>(`${BASE}/${conductorId}`, data, configFlota),
+    httpClient.patch<ConductorDetalleDto>(`${BASE}/${conductorId}`, data),
 
   /**
    * POST /api/flota/conductores/{conductorId}/estado -> **204 SIN CUERPO** | 404 | 409.
@@ -116,7 +112,7 @@ export const conductoresService = {
    * documentacion obligatoria vencida o sin cargar.
    */
   cambiarEstado: (conductorId: string, data: CambiarEstadoConductorRequest) =>
-    httpClient.post<void>(`${BASE}/${conductorId}/estado`, data, configFlota),
+    httpClient.post<void>(`${BASE}/${conductorId}/estado`, data),
 
   /**
    * POST /api/flota/conductores/{conductorId}/baja -> 204 | 404 | 409. Permiso `eliminar` (P-F).
@@ -131,7 +127,7 @@ export const conductoresService = {
    * PO. El copy del modal NO debe prometer que desasigna.
    */
   darDeBaja: (conductorId: string) =>
-    httpClient.post<void>(`${BASE}/${conductorId}/baja`, undefined, configFlota),
+    httpClient.post<void>(`${BASE}/${conductorId}/baja`, undefined),
 
   /**
    * POST /api/flota/conductores/{conductorId}/reactivar -> 204 | 404 | 409. Permiso `editar` (P-F).
@@ -145,7 +141,7 @@ export const conductoresService = {
    * NO resetea el estado operativo: es la contracara de que la baja no lo movio.
    */
   reactivar: (conductorId: string) =>
-    httpClient.post<void>(`${BASE}/${conductorId}/reactivar`, undefined, configFlota),
+    httpClient.post<void>(`${BASE}/${conductorId}/reactivar`, undefined),
 
   /**
    * DELETE /api/flota/conductores/{conductorId} -> 204 | 404 | 409. Permiso `eliminar`.
@@ -155,7 +151,7 @@ export const conductoresService = {
    * devuelve 409 `flota.recurso.tiene_dependencias` (`args {recurso}`).
    */
   eliminar: (conductorId: string) =>
-    httpClient.delete<void>(`${BASE}/${conductorId}`, configFlota),
+    httpClient.delete<void>(`${BASE}/${conductorId}`),
 
   /**
    * GET /api/flota/conductores/{conductorId}/asignaciones ->
@@ -167,7 +163,7 @@ export const conductoresService = {
   listarAsignaciones: (conductorId: string, query: HistorialConductorQuery = {}) =>
     httpClient.get<PagedResult<AsignacionConductorHistorialDto>>(
       `${BASE}/${conductorId}/asignaciones`,
-      { ...configFlota, params: query },
+      { params: query },
     ),
 
   /**
@@ -179,7 +175,7 @@ export const conductoresService = {
   listarDispositivos: (conductorId: string, query: HistorialConductorQuery = {}) =>
     httpClient.get<PagedResult<AsignacionConductorDispositivoDto>>(
       `${BASE}/${conductorId}/dispositivos`,
-      { ...configFlota, params: query },
+      { params: query },
     ),
 
   /**
@@ -193,7 +189,6 @@ export const conductoresService = {
     httpClient.post<AsignacionConductorDispositivoDto>(
       `${BASE}/${conductorId}/dispositivos`,
       data,
-      configFlota,
     ),
 
   /**
@@ -210,7 +205,6 @@ export const conductoresService = {
     data?: CerrarVinculoConductorDispositivoRequest,
   ) =>
     httpClient.delete<void>(`${BASE}/${conductorId}/dispositivos/${asignacionId}`, {
-      ...configFlota,
       data,
     }),
 
@@ -225,7 +219,7 @@ export const conductoresService = {
    * forbidden de pagina.
    */
   listarDocumentos: (conductorId: string) =>
-    httpClient.get<DocumentoDto[]>(`${BASE}/${conductorId}/documentos`, configFlota),
+    httpClient.get<DocumentoDto[]>(`${BASE}/${conductorId}/documentos`),
 
   /**
    * POST /api/flota/conductores/{conductorId}/documentos -> 201 DocumentoDto | 400 | 403 | 404.
@@ -237,7 +231,7 @@ export const conductoresService = {
    * no hay upload que exceda un limite.
    */
   cargarDocumento: (conductorId: string, data: SubirDocumentoRequest) =>
-    httpClient.post<DocumentoDto>(`${BASE}/${conductorId}/documentos`, data, configFlota),
+    httpClient.post<DocumentoDto>(`${BASE}/${conductorId}/documentos`, data),
 
   /**
    * DELETE /api/flota/conductores/{conductorId}/documentos/{documentoId} -> 204 | 403 | 404.
@@ -249,5 +243,5 @@ export const conductoresService = {
    * confirmacion no debe prometer que se borra el archivo.
    */
   eliminarDocumento: (conductorId: string, documentoId: string) =>
-    httpClient.delete<void>(`${BASE}/${conductorId}/documentos/${documentoId}`, configFlota),
+    httpClient.delete<void>(`${BASE}/${conductorId}/documentos/${documentoId}`),
 }

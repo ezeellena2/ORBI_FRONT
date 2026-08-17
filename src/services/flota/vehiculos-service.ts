@@ -1,4 +1,3 @@
-import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type {
   ActualizarVehiculoRequest,
@@ -38,31 +37,28 @@ import type {
 
 const BASE = '/api/flota/vehiculos'
 
-const configFlota = { baseURL: appConfig.flotaApiBaseUrl } as const
-
 export const vehiculosService = {
   /** GET /api/flota/vehiculos -> 200 PagedResult<VehiculoListItemDto> */
   listar: (query: VehiculosPageQuery = {}) =>
     httpClient.get<PagedResult<VehiculoListItemDto>>(BASE, {
-      ...configFlota,
       params: query,
     }),
 
   /** GET /api/flota/vehiculos/{vehiculoFlotaId} -> 200 | 404 (404 tambien es cross-tenant) */
   obtener: (vehiculoFlotaId: string) =>
-    httpClient.get<VehiculoDetalleDto>(`${BASE}/${vehiculoFlotaId}`, configFlota),
+    httpClient.get<VehiculoDetalleDto>(`${BASE}/${vehiculoFlotaId}`),
 
   /** POST /api/flota/vehiculos -> 201 VehiculoDetalleDto | 409 | 400 | 500 */
   crear: (data: CrearVehiculoRequest) =>
-    httpClient.post<VehiculoDetalleDto>(BASE, data, configFlota),
+    httpClient.post<VehiculoDetalleDto>(BASE, data),
 
   /** PATCH /api/flota/vehiculos/{vehiculoFlotaId} -> 200 VehiculoDetalleDto | 404 | 409 */
   actualizar: (vehiculoFlotaId: string, data: ActualizarVehiculoRequest) =>
-    httpClient.patch<VehiculoDetalleDto>(`${BASE}/${vehiculoFlotaId}`, data, configFlota),
+    httpClient.patch<VehiculoDetalleDto>(`${BASE}/${vehiculoFlotaId}`, data),
 
   /** DELETE /api/flota/vehiculos/{vehiculoFlotaId} -> 204 (baja logica) | 404 | 409 */
   eliminar: (vehiculoFlotaId: string) =>
-    httpClient.delete<void>(`${BASE}/${vehiculoFlotaId}`, configFlota),
+    httpClient.delete<void>(`${BASE}/${vehiculoFlotaId}`),
 
   /**
    * POST /api/flota/vehiculos/{vehiculoFlotaId}/asignaciones/dispositivo -> 200
@@ -90,7 +86,6 @@ export const vehiculosService = {
     httpClient.post<AsignacionVehiculoDispositivoDto>(
       `${BASE}/${vehiculoFlotaId}/asignaciones/dispositivo`,
       data,
-      configFlota,
     ),
 
   /**
@@ -110,7 +105,7 @@ export const vehiculosService = {
   ) =>
     httpClient.delete<void>(
       `${BASE}/${vehiculoFlotaId}/asignaciones/dispositivo/${asignacionId}`,
-      { ...configFlota, data },
+      { data },
     ),
 
   /**
@@ -144,7 +139,6 @@ export const vehiculosService = {
     httpClient.post<AsignacionVehiculoConductorDto>(
       `${BASE}/${vehiculoFlotaId}/asignaciones/conductor`,
       data,
-      configFlota,
     ),
 
   /**
@@ -165,7 +159,6 @@ export const vehiculosService = {
     data?: DesasignarConductorRequest,
   ) =>
     httpClient.delete<void>(`${BASE}/${vehiculoFlotaId}/asignaciones/conductor/${asignacionId}`, {
-      ...configFlota,
       data,
     }),
 }

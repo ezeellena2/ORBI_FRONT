@@ -1,4 +1,3 @@
-import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type {
   AsignarProblemaRequest,
@@ -62,8 +61,6 @@ import type {
 
 const BASE = '/api/flota/problemas'
 
-const configFlota = { baseURL: appConfig.flotaApiBaseUrl } as const
-
 export const problemasService = {
   /**
    * GET /api/flota/problemas -> 200 `PagedResult<ProblemaOperativoListItemDto>`.
@@ -79,7 +76,6 @@ export const problemasService = {
    */
   listar: (query: ProblemasPageQuery = {}) =>
     httpClient.get<PagedResult<ProblemaOperativoListItemDto>>(BASE, {
-      ...configFlota,
       params: query,
     }),
 
@@ -95,7 +91,7 @@ export const problemasService = {
    * `contextoOperativo.criticidadActivo: null`.
    */
   obtener: (problemaId: string) =>
-    httpClient.get<ProblemaOperativoDetalleDto>(`${BASE}/${problemaId}`, configFlota),
+    httpClient.get<ProblemaOperativoDetalleDto>(`${BASE}/${problemaId}`),
 
   /**
    * POST /api/flota/problemas/{problemaId}/asignar -> **204 SIN CUERPO** | 404 |
@@ -110,7 +106,7 @@ export const problemasService = {
    * viaja al `detalle` del hecho `asignado`. No prometerle al usuario que va a quedar en el hilo.
    */
   asignar: (problemaId: string, data: AsignarProblemaRequest) =>
-    httpClient.post<void>(`${BASE}/${problemaId}/asignar`, data, configFlota),
+    httpClient.post<void>(`${BASE}/${problemaId}/asignar`, data),
 
   /**
    * POST /api/flota/problemas/{problemaId}/silenciar -> **204 SIN CUERPO** | 400 | 404 | 409.
@@ -123,7 +119,7 @@ export const problemasService = {
    * `hasta`), **no borra senales**, **no detiene la deteccion** y **no pausa el reloj de SLA**.
    */
   silenciar: (problemaId: string, data: SilenciarProblemaRequest) =>
-    httpClient.post<void>(`${BASE}/${problemaId}/silenciar`, data, configFlota),
+    httpClient.post<void>(`${BASE}/${problemaId}/silenciar`, data),
 
   /**
    * POST /api/flota/problemas/{problemaId}/resolver -> **204 SIN CUERPO** | 400 | 404 | 409.
@@ -137,5 +133,5 @@ export const problemasService = {
    * es prometer una integracion que no ocurre.
    */
   resolver: (problemaId: string, data: ResolverProblemaRequest) =>
-    httpClient.post<void>(`${BASE}/${problemaId}/resolver`, data, configFlota),
+    httpClient.post<void>(`${BASE}/${problemaId}/resolver`, data),
 }

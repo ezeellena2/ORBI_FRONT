@@ -1,4 +1,3 @@
-import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type {
   CatalogoGrowableItemDto,
@@ -38,15 +37,13 @@ import type {
 
 const BASE = '/api/flota/catalogos'
 
-const configFlota = { baseURL: appConfig.flotaApiBaseUrl } as const
-
 export const catalogosDispositivoService = {
   /**
    * GET /api/flota/catalogos/modelos-dispositivo -> 200 CatalogoGrowableItemDto[].
    * Permiso `flota.dispositivos.leer`.
    */
   listarModelosDispositivo: () =>
-    httpClient.get<CatalogoGrowableItemDto[]>(`${BASE}/modelos-dispositivo`, configFlota),
+    httpClient.get<CatalogoGrowableItemDto[]>(`${BASE}/modelos-dispositivo`),
 
   /**
    * POST /api/flota/catalogos/modelos-dispositivo -> 201 CatalogoGrowableItemDto |
@@ -58,13 +55,13 @@ export const catalogosDispositivoService = {
    * el select puede terminar mostrando dos entradas homonimas. Es deliberado, no un bug.
    */
   crearModeloDispositivo: (data: CrearModeloDispositivoRequest) =>
-    httpClient.post<CatalogoGrowableItemDto>(`${BASE}/modelos-dispositivo`, data, configFlota),
+    httpClient.post<CatalogoGrowableItemDto>(`${BASE}/modelos-dispositivo`, data),
 
   /** GET /api/flota/catalogos/proveedores-sim -> 200 CatalogoGrowableItemDto[] (`fabricante` siempre null). */
   listarProveedoresSim: () =>
-    httpClient.get<CatalogoGrowableItemDto[]>(`${BASE}/proveedores-sim`, configFlota),
+    httpClient.get<CatalogoGrowableItemDto[]>(`${BASE}/proveedores-sim`),
 
   /** POST /api/flota/catalogos/proveedores-sim -> 201 | 409 `flota.catalogo.nombre_duplicado`. */
   crearProveedorSim: (data: CrearProveedorSimRequest) =>
-    httpClient.post<CatalogoGrowableItemDto>(`${BASE}/proveedores-sim`, data, configFlota),
+    httpClient.post<CatalogoGrowableItemDto>(`${BASE}/proveedores-sim`, data),
 }

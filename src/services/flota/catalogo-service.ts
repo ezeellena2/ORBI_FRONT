@@ -1,4 +1,3 @@
-import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type {
   CatalogoCanonicoItemDto,
@@ -24,13 +23,10 @@ import type {
 
 const BASE = '/api/plataforma-canonica/catalogo'
 
-const configCanonica = { baseURL: appConfig.canonicaApiBaseUrl } as const
-
 export const catalogoService = {
   /** GET /catalogo/marcas?q=&page=&pageSize= -> 200 PagedResult<MarcaCatalogoDto> */
   listarMarcas: (query: CatalogoPageQuery = {}) =>
     httpClient.get<PagedResult<MarcaCatalogoDto>>(`${BASE}/marcas`, {
-      ...configCanonica,
       params: query,
     }),
 
@@ -43,13 +39,12 @@ export const catalogoService = {
    */
   listarModelos: (marcaId: string, query: CatalogoPageQuery = {}) =>
     httpClient.get<PagedResult<ModeloCatalogoDto>>(`${BASE}/marcas/${marcaId}/modelos`, {
-      ...configCanonica,
       params: query,
     }),
 
   /** GET /catalogo/tipos-vehiculo -> 200 CatalogoCanonicoItemDto[] (lista entera, sin paginar) */
   listarTiposVehiculo: () =>
-    httpClient.get<CatalogoCanonicoItemDto[]>(`${BASE}/tipos-vehiculo`, configCanonica),
+    httpClient.get<CatalogoCanonicoItemDto[]>(`${BASE}/tipos-vehiculo`),
 
   /**
    * GET /catalogo/buscar?q=focus 2020 se -> 200 PagedResult<VersionCaminoCompletoDto>.
@@ -57,7 +52,6 @@ export const catalogoService = {
    */
   buscar: (query: CatalogoPageQuery) =>
     httpClient.get<PagedResult<VersionCaminoCompletoDto>>(`${BASE}/buscar`, {
-      ...configCanonica,
       params: query,
     }),
 }

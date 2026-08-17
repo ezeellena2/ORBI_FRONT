@@ -1,4 +1,3 @@
-import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type { AlertaListItemDto, AlertasPageQuery, PagedResult } from '@/services/contracts/flota'
 
@@ -41,8 +40,6 @@ import type { AlertaListItemDto, AlertasPageQuery, PagedResult } from '@/service
 
 const BASE = '/api/flota/alertas'
 
-const configFlota = { baseURL: appConfig.flotaApiBaseUrl } as const
-
 export const senalesService = {
   /**
    * GET /api/flota/alertas -> 200 `PagedResult<AlertaListItemDto>`.
@@ -58,7 +55,6 @@ export const senalesService = {
    */
   listar: (query: AlertasPageQuery = {}) =>
     httpClient.get<PagedResult<AlertaListItemDto>>(BASE, {
-      ...configFlota,
       params: query,
     }),
 }

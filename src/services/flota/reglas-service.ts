@@ -1,4 +1,3 @@
-import { appConfig } from '@/config/env'
 import { httpClient } from '@/services/http/http-client'
 import type {
   ActualizarReglaProblemaRequest,
@@ -47,8 +46,6 @@ import type {
 
 const BASE = '/api/flota/problemas/reglas'
 
-const configFlota = { baseURL: appConfig.flotaApiBaseUrl } as const
-
 export const reglasService = {
   /**
    * GET /api/flota/problemas/reglas -> 200 `PagedResult<ReglaProblemaDto>`.
@@ -64,7 +61,6 @@ export const reglasService = {
    */
   listar: (query: ReglasPageQuery = {}) =>
     httpClient.get<PagedResult<ReglaProblemaDto>>(BASE, {
-      ...configFlota,
       params: query,
     }),
 
@@ -80,7 +76,7 @@ export const reglasService = {
    * `null` y la regla se rechaza con `motivo: 'umbral_minutos_invalido'`.
    */
   crear: (data: CrearReglaProblemaRequest) =>
-    httpClient.post<ReglaProblemaDto>(BASE, data, configFlota),
+    httpClient.post<ReglaProblemaDto>(BASE, data),
 
   /**
    * PATCH /api/flota/problemas/reglas/{reglaId} -> 200 `ReglaProblemaDto` |
@@ -96,5 +92,5 @@ export const reglasService = {
    * dispositivo. Si la pantalla ofrece "quitar webhook", tiene que avisar que hoy no se puede.
    */
   actualizar: (reglaId: string, data: ActualizarReglaProblemaRequest) =>
-    httpClient.patch<ReglaProblemaDto>(`${BASE}/${reglaId}`, data, configFlota),
+    httpClient.patch<ReglaProblemaDto>(`${BASE}/${reglaId}`, data),
 }
