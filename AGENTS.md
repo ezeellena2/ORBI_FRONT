@@ -63,33 +63,46 @@ algo plausible.
   > dos máquinas con paths distintos y ninguna ruta absoluta sobrevive a eso.
 - `TracAutoFrontV2` es solo la implementacion frontend React.
 
+> ⚠️ **Corregido el 2026-08-17.** Esta sección mandaba leer **19 documentos que no existen**:
+> `docs/planes/web/*` (6), `docs/planes/arquitectura-v3/*` (5 + su README) y `docs/mockups/*` (6).
+> Las carpetas `docs/planes/` y `docs/mockups/` **fueron eliminadas del repo hermano** — su contenido
+> se consolidó en `docsv2/` y los mockups vigentes viven en `docs/mockupsv2/`. Ninguno de los 19
+> archivos se perdió: **todos cambiaron de carpeta**, y abajo están sus rutas reales. El daño no era
+> el link roto sino el silencio: un agente que no encuentra el archivo improvisa el contrato.
+
 ### Web vigente en TracAutoV2
 
-- `docs/planes/web/base-y-alcance-web.md`
-- `docs/planes/web/estructura-base-y-capas-web.md`
-- `docs/planes/web/sesion-contexto-y-contratos-web.md`
-- `docs/planes/web/navegacion-y-superficies-web.md`
-- `docs/planes/web/calidad-seguridad-y-operacion-web.md`
-- `docs/planes/web/reglas-para-ia-web.md`
+La arquitectura frontend vigente es la que ya lista el bloque **LEER PRIMERO** de arriba:
+`../TracAutoV2/docsv2/02-arquitectura/frontend/` (7 documentos, del sistema de diseño a la Capa 0).
+No hay otra: `docs/planes/web/` ya no existe.
 
 ### Arquitectura y auth a respetar
 
-- `docs/planes/arquitectura-v3/02-identidad-acceso-y-contexto-activo.md`
-- `docs/planes/arquitectura-v3/05-modulos-vistas-y-superficies.md`
-- `docs/planes/arquitectura-v3/08-infraestructura-contenedores-y-despliegue.md`
-- `docs/planes/arquitectura-v3/12-patrones-de-implementacion-web-y-servicios.md`
-- `docs/planes/arquitectura-v3/14-cuentas-federadas-y-google-sign-in.md`
-- `docs/planes/web/README.md`
-- `CLAUDE.md` del backend en `TracAutoV2`
+Todas bajo `../TracAutoV2/docsv2/02-arquitectura/arquitectura-v3-completa/` (mismos nombres de
+archivo que antes; lo único que cambió es la carpeta):
+
+- `02-identidad-acceso-y-contexto-activo.md`
+- `05-modulos-vistas-y-superficies.md`
+- `08-infraestructura-contenedores-y-despliegue.md`
+- `12-patrones-de-implementacion-web-y-servicios.md`
+- `13-internacionalizacion-localizacion-y-contrato-de-errores.md` — el contrato de error que consume
+  `parse-api-error` (`code` / `message_key` / `args`), que esta lista omitía
+- `14-cuentas-federadas-y-google-sign-in.md`
+- `../../../CLAUDE.md` del backend (`TracAutoV2/CLAUDE.md`)
 
 ### Mockups obligatorios
 
-- `docs/mockups/GUIA-MOCKUPS.md`
-- `docs/mockups/login/index.html`
-- `docs/mockups/login/selector.html`
-- `docs/mockups/registro-b2c/index.html`
-- `docs/mockups/registro-empresa/index.html`
-- `docs/mockups/invitacion/index.html`
+Viven en `../TracAutoV2/docs/mockupsv2/` — **v2, no `docs/mockups/`**, que era el legacy y ya no está
+en el repo (ADR-0049). Los 5 de auth conservan su nombre bajo `publico/`:
+
+- `docs/mockupsv2/publico/login/index.html`
+- `docs/mockupsv2/publico/login/selector.html`
+- `docs/mockupsv2/publico/registro-b2c/index.html`
+- `docs/mockupsv2/publico/registro-empresa/index.html`
+- `docs/mockupsv2/publico/invitacion/index.html`
+
+> `GUIA-MOCKUPS.md` no tiene reemplazo y no hace falta: el mockup es **referencia visual únicamente**
+> y el criterio de cómo leerlo está en el bloque "Diseño y animación" de este archivo.
 
 ### Endpoints backend del slice-01
 
@@ -103,7 +116,9 @@ algo plausible.
 
 Si una tarea toca `Google Sign-In`, no asumir endpoints ni contratos por fuera de:
 
-- `C:\Users\ezequ\source\repos\TracAutoV2\docs\planes\arquitectura-v3\14-cuentas-federadas-y-google-sign-in.md`
+- `../TracAutoV2/docsv2/02-arquitectura/arquitectura-v3-completa/14-cuentas-federadas-y-google-sign-in.md`
+  (era una ruta absoluta a un archivo inexistente — las dos cosas que este archivo ya declaraba
+  derogadas más arriba, y la única ruta absoluta que quedaba)
 
 Backend base URL en desarrollo — **single-origin** (ADR-0081):
 
@@ -590,9 +605,14 @@ Antes de aprobar un cambio:
 
 ## Antes de codear
 
-1. Leer el prompt de implementacion correspondiente en `docs/implementacion/slice-01-auth-identidad/`.
-2. Releer los docs normativos web del backend.
-3. Abrir el mockup HTML si la tarea toca UI.
+1. Leer el plan que corresponda en `../TracAutoV2/docsv2/04-implementacion/`. Si la tarea es de un
+   módulo **con doc co-locada** (hoy solo Flota), su plan manda y vive en
+   `../TracAutoV2/src/<Modulo>/docs/` — arrancando por su `ESTADO.md`.
+   (Decía `docs/implementacion/slice-01-auth-identidad/`: esa carpeta ya no existe en ninguno de los
+   dos repos.)
+2. Releer los docs normativos de frontend del backend — los 7 de
+   `../TracAutoV2/docsv2/02-arquitectura/frontend/`.
+3. Abrir el mockup HTML si la tarea toca UI (`../TracAutoV2/docs/mockupsv2/`).
 4. Si falta un contrato backend, dejar el hueco visible y no inventarlo.
 
 ## Despues de codear
@@ -621,28 +641,33 @@ Antes de implementar cualquier cambio, el agente DEBE crear un artefacto `pre-im
 4. **Restricciones arquitectonicas** que aplican al cambio especifico
 5. **Huecos documentales** encontrados (contratos no cerrados, ambiguedades, etc.)
 
-Si el agente no puede producir este artefacto, el cambio se rechaza.
+> ⚠️ **Honestidad sobre el enforcement (2026-08-17).** Esta sección decía *"si el agente no puede
+> producir este artefacto, el cambio se rechaza"*, y **nadie rechaza nada**: no hay script, hook ni
+> job de CI que busque un `pre-implementacion.md`. Es la misma corrección que ya lleva
+> `TracAutoV2/CLAUDE.md` en su sección equivalente. El preflight vale igual —es lo que evita arrancar
+> sobre terreno equivocado— pero **hoy lo sostiene tu criterio, no una puerta**.
 
 ## Skills disponibles y mapeo por tipo de tarea
 
-Skills instalados en el entorno. El agente DEBE consultar los skills relevantes antes de implementar.
+> ⚠️ **Verificado el 2026-08-17: 4 de los 9 skills que esta tabla declaraba obligatorios no existen
+> con ese nombre** (`solid`, `architecture-patterns`, `react-best-practices`,
+> `verification-before-completion`), y la segunda tabla —«nombres comunes → skill real instalado»—
+> mapeaba cada nombre **a sí mismo**, así que no resolvía nada. Un agente que intenta invocarlos
+> falla y sigue de largo. Abajo quedan solo los que están instalados de verdad.
 
-| Tipo de tarea | Skills obligatorios |
+| Tipo de tarea | Skills disponibles |
 |---------------|--------------------|
-| Crear componente React / formulario | `frontend-design`, `react-best-practices` |
-| Accesibilidad y auditoria visual | `web-design-guidelines`, `frontend-design` |
-| Refactoring | `solid`, `react-best-practices` |
-| Review de codigo | `code-review`, `react-best-practices` |
-| Arquitectura y contratos | `architecture-patterns`, `solid` |
-| Planificacion de tareas | `writing-plans` o `implementation-planner` |
-| Cierre y verificacion | `verification-before-completion` |
+| Crear componente React / formulario | `frontend-design` |
+| Accesibilidad y auditoría visual | `web-design-guidelines`, `frontend-design` |
+| Diseño de UI (estilos, paletas, tipografía) | `ui-ux-pro-max` |
+| Refactoring | `clean-code` |
+| Planificación de tareas | `writing-plans` o `implementation-planner` |
+| Ejecutar un plan ya escrito | `executing-plans` |
+| Premisas de ORBI (tenancy, permisos, eventos) | `orbi-premisas` |
 
-Skills equivalentes para nombres comunes:
-
-| Nombre comun | Skill real instalado |
-|-------------|---------------------|
-| `react-best-practices` | `react-best-practices` |
-| `solid` | `solid` |
-| `verification-before-completion` | `verification-before-completion` |
-| `architecture-patterns` | `architecture-patterns` |
-| `frontend-design` | `frontend-design` |
+Los que la tabla vieja pedía y **no** están instalados: `solid`, `architecture-patterns`,
+`react-best-practices`, `verification-before-completion`, `code-review`. Hay equivalentes provistos
+por plugins, que se invocan con su prefijo (`superpowers:verification-before-completion`,
+`superpowers:test-driven-development`, `code-review:code-review`) — **si el plugin está activo en esa
+sesión**, cosa que este archivo no puede garantizar. Instalar los faltantes como skills propios del
+repo es decisión del PO, no de un agente.
