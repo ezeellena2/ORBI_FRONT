@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState, type PropsWithChildren } from 'react'
 import { useThemeSync } from '@/shared/hooks/useThemeSync'
+import { usePurgarCacheAlCambiarDeSesion } from '@/shared/hooks/usePurgarCacheAlCambiarDeSesion'
 
 export function AppProviders({ children }: PropsWithChildren) {
   useThemeSync()
@@ -20,6 +21,10 @@ export function AppProviders({ children }: PropsWithChildren) {
         },
       }),
   )
+
+  // Aisla la cache entre sesiones: sin esto, cambiar de organizacion servia los datos de la
+  // anterior durante el `staleTime`, porque ninguna query key lleva el tenant.
+  usePurgarCacheAlCambiarDeSesion(queryClient)
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 }
