@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { Sidebar } from '@/features/shell/components/sidebar/Sidebar'
 import { AppHeader } from '@/features/shell/components/AppHeader'
 import { ColumnaDeModulo } from '@/features/shell/module-nav/ColumnaDeModulo'
+import { ProveedorDelSlot } from '@/shared/ui/SlotDeColumnaDePantalla'
 import { useSidebarState } from '@/features/shell/hooks/useSidebarState'
 
 /**
@@ -26,12 +27,22 @@ export function AppShell() {
       <Sidebar collapsed={collapsed} onToggle={toggle} />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <AppHeader />
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
-          <ColumnaDeModulo />
-          <main className="min-w-0 flex-1 overflow-y-auto p-6">
-            <Outlet />
-          </main>
-        </div>
+        <ProveedorDelSlot>
+          {(slotDePantalla) => (
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
+              <ColumnaDeModulo />
+              {/*
+                La columna que aporta la PANTALLA (p. ej. el Centro de Problemas) se monta acá, como
+                hermana de la del módulo. Renderizada dentro del `<main>` heredaba su `p-6` y quedaba
+                despegada de la anterior — medido: 24px de aire y sin llegar al alto completo.
+              */}
+              {slotDePantalla}
+              <main className="min-w-0 flex-1 overflow-y-auto p-6">
+                <Outlet />
+              </main>
+            </div>
+          )}
+        </ProveedorDelSlot>
       </div>
     </div>
   )

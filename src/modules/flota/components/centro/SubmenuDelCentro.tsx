@@ -1,9 +1,6 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import {
-  ChevronLeft,
-  ChevronRight,
   Columns3,
   GaugeCircle,
   Inbox,
@@ -15,6 +12,8 @@ import { AccionConMotivo } from '../AccionConMotivo'
 import { usePermisos } from '../../hooks/usePermisos'
 import { PARAM_VISTA, type VistaDelCentro } from '../../vocabulario-vistas-del-centro'
 import { cn } from '@/shared/utils/cn'
+import { ColumnaLateral } from '@/shared/ui/ColumnaLateral'
+import { ColumnaDePantalla } from '@/shared/ui/SlotDeColumnaDePantalla'
 
 /**
  * Submenú secundario del Centro de Problemas (ficha §1 y §6).
@@ -72,40 +71,19 @@ export function SubmenuDelCentro({
   const { t } = useTranslation('flota')
   const { tienePermiso } = usePermisos()
 
-  const [colapsado, setColapsado] = useState(
-    () => localStorage.getItem(CLAVE_COLAPSO) === 'true',
-  )
-
-  function alternar() {
-    setColapsado((previo) => {
-      const siguiente = !previo
-      localStorage.setItem(CLAVE_COLAPSO, String(siguiente))
-      return siguiente
-    })
-  }
-
   return (
-    <nav
-      aria-label={t('centro.problemas.titulo')}
-      className={cn(
-        'flex shrink-0 flex-col gap-4 rounded-xl border border-borde bg-superficie-1 p-3',
-        colapsado ? 'lg:w-14' : 'lg:w-56',
-      )}
+    // Se monta en el slot del shell, al lado de la columna del módulo. Dentro del contenido
+    // heredaba su padding y quedaba despegada de la anterior.
+    <ColumnaDePantalla>
+    <ColumnaLateral
+      titulo={t('centro.problemas.titulo')}
+      subtitulo={t('centro.submenu.bajada')}
+      etiquetaAria={t('centro.problemas.titulo')}
+      etiquetaAlternar={t('centro.submenu.alternar')}
+      claveColapso={CLAVE_COLAPSO}
     >
-      <button
-        type="button"
-        onClick={alternar}
-        aria-expanded={!colapsado}
-        className="hidden h-8 w-8 items-center justify-center self-end rounded-sm text-fg-terciario hover:bg-superficie-2 hover:text-fg-primario lg:flex"
-      >
-        {colapsado ? (
-          <ChevronRight className="size-4" aria-hidden />
-        ) : (
-          <ChevronLeft className="size-4" aria-hidden />
-        )}
-        <span className="sr-only">{t('centro.submenu.alternar')}</span>
-      </button>
-
+      {(colapsado) => (
+        <div className="flex flex-col gap-3">
       <Grupo titulo={t('centro.submenu.vistas')} colapsado={colapsado}>
         <ItemDeVista
           icono={Inbox}
@@ -153,7 +131,10 @@ export function SubmenuDelCentro({
           colapsado={colapsado}
         />
       </Grupo>
-    </nav>
+        </div>
+      )}
+    </ColumnaLateral>
+    </ColumnaDePantalla>
   )
 }
 

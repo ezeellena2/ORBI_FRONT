@@ -1924,7 +1924,8 @@
       "integraciones": "Integrations",
       "sinPermiso": "You need the {{permiso}} permission to open this.",
       "alternar": "Show or hide the Center menu",
-      "kanban": "Kanban by status"
+      "kanban": "Kanban by status",
+      "bajada": "Operations and tracking"
     },
     "sala": {
       "cola": {

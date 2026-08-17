@@ -68,6 +68,8 @@ export interface GrupoDeModulo {
 export interface RegistroDeModulo {
   key: string
   labelKey: string
+  /** Bajada del encabezado de la columna. Es el `subtitle` del registro del mockup. */
+  subtituloKey?: string
   icono: LucideIcon
   /** Código de módulo para el gate de módulo activo. Ausente = superficie de sistema, sin gate. */
   modulo?: string
@@ -83,6 +85,7 @@ export interface RegistroDeModulo {
 const FLOTA: RegistroDeModulo = {
   key: 'flota',
   labelKey: 'shell.nav.flota',
+  subtituloKey: 'shell.nav.flotaBajada',
   icono: Car,
   modulo: 'flota',
   hub: '/app/flota/vehiculos',
@@ -151,6 +154,7 @@ const FLOTA: RegistroDeModulo = {
 const CONFIGURACION: RegistroDeModulo = {
   key: 'configuracion',
   labelKey: 'shell.nav.configuracion',
+  subtituloKey: 'shell.nav.configuracionBajada',
   icono: Cog,
   hub: '/app/configuracion/empresa',
   grupos: [

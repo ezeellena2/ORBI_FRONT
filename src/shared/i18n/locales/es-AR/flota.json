@@ -1924,7 +1924,8 @@
       "integraciones": "Integraciones",
       "sinPermiso": "Necesitás el permiso {{permiso}} para entrar acá.",
       "alternar": "Mostrar u ocultar el menú del Centro",
-      "kanban": "Kanban por estado"
+      "kanban": "Kanban por estado",
+      "bajada": "Operación y seguimiento"
     },
     "sala": {
       "cola": {
