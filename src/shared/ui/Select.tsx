@@ -53,6 +53,10 @@ export interface SelectProps {
   id?: string
   name?: string
   'aria-describedby'?: string
+  /** Nombre accesible cuando el control NO lleva `<label>` visible — el caso de la barra de filtros. */
+  'aria-label'?: string
+  /** Tooltip nativo. Lo usa la barra de filtros para explicar un filtro sin ocupar la fila. */
+  title?: string
   className?: string
 }
 

@@ -1,7 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Boton } from '@/shared/ui/Boton'
-import { Select } from '@/shared/ui/Select'
-import { Toggle } from '@/shared/ui/Toggle'
+import { BarraDeFiltros, FiltroSelect } from '@/shared/ui/BarraDeFiltros'
 import type {
   EstadoStockDispositivo,
   FiltroAsignacionDispositivo,
@@ -124,14 +122,22 @@ export function FiltrosDispositivos({
   ]
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-borde bg-superficie-1 p-3">
+    <BarraDeFiltros
+      soloActivos={{
+        valor: soloActivos,
+        onCambio: onSoloActivos,
+        etiqueta: t('dispositivosListado.filtros.soloActivos'),
+      }}
+      hayFiltros={hayFiltros}
+      onLimpiar={onLimpiar}
+      etiquetaLimpiar={t('dispositivosListado.filtros.limpiar')}
+    >
       <FiltroSelect
         etiqueta={t('dispositivosListado.filtros.stock')}
         opciones={opcionesStock}
         valor={stock}
         onCambio={(valor) => onStock(valor as FiltroStock)}
       />
-
       <FiltroSelect
         etiqueta={t('dispositivosListado.filtros.modelo')}
         opciones={opcionesModelo}
@@ -141,7 +147,6 @@ export function FiltrosDispositivos({
         cargando={modelos.isPending}
         onCambio={onModelo}
       />
-
       <FiltroSelect
         etiqueta={t('dispositivosListado.filtros.asignacion')}
         // El titulo separa los dos ejes que mas se confunden en esta barra: la asignacion es dato
@@ -151,7 +156,6 @@ export function FiltrosDispositivos({
         valor={asignacion}
         onCambio={(valor) => onAsignacion(valor as FiltroAsignacion)}
       />
-
       <FiltroSelect
         etiqueta={t('conexion.filtro.etiqueta')}
         // Sin esta ayuda, "En linea" devolviendo vacio con Telemetria caida se lee como "no tengo
@@ -161,40 +165,6 @@ export function FiltrosDispositivos({
         valor={conexion}
         onCambio={(valor) => onConexion(valor as FiltroConexionDispositivo)}
       />
-
-      <Toggle
-        etiqueta={t('dispositivosListado.filtros.soloActivos')}
-        activo={soloActivos}
-        onCambio={onSoloActivos}
-      />
-
-      <Boton variante="fantasma" tamano="sm" deshabilitado={!hayFiltros} onClick={onLimpiar}>
-        {t('dispositivosListado.filtros.limpiar')}
-      </Boton>
-    </div>
-  )
-}
-
-function FiltroSelect({
-  etiqueta,
-  ayuda,
-  opciones,
-  valor,
-  cargando,
-  onCambio,
-}: {
-  /** Ya resuelto por i18n. */
-  etiqueta: string
-  ayuda?: string
-  opciones: Array<{ valor: string; etiqueta: string }>
-  valor: string
-  cargando?: boolean
-  onCambio: (valor: string) => void
-}) {
-  return (
-    <label className="flex min-w-52 flex-col gap-1 text-xs text-fg-secundario" title={ayuda}>
-      {etiqueta}
-      <Select opciones={opciones} valor={valor} cargando={cargando} onCambio={onCambio} />
-    </label>
+    </BarraDeFiltros>
   )
 }

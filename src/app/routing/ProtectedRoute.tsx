@@ -2,8 +2,8 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useSessionStore } from '@/stores/session-store'
 import { authService } from '@/services/auth/auth-service'
 import { useTranslation } from 'react-i18next'
-import { useMutation } from '@tanstack/react-query'
-import { useEffect, useRef, type PropsWithChildren } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useEffect, type PropsWithChildren } from 'react'
 
 /**
  * Guard que protege rutas autenticadas.
@@ -25,28 +25,47 @@ import { useEffect, useRef, type PropsWithChildren } from 'react'
  *
  * Ahora la decision se toma con un estado que el render SI ve: solo se redirige cuando el recovery
  * fallo de verdad (`recovery.isError`). Mientras no fallo, se muestra el cargando.
+ *
+ * ── POR QUE ES useQuery Y NO useMutation + useRef (regresion arreglada el 2026-08-17) ──────────
+ * La version anterior disparaba una `useMutation` desde un `useEffect`, con un `useRef` como guard
+ * de "ya lo intente". Con `StrictMode` (activo en `main.tsx`) eso se colgaba PARA SIEMPRE:
+ *
+ *   1. Primer montaje: el efecto corre, pone el ref en `true` y dispara el refresh.
+ *   2. StrictMode desmonta y REMONTA el componente.
+ *   3. En el remontaje, `useMutation` arranca con estado FRESCO (`isIdle`, `isError: false`).
+ *   4. El efecto corre otra vez, pero EL REF SOBREVIVIO al remontaje → no vuelve a disparar.
+ *   5. El 401 aterriza sobre la instancia DESCARTADA. La viva queda `isIdle` para siempre.
+ *
+ * Resultado medido: entrar sin sesion a cualquier `/app/*` —un bookmark, un link compartido, o un
+ * F5 con la sesion vencida— dejaba una pantalla "Cargando..." infinita que NUNCA llegaba al login.
+ *
+ * `useQuery` no tiene ese problema: el estado vive en el cache de React Query, indexado por
+ * `queryKey`, no en la instancia del componente. El remontaje de StrictMode reusa la MISMA consulta
+ * en vuelo —una sola request— y el resultado sobrevive. No cambiar esto por una mutation sin
+ * entender los 5 pasos de arriba.
  */
 export function ProtectedRoute({ children }: PropsWithChildren) {
   const { t } = useTranslation()
   const isAuthenticated = useSessionStore((s) => s.isAuthenticated)
   const login = useSessionStore((s) => s.login)
   const location = useLocation()
-  const recoveryAttempted = useRef(false)
 
-  const recovery = useMutation({
-    mutationFn: () => authService.refresh(),
-    onSuccess: (response) => {
-      login(response.data)
-    },
+  const recovery = useQuery({
+    queryKey: ['sesion', 'recuperacion'],
+    queryFn: async () => (await authService.refresh()).data,
+    enabled: !isAuthenticated,
+    // Un refresh que falla es una respuesta, no un error transitorio: reintentar solo demora el
+    // redirect al login. Y sin `staleTime` infinito, cada montaje volveria a pedirlo.
+    retry: false,
+    staleTime: Number.POSITIVE_INFINITY,
+    refetchOnWindowFocus: false,
   })
 
-  useEffect(function attemptSessionRecovery() {
-    if (!isAuthenticated && !recoveryAttempted.current) {
-      recoveryAttempted.current = true
-      recovery.mutate()
+  useEffect(function adoptarSesionRecuperada() {
+    if (recovery.data) {
+      login(recovery.data)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- recovery ref is stable; including the object would cause re-runs
-  }, [isAuthenticated])
+  }, [recovery.data, login])
 
   // Ya autenticado (directo o por recovery)
   if (isAuthenticated) {

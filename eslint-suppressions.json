@@ -52,11 +52,6 @@
       "count": 6
     }
   },
-  "src/features/shell/components/sidebar/SidebarNavGroup.tsx": {
-    "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
   "src/shared/errors/parse-api-error.ts": {
     "no-restricted-imports": {
       "count": 1

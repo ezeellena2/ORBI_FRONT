@@ -72,7 +72,7 @@
       "placeholder": "Search by plate"
     },
     "soloActivos": "Active only",
-    "limpiar": "Clear filters",
+    "limpiar": "Clear",
     "filtros": {
       "situacion": "Situation",
       "situacionTodos": "Whole fleet",
@@ -544,7 +544,7 @@
       "stock": "Stock status",
       "stockTodos": "All",
       "soloActivos": "Active only",
-      "limpiar": "Clear filters",
+      "limpiar": "Clear",
       "modelo": "Model",
       "modeloTodos": "All models",
       "asignacion": "Assignment",
@@ -884,7 +884,7 @@
       "asignacion": "Assignment",
       "asignacionTodos": "All",
       "soloActivos": "Active only",
-      "limpiar": "Clear filters"
+      "limpiar": "Clear"
     },
     "columnas": {
       "conductor": "Driver",
@@ -1924,7 +1924,8 @@
       "integraciones": "Integrations",
       "sinPermiso": "You need the {{permiso}} permission to open this.",
       "alternar": "Show or hide the Center menu",
-      "kanban": "Kanban by status"
+      "kanban": "Kanban by status",
+      "bajada": "Operations and tracking"
     },
     "sala": {
       "cola": {

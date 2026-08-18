@@ -2,7 +2,6 @@ import { useSessionStore } from '@/stores/session-store'
 import { NAV_CONFIG, type NavItem } from '../../nav-config'
 import { SidebarNavLabel } from './SidebarNavLabel'
 import { SidebarNavItem } from './SidebarNavItem'
-import { SidebarNavGroup } from './SidebarNavGroup'
 
 interface Props {
   collapsed: boolean
@@ -26,13 +25,16 @@ export function SidebarNav({ collapsed }: Props) {
 
   return (
     <nav className="flex-1 space-y-0.5 overflow-y-auto py-2">
+      {/*
+        Solo `label` y `link`. El branch de grupo desplegable se elimino el 2026-08-17: el plan de
+        navegacion lateral unificada (Task 16 Step 2) manda que todo modulo con secciones sea un
+        LINK UNICO al hub, y que sus items vivan en la columna secundaria. Ver `nav-config.ts`.
+      */}
       {NAV_CONFIG.filter(isVisible).map((item, i) =>
         item.type === 'label' ? (
           <SidebarNavLabel key={i} item={item} collapsed={collapsed} />
-        ) : item.type === 'link' ? (
-          <SidebarNavItem key={item.key} item={item} collapsed={collapsed} />
         ) : (
-          <SidebarNavGroup key={item.key} item={item} collapsed={collapsed} />
+          <SidebarNavItem key={item.key} item={item} collapsed={collapsed} />
         )
       )}
     </nav>

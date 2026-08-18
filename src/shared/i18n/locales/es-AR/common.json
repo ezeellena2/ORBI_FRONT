@@ -793,7 +793,12 @@
       "confApariencia": "Apariencia",
       "confRoles": "Roles y permisos",
       "usuarios": "Usuarios",
-      "flotaProblemas": "Problemas"
+      "flotaProblemas": "Centro de problemas",
+      "grupoOperacion": "Operación",
+      "alternarColumna": "Colapsar o expandir el menú del módulo",
+      "sinPermiso": "Necesitás el permiso {{permiso}}",
+      "flotaBajada": "Flota conectada",
+      "configuracionBajada": "Ajustes de la organización"
     },
     "sidebar": {
       "collapse": "Colapsar menú",

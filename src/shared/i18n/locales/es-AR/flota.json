@@ -72,7 +72,7 @@
       "placeholder": "Buscar por patente"
     },
     "soloActivos": "Solo activos",
-    "limpiar": "Limpiar filtros",
+    "limpiar": "Limpiar",
     "filtros": {
       "situacion": "Situación",
       "situacionTodos": "Toda la flota",
@@ -544,7 +544,7 @@
       "stock": "Estado de stock",
       "stockTodos": "Todos",
       "soloActivos": "Solo activos",
-      "limpiar": "Limpiar filtros",
+      "limpiar": "Limpiar",
       "modelo": "Modelo",
       "modeloTodos": "Todos los modelos",
       "asignacion": "Asignación",
@@ -884,7 +884,7 @@
       "asignacion": "Asignación",
       "asignacionTodos": "Todas",
       "soloActivos": "Solo activos",
-      "limpiar": "Limpiar filtros"
+      "limpiar": "Limpiar"
     },
     "columnas": {
       "conductor": "Conductor",
@@ -1924,7 +1924,8 @@
       "integraciones": "Integraciones",
       "sinPermiso": "Necesitás el permiso {{permiso}} para entrar acá.",
       "alternar": "Mostrar u ocultar el menú del Centro",
-      "kanban": "Kanban por estado"
+      "kanban": "Kanban por estado",
+      "bajada": "Operación y seguimiento"
     },
     "sala": {
       "cola": {

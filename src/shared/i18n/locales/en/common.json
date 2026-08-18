@@ -793,7 +793,12 @@
       "confApariencia": "Appearance",
       "confRoles": "Roles and permissions",
       "usuarios": "Users",
-      "flotaProblemas": "Problems"
+      "flotaProblemas": "Problem center",
+      "grupoOperacion": "Operations",
+      "alternarColumna": "Collapse or expand the module menu",
+      "sinPermiso": "You need the {{permiso}} permission",
+      "flotaBajada": "Connected fleet",
+      "configuracionBajada": "Organization settings"
     },
     "sidebar": {
       "collapse": "Collapse menu",
