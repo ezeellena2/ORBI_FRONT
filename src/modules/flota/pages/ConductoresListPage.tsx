@@ -15,9 +15,9 @@ import {
   DialogoReactivarConductor,
 } from '../components/conductores/DialogosConductor'
 import { AccionConMotivo } from '../components/AccionConMotivo'
-import { AvisoOperacion } from '../components/AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { useConductores } from '../hooks/useConductores'
-import { usePermisos } from '../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import type { ConductorListItemDto } from '@/services/contracts/flota'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
 import { Boton } from '@/shared/ui/Boton'
@@ -264,7 +264,7 @@ export default function ConductoresListPage() {
       />
 
       {errorApi && hayDatosEnMano ? (
-        <AvisoOperacion
+        <Aviso
           titulo={t('conductoresListado.error.tituloRefresco')}
           mensaje={resolveApiErrorMessage(errorApi, tComun)}
           trazaId={errorApi.traceId ?? undefined}

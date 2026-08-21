@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Boton } from '@/shared/ui/Boton'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { tratamientoDeErrorAsignacionConductor } from './vocabulario-conductor-asignacion'
 
 /**
@@ -51,7 +51,7 @@ export function AvisoErrorAsignacionConductor({
   }[tratamiento]
 
   return (
-    <AvisoOperacion
+    <Aviso
       titulo={mensaje}
       mensaje={explicacion}
       trazaId={apiError.traceId}

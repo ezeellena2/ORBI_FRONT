@@ -9,7 +9,7 @@ import { Skeleton } from '@/shared/ui/Skeleton'
 import { cn } from '@/shared/utils/cn'
 import { AccionConMotivo } from '../../AccionConMotivo'
 import { claseDeFondoPorVariante, formatearInstanteCorto } from '../formato-centro'
-import { usePermisos } from '../../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import {
   SEVERIDADES_PROBLEMA,
   claveDeOrigenSenal,

@@ -34,3 +34,5 @@ storybook-static
 .env.*.local
 
 coverage
+
+graphify-out

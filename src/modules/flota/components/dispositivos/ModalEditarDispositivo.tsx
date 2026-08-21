@@ -18,12 +18,12 @@ import {
 } from '@/shared/errors/parse-api-error'
 import type { DispositivoDetalleDto } from '@/services/contracts/flota'
 import { AccionConMotivo } from '../AccionConMotivo'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { CampoModeloDispositivo, CampoProveedorSim } from './CamposCatalogoDispositivo'
 import { useBajaDispositivo } from '../../hooks/useBajaDispositivo'
 import { useDispositivo } from '../../hooks/useDispositivo'
 import { useEditarDispositivo } from '../../hooks/useEditarDispositivo'
-import { usePermisos } from '../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { useReactivarDispositivo } from '../../hooks/useReactivarDispositivo'
 import {
   aActualizarDispositivoRequest,
@@ -141,7 +141,7 @@ export function ModalEditarDispositivoPorId({
   return (
     <Modal abierto onCerrar={onCerrar} titulo={t('flota:dispositivosListado.editar.titulo')}>
       {consulta.isError ? (
-        <AvisoOperacion
+        <Aviso
           titulo={t('flota:dispositivosListado.editar.errorCarga')}
           mensaje={resolveApiErrorMessage(parseApiError(consulta.error), t)}
         />
@@ -244,7 +244,7 @@ function Formulario({
           void enviar()
         }}
       >
-        {errorGeneral ? <AvisoOperacion titulo={errorGeneral} /> : null}
+        {errorGeneral ? <Aviso titulo={errorGeneral} /> : null}
 
         <IdentidadTecnicaBloqueada dispositivo={dispositivo} />
 
@@ -449,7 +449,7 @@ function ToggleActivo({
           }}
         />
       </AccionConMotivo>
-      {error ? <AvisoOperacion titulo={resolveApiErrorMessage(parseApiError(error), t)} /> : null}
+      {error ? <Aviso titulo={resolveApiErrorMessage(parseApiError(error), t)} /> : null}
     </div>
   )
 }

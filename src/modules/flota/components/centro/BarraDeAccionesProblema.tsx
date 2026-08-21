@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { AccionProblema, ProblemaOperativoDetalleDto } from '@/services/contracts/flota'
 import { Boton } from '@/shared/ui/Boton'
 import { AccionConMotivo } from '../AccionConMotivo'
-import { usePermisos } from '../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { claveDeAccionProblema } from '../../vocabulario-centro-problemas'
 import {
   esAccionDeNavegacion,

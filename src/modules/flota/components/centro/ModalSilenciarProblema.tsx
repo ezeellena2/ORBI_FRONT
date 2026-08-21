@@ -8,7 +8,7 @@ import { GrupoRadio, type OpcionRadio } from '@/shared/ui/GrupoRadio'
 import { Modal } from '@/shared/ui/Modal'
 import { Toggle } from '@/shared/ui/Toggle'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { useSilenciarProblema } from '../../hooks/useSilenciarProblema'
 import { ahoraDelNavegadorMs } from '../../reloj-del-navegador'
 import {
@@ -132,7 +132,7 @@ function Formulario({
         }}
       >
         {apiError === null ? null : (
-          <AvisoOperacion
+          <Aviso
             titulo={resolveApiErrorMessage(apiError, t)}
             mensaje={t(
               `flota:${claveDeGuiaDeErrorCentro(tratamientoDeErrorCentro(apiError.code, apiError.args))}`,

@@ -359,7 +359,7 @@ export function avisoDeSenales(indice: IndiceDeSenales, fallo: boolean): AvisoDe
  */
 export function claseDeAnilloDeSeveridad(severidad: SeveridadAlerta | null): string | null {
   if (severidad === null) return null
-  return `marcador-vehiculo--senal-${varianteDeSeveridadAlerta(severidad)}`
+  return `marcador--senal-${varianteDeSeveridadAlerta(severidad)}`
 }
 
 /**

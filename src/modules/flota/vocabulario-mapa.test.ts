@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
   POLLING_MAPA_MS,
   antiguedadDeLaSenal,
@@ -9,9 +9,6 @@ import {
   filtrarItemsDelMapa,
   hayFiltrosDeMapaActivos,
   instanteDeReferencia,
-  limitesDeLaFlota,
-  manejadoresDelMarcador,
-  posicionEstable,
   puedeMostrarVelocidad,
   vacioDelMapa,
 } from './vocabulario-mapa'
@@ -64,19 +61,19 @@ describe('el marcador se pinta con el MISMO vocabulario que el badge del listado
   it('`sin_dato` es NEUTRO, no `peligro`', () => {
     // La mentira mas cara del slice: con Telemetria caida TODA la flota cae en `sin_dato`, y un mapa
     // entero de marcadores rojos manda a llamar al proveedor de GPS por una flota que esta bien.
-    expect(claseDelMarcador('sin_dato')).toBe('marcador-vehiculo--neutro')
+    expect(claseDelMarcador('sin_dato')).toBe('marcador--neutro')
   })
 
   it('los 4 codigos tienen su clase, y ninguna se repite entre estados de distinta naturaleza', () => {
-    expect(claseDelMarcador('en_linea')).toBe('marcador-vehiculo--exito')
-    expect(claseDelMarcador('desconectado')).toBe('marcador-vehiculo--peligro')
-    expect(claseDelMarcador('incompleto')).toBe('marcador-vehiculo--advertencia')
+    expect(claseDelMarcador('en_linea')).toBe('marcador--exito')
+    expect(claseDelMarcador('desconectado')).toBe('marcador--peligro')
+    expect(claseDelMarcador('incompleto')).toBe('marcador--advertencia')
     expect(claseDelMarcador('sin_dato')).not.toBe(claseDelMarcador('desconectado'))
   })
 
   it('todos los codigos del vocabulario producen una clase valida', () => {
     for (const estado of ESTADOS_CONEXION) {
-      expect(claseDelMarcador(estado)).toMatch(/^marcador-vehiculo--[a-z]+$/)
+      expect(claseDelMarcador(estado)).toMatch(/^marcador--[a-z]+$/)
     }
   })
 })
@@ -159,55 +156,6 @@ describe('el "ahora" contra el que se mide la antiguedad', () => {
 
   it('un error VIEJO no retrocede el reloj de una respuesta nueva', () => {
     expect(instanteDeReferencia(600_000, 1_000)).toBe(600_000)
-  })
-})
-
-describe('estabilidad por valor de las props del marcador', () => {
-  it('la misma posicion devuelve la MISMA tupla (react-leaflet compara por identidad)', () => {
-    // Con un array literal en el JSX, cada render disparaba `setLatLng` + `marker.update()` en los N
-    // marcadores. El buscador re-renderiza en cada tecla: 8 caracteres sobre 200 vehiculos eran
-    // 1.600 reescrituras del DOM sin que se hubiera movido nada.
-    const a = posicionEstable('v1', -34.6, -58.44)
-    const b = posicionEstable('v1', -34.6, -58.44)
-    expect(b).toBe(a)
-    expect(a).toEqual([-34.6, -58.44])
-  })
-
-  it('cuando el vehiculo SE MUEVE devuelve una tupla nueva', () => {
-    const a = posicionEstable('v2', -34.6, -58.44)
-    const b = posicionEstable('v2', -34.61, -58.44)
-    expect(b).not.toBe(a)
-    expect(b).toEqual([-34.61, -58.44])
-  })
-
-  it('cada vehiculo tiene su propia entrada: no se pisan entre si', () => {
-    const a = posicionEstable('v3', -30, -60)
-    const b = posicionEstable('v4', -31, -61)
-    expect(a).not.toBe(b)
-    expect(posicionEstable('v3', -30, -60)).toBe(a)
-  })
-
-  it('los handlers son estables mientras no cambie el callback, y llaman con el id correcto', () => {
-    const onSeleccionar = vi.fn()
-    const a = manejadoresDelMarcador('v5', onSeleccionar)
-    expect(manejadoresDelMarcador('v5', onSeleccionar)).toBe(a)
-
-    a.click()
-    expect(onSeleccionar).toHaveBeenCalledWith('v5')
-  })
-
-  it('si el callback cambia, los handlers se rehacen: no queda apuntando al render viejo', () => {
-    // Es la parte que impide que la cache se convierta en un bug: hoy `onSeleccionar` es la accion
-    // del store (identidad estable), pero un arrow inline en el futuro dejaria handlers muertos.
-    const viejo = vi.fn()
-    const nuevo = vi.fn()
-    const a = manejadoresDelMarcador('v6', viejo)
-    const b = manejadoresDelMarcador('v6', nuevo)
-
-    expect(b).not.toBe(a)
-    b.click()
-    expect(nuevo).toHaveBeenCalledWith('v6')
-    expect(viejo).not.toHaveBeenCalled()
   })
 })
 
@@ -303,24 +251,6 @@ describe('antiguedad de la ultima posicion', () => {
     expect(antiguedadDeLaSenal(null, base)).toBeNull()
     expect(antiguedadDeLaSenal(undefined, base)).toBeNull()
     expect(antiguedadDeLaSenal('no es una fecha', base)).toBeNull()
-  })
-})
-
-describe('encuadre de la flota', () => {
-  it('sin marcadores no hay rectangulo que encuadrar', () => {
-    expect(limitesDeLaFlota([])).toBeNull()
-  })
-
-  it('el rectangulo contiene a todos los marcadores', () => {
-    const limites = limitesDeLaFlota([
-      item({ ubicacion: { latitud: -34.6, longitud: -58.4, direccionGrados: null, fechaUtc: 'x' } }),
-      item({ ubicacion: { latitud: -31.4, longitud: -64.2, direccionGrados: null, fechaUtc: 'x' } }),
-    ])
-
-    expect(limites).toEqual([
-      [-34.6, -64.2],
-      [-31.4, -58.4],
-    ])
   })
 })
 

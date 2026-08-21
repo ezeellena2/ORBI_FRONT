@@ -777,12 +777,6 @@
       "modulos": "Modules",
       "sistema": "System",
       "dashboard": "Dashboard",
-      "flota": "Telemetry and fleet",
-      "flotaMapa": "Live map",
-      "flotaVehiculos": "Vehicles",
-      "flotaDispositivos": "Devices",
-      "flotaConductores": "Drivers",
-      "flotaGeozonas": "Geofences",
       "configuracion": "Settings",
       "confEmpresa": "Company",
       "confModulos": "Modules",
@@ -793,11 +787,9 @@
       "confApariencia": "Appearance",
       "confRoles": "Roles and permissions",
       "usuarios": "Users",
-      "flotaProblemas": "Problem center",
       "grupoOperacion": "Operations",
       "alternarColumna": "Collapse or expand the module menu",
       "sinPermiso": "You need the {{permiso}} permission",
-      "flotaBajada": "Connected fleet",
       "configuracionBajada": "Organization settings"
     },
     "sidebar": {
@@ -851,6 +843,16 @@
     "placeholder": {
       "title": "Section under construction",
       "comingSoon": "Coming soon."
+    }
+  },
+  "mapa": {
+    "controles": {
+      "acercar": "Zoom in",
+      "alejar": "Zoom out",
+      "centrar": "Center on map",
+      "centrarSinPosiciones": "No positions to center on",
+      "pantallaCompleta": "Fullscreen",
+      "salirPantallaCompleta": "Exit fullscreen"
     }
   }
 }

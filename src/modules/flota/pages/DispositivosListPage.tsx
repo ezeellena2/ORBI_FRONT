@@ -10,10 +10,10 @@ import { ModalRegistrarDispositivo } from '../components/dispositivos/ModalRegis
 import { TablaDispositivos } from '../components/dispositivos/TablaDispositivos'
 import { AccionConMotivo } from '../components/AccionConMotivo'
 import { AvisoDatosDeConexion } from '../components/AvisoDatosDeConexion'
-import { AvisoOperacion } from '../components/AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { useDispositivos } from '../hooks/useDispositivos'
 import { useEliminarDispositivo } from '../hooks/useEliminarDispositivo'
-import { usePermisos } from '../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import {
   claveDeVacioPorFiltroDeConexionDeEquipo,
   coberturaDeConexion,
@@ -299,7 +299,7 @@ export default function DispositivosListPage() {
       />
 
       {errorApi && hayDatosEnMano ? (
-        <AvisoOperacion
+        <Aviso
           titulo={t('dispositivosListado.error.tituloRefresco')}
           mensaje={resolveApiErrorMessage(errorApi, tComun)}
           trazaId={errorApi.traceId ?? undefined}

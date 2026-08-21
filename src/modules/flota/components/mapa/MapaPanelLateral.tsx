@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ChevronLeft, ChevronRight, MapPinOff, Search, SearchX } from 'lucide-react'
+import { ChevronLeft, MapPinOff, Search, SearchX } from 'lucide-react'
 import { MapaChipVehiculo } from './MapaChipVehiculo'
 import { PistaDeFueraDelMapa } from './PistaDeFueraDelMapa'
 import {
@@ -9,11 +9,12 @@ import {
 } from '../../vocabulario-conexion'
 import type { EstadoConexion, MapaItemDto, SeveridadAlerta } from '@/services/contracts/flota'
 import { Boton } from '@/shared/ui/Boton'
-import { BotonIcono } from '@/shared/ui/BotonIcono'
 import { Icono } from '@/shared/ui/Icono'
 import { Input } from '@/shared/ui/Input'
 import { Select } from '@/shared/ui/Select'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { Spinner } from '@/shared/ui/Spinner'
+import { cn } from '@/shared/utils/cn'
 
 /**
  * Panel izquierdo: buscador, filtro de conexion y la lista de vehiculos que **si** estan en el mapa.
@@ -66,99 +67,139 @@ export interface MapaPanelLateralProps {
   ahoraMs: number
   /** Severidad maxima de las señales abiertas del vehiculo; `null` si no tiene (o no se sabe). */
   severidadDe: (item: MapaItemDto) => SeveridadAlerta | null
+  /** El polling esta yendo a buscar datos. Se muestra acá porque la pantalla no tiene encabezado. */
+  refrescando: boolean
 }
 
+/**
+ * ── EL CROMO: PANEL PEGADO AL LIENZO, NO TARJETA FLOTANTE ─────────────────────────────────────
+ * Sin `rounded`, sin sombra, sin `gap` contra el mapa: se separa por un **borde derecho** y nada
+ * mas, igual que `.map-side-panel` del mockup (`components.css:3905`). Es la misma decision que ya
+ * tomamos para `ColumnaLateral`, y por el mismo motivo: dos superficies pegadas leen como una sola
+ * pieza; separadas por aire leen como dos tarjetas sueltas adentro de una pagina.
+ *
+ * Colapsado deja un **riel de 56px** con el toggle, no un boton al aire. El toggle es un circulo
+ * montado sobre el borde (`-right-3.5`), que es la firma visual de las columnas de ORBI.
+ */
 export function MapaPanelLateral(props: MapaPanelLateralProps) {
   const { t } = useTranslation('flota')
 
-  if (props.colapsado) {
-    return (
-      <aside className="flex shrink-0 items-start">
-        <BotonIcono
-          icono={ChevronRight}
-          etiqueta={t('mapa.panel.expandir')}
-          variante="superficie"
-          tamano="sm"
-          onClick={props.onAlternar}
-        />
-      </aside>
-    )
-  }
-
   return (
-    <aside className="flex w-full shrink-0 flex-col gap-3 lg:w-80">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-fg-primario">{t('mapa.panel.titulo')}</h2>
-        <BotonIcono
-          icono={ChevronLeft}
-          etiqueta={t('mapa.panel.colapsar')}
-          variante="fantasma"
-          tamano="sm"
-          onClick={props.onAlternar}
+    <aside
+      className={cn(
+        'relative flex w-full shrink-0 flex-col border-b border-borde bg-superficie-1',
+        'lg:border-r lg:border-b-0',
+        props.colapsado ? 'lg:w-14' : 'lg:w-80',
+      )}
+    >
+      {/* Monta sobre el borde derecho. `hidden lg:flex`: abajo de `lg` el panel se apila. */}
+      <button
+        type="button"
+        onClick={props.onAlternar}
+        aria-expanded={!props.colapsado}
+        className={cn(
+          'absolute top-4 -right-3.5 z-10 hidden h-7 w-7 items-center justify-center rounded-full lg:flex',
+          'border border-borde bg-superficie-1 text-fg-secundario shadow-sm',
+          'transition-colors duration-150 ease-out hover:border-marca hover:text-fg-primario',
+        )}
+      >
+        <ChevronLeft
+          className={cn('size-3.5 transition-transform', props.colapsado && 'rotate-180')}
+          aria-hidden
         />
-      </div>
+        <span className="sr-only">
+          {props.colapsado ? t('mapa.panel.expandir') : t('mapa.panel.colapsar')}
+        </span>
+      </button>
 
-      {/* Label VISIBLE, no placeholder solo: es la regla de accesibilidad del repo. */}
-      <label className="flex flex-col gap-1 text-xs text-fg-secundario">
-        {t('mapa.panel.buscarEtiqueta')}
-        <Input
-          type="search"
-          iconoIzq={Search}
-          autoComplete="off"
-          value={props.busqueda}
-          onChange={(evento) => props.onBusqueda(evento.target.value)}
-          placeholder={t('mapa.panel.buscar')}
-        />
-      </label>
+      {props.colapsado ? null : (
+        <>
+          <div className="shrink-0 border-b border-borde px-4 pt-4 pb-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-fg-primario">{t('mapa.panel.titulo')}</h2>
+              {/*
+                El indicador de refresco vive acá porque la pantalla ya NO tiene encabezado propio
+                (el mockup tampoco lo tiene). `aria-live="off"`: anunciar "actualizando" cada 12 s a
+                un lector de pantalla vuelve la pantalla inusable.
+              */}
+              {props.refrescando ? (
+                <span
+                  className="flex items-center gap-1.5 text-xs text-fg-terciario"
+                  aria-live="off"
+                >
+                  <Spinner tamano="sm" />
+                  {t('mapa.actualizando')}
+                </span>
+              ) : null}
+            </div>
 
-      <label className="flex flex-col gap-1 text-xs text-fg-secundario">
-        {t('conexion.filtro.etiqueta')}
-        <Select
-          valor={props.estado}
-          onCambio={(valor) => props.onEstado(valor as EstadoConexion | '')}
-          opciones={[
-            { valor: '', etiqueta: t('conexion.filtro.todos') },
-            ...VALORES_FILTRO_CONEXION.map((codigo) => ({
-              valor: codigo,
-              etiqueta: t(claveDeConexion(codigo), { defaultValue: codigo }),
-            })),
-          ]}
-        />
-      </label>
+            {/*
+              ⚠️ EL DENOMINADOR TIENE QUE SER EL MISMO QUE EL DEL AVISO DE ABAJO.
+              Este contador decia `visibles.length` (o sea, ya filtrado) y el aviso de "fuera del
+              mapa" usa `items.length` (sin filtrar), y los dos se renderizan pegados: con 20
+              vehiculos, 12 con posicion y "AB" tipeado, se leia "3 vehiculos en el mapa" e
+              inmediatamente abajo "8 de 20 no aparecen en el mapa". 3 + 8 = 11, y los 9 restantes no
+              los explicaba nadie — encima el aviso de abajo esta redactado como una rendicion de
+              cuentas de TODA la flota, asi que invita a la resta. Ahora este cuenta lo que hay en el
+              mapa (`items`), que cierra con el aviso, y lo que el filtro recorta se dice **aparte**.
 
-      {/*
-        ⚠️ EL DENOMINADOR TIENE QUE SER EL MISMO QUE EL DEL AVISO DE ABAJO.
-        Este contador decia `visibles.length` (o sea, ya filtrado) y el aviso de "fuera del mapa"
-        usa `items.length` (sin filtrar), y los dos se renderizan pegados: con 20 vehiculos, 12 con
-        posicion y "AB" tipeado, se leia "3 vehiculos en el mapa" e inmediatamente abajo "8 de 20 no
-        aparecen en el mapa". 3 + 8 = 11, y los 9 restantes no los explicaba nadie — encima el aviso
-        de abajo esta redactado como una rendicion de cuentas de TODA la flota, asi que invita a la
-        resta. Ahora este cuenta lo que hay en el mapa (`items`), que cierra con el aviso, y lo que
-        el filtro recorta se dice **aparte**.
-      */}
-      <p className="text-xs text-fg-terciario">
-        {t('mapa.panel.enElMapa', { count: props.items.length })}
-      </p>
+              El mockup pone acá una linea de resumen con cuatro cifras ("10 vehiculos · 5 en ruta ·
+              1 alerta · 2 sin señal"). Tres de las cuatro NO se pueden afirmar: "en ruta" y
+              "detenido" son DA-MV-05 (abierta) y "alerta" necesita `alertasActivasCount`, que viaja
+              siempre `null` (B-33). Se dice lo que sí se sabe.
+            */}
+            <p className="mt-1 text-xs text-fg-terciario">
+              {t('mapa.panel.enElMapa', { count: props.items.length })}
+              {props.hayFiltros
+                ? ` · ${t('mapa.panel.coinciden', {
+                    count: props.visibles.length,
+                    visibles: props.visibles.length,
+                    total: props.items.length,
+                  })}`
+                : ''}
+            </p>
+          </div>
 
-      {props.hayFiltros ? (
-        <p className="text-xs text-fg-terciario">
-          {t('mapa.panel.coinciden', {
-            count: props.visibles.length,
-            visibles: props.visibles.length,
-            total: props.items.length,
-          })}
-        </p>
-      ) : null}
+          <div className="flex shrink-0 flex-col gap-2 border-b border-borde px-4 py-3">
+            {/* Label VISIBLE, no placeholder solo: es la regla de accesibilidad del repo. */}
+            <label className="flex flex-col gap-1 text-xs text-fg-secundario">
+              {t('mapa.panel.buscarEtiqueta')}
+              <Input
+                type="search"
+                iconoIzq={Search}
+                autoComplete="off"
+                value={props.busqueda}
+                onChange={(evento) => props.onBusqueda(evento.target.value)}
+                placeholder={t('mapa.panel.buscar')}
+              />
+            </label>
 
-      <AvisoFueraDelMapa
-        fueraDelMapa={props.fueraDelMapa}
-        totalDeLaFlota={props.totalDeLaFlota}
-        onVerVehiculos={props.onVerVehiculos}
-      />
+            <label className="flex flex-col gap-1 text-xs text-fg-secundario">
+              {t('conexion.filtro.etiqueta')}
+              <Select
+                valor={props.estado}
+                onCambio={(valor) => props.onEstado(valor as EstadoConexion | '')}
+                opciones={[
+                  { valor: '', etiqueta: t('conexion.filtro.todos') },
+                  ...VALORES_FILTRO_CONEXION.map((codigo) => ({
+                    valor: codigo,
+                    etiqueta: t(claveDeConexion(codigo), { defaultValue: codigo }),
+                  })),
+                ]}
+              />
+            </label>
+          </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
-        <ListaDeChips {...props} />
-      </div>
+          <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-3">
+            <AvisoFueraDelMapa
+              fueraDelMapa={props.fueraDelMapa}
+              totalDeLaFlota={props.totalDeLaFlota}
+              onVerVehiculos={props.onVerVehiculos}
+            />
+            <ListaDeChips {...props} />
+          </div>
+        </>
+      )}
     </aside>
   )
 }

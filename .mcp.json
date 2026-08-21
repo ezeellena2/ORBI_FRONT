@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "mempalace": {
+      "type": "stdio",
+      "command": "C:\\Users\\ezequ\\.mempalace\\venv\\Scripts\\mempalace-mcp.exe",
+      "args": ["--palace", "C:\\Users\\ezequ\\.mempalace\\orbi-palace"]
+    }
+  }
+}

@@ -5,7 +5,7 @@ import { BotonIcono } from '@/shared/ui/BotonIcono'
 import { MenuAcciones, type ItemMenuAcciones } from '@/shared/ui/MenuAcciones'
 import type { DispositivoDetalleDto } from '@/services/contracts/flota'
 import { AccionConMotivo } from '../../AccionConMotivo'
-import { usePermisos } from '../../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { destinosDeStock } from './vocabulario-stock'
 
 /**

@@ -16,7 +16,7 @@ import {
 } from '@/shared/errors/parse-api-error'
 import type { VehiculoDetalleDto } from '@/services/contracts/flota'
 import { AvisoCamposNoBorrables } from '../AvisoCamposNoBorrables'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { useEditarVehiculo } from '../../hooks/useEditarVehiculo'
 import { claveDeTipoVehiculo } from './vocabulario'
 import {
@@ -131,7 +131,7 @@ export function ModalEditarVehiculo({
           void enviar()
         }}
       >
-        {errorGeneral ? <AvisoOperacion titulo={errorGeneral} /> : null}
+        {errorGeneral ? <Aviso titulo={errorGeneral} /> : null}
 
         <IdentidadBloqueada vehiculo={vehiculo} />
 

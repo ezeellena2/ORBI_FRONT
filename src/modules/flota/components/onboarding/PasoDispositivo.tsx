@@ -18,7 +18,7 @@ import { QUERY_DISPOSITIVOS_EN_STOCK } from '../dispositivos/vocabulario-asignac
 import { flotaKeysAfectadasPorAsignacion } from '../../query-keys'
 import { useAsignarDispositivo } from '../../hooks/useAsignarDispositivo'
 import { useDispositivos } from '../../hooks/useDispositivos'
-import { usePermisos } from '../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import {
   aAsignarDispositivoRequest,
   asignarDispositivoSchema,

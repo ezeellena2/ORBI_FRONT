@@ -8,7 +8,7 @@ import { EstadoVacio } from '@/shared/ui/EstadoVacio'
 import type { DispositivoDetalleDto } from '@/services/contracts/flota'
 import { ParDato } from '../../detalle/ParDato'
 import { formatearFecha, formatearFechaHora } from '../../detalle/formato'
-import { usePermisos } from '../../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { claveDeStock, varianteDeStock } from './vocabulario-stock'
 
 /**

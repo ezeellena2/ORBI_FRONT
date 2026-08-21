@@ -19,9 +19,10 @@
 # Regla que sale de ahí y que NO se puede repetir: ningún `if` de este archivo
 # depende de un archivo fuera del workspace.
 #
-# ⚠️ Este workflow es inútil mientras el job `frontend` del backend siga ahí:
-# hay que BORRARLO de `TracAutoV2/.github/workflows/ci.yml`. Eso se toca en el
-# otro repo, así que queda como pendiente explícito.
+# ✅ PENDIENTE SALDADO el 2026-08-18. El job `frontend` de
+# `TracAutoV2/.github/workflows/ci.yml` fue borrado, con el porqué escrito en su lugar.
+# No se perdió cobertura —nunca corrió— y este workflow pasa a ser el único que
+# verifica el front. Ya no hay dos lugares que digan verificarlo y uno que miente.
 # ═══════════════════════════════════════════════════════════════════════════
 
 name: CI
@@ -64,6 +65,44 @@ jobs:
       # `eslint-suppressions.json` (baseline, `06-capa-0-frontend.md` §3.3;
       # mismo patrón que `check-links.mjs --baseline=47` del backend). El CI
       # falla si el número CRECE. Para bajarlo: `npm run lint:baseline:podar`.
+      # ── La ley del frontend, que este repo NO es dueño de escribir ──────────
+      #
+      # `docs/reglas/frontend-core.md` es una COPIA GENERADA del original, que vive en
+      # `TracAutoV2/docsv2/00-ai-context/reglas/frontend-core.md`. La copia existe porque un
+      # `@import` de CLAUDE.md que sale del repo queda detrás de un diálogo de aprobación y, si
+      # alguien lo declina una vez, se apaga para siempre y en silencio (DA-FE-31).
+      #
+      # ⚠️ LO QUE ESTE PASO PUEDE Y NO PUEDE: detecta que alguien EDITÓ LA COPIA A MANO, comparando
+      # el `origen-sha256` que declara el banner contra el hash del cuerpo. NO puede detectar que el
+      # ORIGINAL cambió: ese archivo está en otro repo y este runner no lo tiene (por el mismo
+      # motivo por el que el job `frontend` del backend nunca corría — ver la cabecera). Ese modo de
+      # falla lo agarra `orbi-verificar.ps1` en el repo normativo, que es el único lugar donde los
+      # dos repos existen a la vez.
+      - name: Regla de frontend — la copia no fue editada a mano
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const { createHash } = require("node:crypto");
+            const RUTA = "docs/reglas/frontend-core.md";
+            const MARCA = "<!-- FIN DEL BANNER GENERADO -->";
+            const copia = fs.readFileSync(RUTA, "utf8");
+            const i = copia.indexOf(MARCA);
+            if (i === -1) {
+              console.error(`FALLA  ${RUTA} perdio su banner GENERADO.`);
+              console.error("       Regeneralo desde TracAutoV2: node docsv2/scripts/sincronizar-reglas-front.mjs");
+              process.exit(1);
+            }
+            const declarado = (copia.match(/origen-sha256:\s*([0-9a-f]+)/) || [])[1];
+            const cuerpo = copia.slice(i + MARCA.length).replace(/^\r?\n/, "");
+            const real = createHash("sha256").update(cuerpo.replace(/\r\n/g, "\n"), "utf8").digest("hex").slice(0, 16);
+            if (declarado !== real) {
+              console.error(`FALLA  ${RUTA} fue editado a mano (banner ${declarado} != cuerpo ${real}).`);
+              console.error("       Es una copia generada: edita el ORIGINAL en TracAutoV2 y volve a correr el script.");
+              process.exit(1);
+            }
+            console.log(`OK     ${RUTA} intacta (origen-sha256 ${real}).`);
+          '
+
       - name: Lint (ESLint + reglas ORBI)
         run: npm run lint:eslint
 

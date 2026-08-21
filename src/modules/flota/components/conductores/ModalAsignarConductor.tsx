@@ -9,7 +9,7 @@ import { Campo } from '@/shared/ui/Campo'
 import { GrupoRadio } from '@/shared/ui/GrupoRadio'
 import { Modal } from '@/shared/ui/Modal'
 import type { AsignacionVehiculoConductorDto } from '@/services/contracts/flota'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { flotaKeysAfectadasPorAsignacionConductor } from '../../query-keys'
 import { useAsignarConductor } from '../../hooks/useAsignarConductor'
 import { useDesasignarConductor } from '../../hooks/useDesasignarConductor'
@@ -245,7 +245,7 @@ function Formulario({
           sistema, no la causa del fallo.
         */}
         {cierreHecho && asignacion.error ? (
-          <AvisoOperacion
+          <Aviso
             titulo={t('flota:asignacionConductor.cambioAMediasTitulo')}
             mensaje={t('flota:asignacionConductor.cambioAMedias', {
               nombre: identidadAlAbrir ?? t('flota:asignacionConductor.identidadNoDisponible'),

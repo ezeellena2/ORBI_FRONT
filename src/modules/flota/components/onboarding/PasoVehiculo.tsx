@@ -11,7 +11,7 @@ import {
   resolveApiFieldErrors,
 } from '@/shared/errors/parse-api-error'
 import type { VehiculoDetalleDto } from '@/services/contracts/flota'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { CampoMarcaYModelo } from './CampoMarcaYModelo'
 import { CampoSelectCatalogo } from './CampoSelectCatalogo'
 import { useCatalogoTipos } from '../../hooks/useCatalogoTipos'
@@ -218,7 +218,7 @@ function AvisoDelSubmit({
   const esReintentable = apiError.code === 'flota.vehiculo.canonico_no_creable'
 
   return (
-    <AvisoOperacion
+    <Aviso
       titulo={resolveApiErrorMessage(apiError, t)}
       mensaje={esReintentable ? t('flota:onboarding.errores.sinFilaFantasma') : null}
       trazaId={apiError.traceId}

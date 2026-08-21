@@ -20,7 +20,7 @@ import { AccionConMotivo } from '../../AccionConMotivo'
 import { ConductorBadgeEstado } from '../ConductorBadgeEstado'
 import { ConductorBadgeLicencia } from '../ConductorBadgeLicencia'
 import { estadoLicenciaVisible } from '../vocabulario-licencia'
-import { usePermisos } from '../../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { formatearFecha } from '../../detalle/formato'
 
 /**

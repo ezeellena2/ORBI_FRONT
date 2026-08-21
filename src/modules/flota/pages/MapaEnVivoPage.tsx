@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MapPinOff, SearchX } from 'lucide-react'
-import { MapaFlota } from '../components/mapa/MapaFlota'
+import { LeyendaDelMapa } from '../components/mapa/LeyendaDelMapa'
 import { MapaPanelDetalle } from '../components/mapa/MapaPanelDetalle'
 import { MapaPanelLateral } from '../components/mapa/MapaPanelLateral'
 import { PistaDeFueraDelMapa } from '../components/mapa/PistaDeFueraDelMapa'
 import { AvisoDatosDeConexion } from '../components/AvisoDatosDeConexion'
 import { AvisoDeSenales } from '../components/senales/AvisoDeSenales'
-import { AvisoOperacion } from '../components/AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
+import { MapaORBI } from '@/shared/patrones/mapa/MapaORBI'
 import { useMapaEnVivo } from '../hooks/useMapaEnVivo'
 import { useSenales } from '../hooks/useSenales'
 import { useTotalDeLaFlota } from '../hooks/useTotalDeLaFlota'
@@ -16,10 +17,13 @@ import { useVehiculoEnVivo } from '../hooks/useVehiculoEnVivo'
 import {
   QUERY_DE_SENALES,
   avisoDeSenales,
+  claseDeAnilloDeSeveridad,
   indiceDeSenales,
   severidadDelMarcador,
 } from '../vocabulario-senales'
 import {
+  aEntidadDelMapa,
+  claseDelMarcador,
   contarFueraDelMapa,
   filtrarItemsDelMapa,
   hayFiltrosDeMapaActivos,
@@ -32,6 +36,7 @@ import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api
 import { Boton } from '@/shared/ui/Boton'
 import { EstadoError } from '@/shared/ui/EstadoError'
 import { EstadoVacio } from '@/shared/ui/EstadoVacio'
+import { PantallaASangre } from '@/shared/ui/PantallaASangre'
 import { SinAccesoOverlay } from '@/shared/ui/SinAccesoOverlay'
 import { Spinner } from '@/shared/ui/Spinner'
 import { useMapaVivoStore } from '@/stores/mapa-vivo-store'
@@ -208,73 +213,21 @@ export default function MapaEnVivoPage() {
   const hayDatosEnMano = mapa.data !== undefined
 
   return (
-    <section className="flex h-full min-h-0 flex-col gap-3">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold tracking-snug text-fg-primario">
-            {t('mapa.titulo')}
-          </h1>
-          <p className="text-sm text-fg-secundario">{t('mapa.subtitulo')}</p>
-        </div>
-        {/*
-          Indicador de refresco. `aria-live="off"`: anunciar "actualizando" cada 12 s a un lector de
-          pantalla convierte la pantalla en inusable.
-        */}
-        {mapa.isFetching ? (
-          <span className="flex items-center gap-2 text-xs text-fg-terciario" aria-live="off">
-            <Spinner tamano="sm" />
-            {t('mapa.actualizando')}
-          </span>
-        ) : null}
-      </header>
+    /*
+      ── SIN ENCABEZADO DE PANTALLA, Y ESO NO ES UN OLVIDO ─────────────────────────────────────
+      El mockup no tiene `page-header`: ni `<h1>`, ni bajada, ni fila de acciones
+      (`docs/mockupsv2/b2b/flota/mapa.html:165-187` — `dashboard-content` arranca directo en el
+      layout de 3 columnas). La pantalla se identifica por el breadcrumb del header global y por el
+      item activo de la columna del modulo, que ya dicen "Mapa en vivo" dos veces. Un `<h1>` seria
+      la tercera, y se comeria 64px de alto util del lienzo, que es el contenido.
 
-      {/*
-        Un refetch fallado NO borra el mapa que ya estaba dibujado: con datos en mano es partial-data
-        —el aviso arriba, con su reintento— y no una pantalla de error. Sin datos en mano si
-        corresponde el panel entero, porque no hay nada que preservar.
-      */}
-      {errorApi && hayDatosEnMano ? (
-        <AvisoOperacion
-          titulo={t('mapa.error.tituloRefresco')}
-          mensaje={resolveApiErrorMessage(errorApi, tComun)}
-          trazaId={errorApi.traceId ?? undefined}
-          accion={
-            <Boton variante="secundaria" tamano="sm" onClick={() => void mapa.refetch()}>
-              {t('mapa.error.reintentar')}
-            </Boton>
-          }
-        />
-      ) : null}
+      Esto va con `<PantallaASangre />`: sin el, el `<main>` del shell aporta su `p-6` y las tres
+      columnas quedan flotando adentro de una pagina normal en vez de ser un tri-pane inmersivo.
+    */
+    <section className="flex h-full min-h-0 flex-col">
+      <PantallaASangre />
 
-      {avisoDelEnlace ? (
-        <AvisoOperacion
-          titulo={t('mapa.enlace.titulo')}
-          mensaje={t('mapa.enlace.descripcion')}
-          accion={
-            <Boton
-              variante="secundaria"
-              tamano="sm"
-              onClick={() => setAvisoDelEnlaceDescartado(true)}
-            >
-              {t('mapa.enlace.entendido')}
-            </Boton>
-          }
-        />
-      ) : null}
-
-      {/*
-        ⚠️ ESTOS 2 AVISOS VIVEN SOBRE EL LIENZO, NO DENTRO DEL PANEL, Y ESA ES LA CORRECCION.
-        Hasta el cierre de slice-06 estaban dentro de `MapaPanelLateral`, en su rama expandida — y
-        colapsar el panel (que es lo primero que uno hace en un mapa, para ganar superficie) se
-        llevaba puesta la unica linea que explica que los pines sin anillo NO significan "todo bien"
-        (senales, B-38) y que los pines grises NO significan "el vehiculo esta apagado" (conexion).
-        Un click dejaba la pantalla afirmando por omision exactamente lo que estos avisos existen
-        para desmentir. Aca se ven siempre, y siguen siendo UNO solo (no se duplican en el panel).
-      */}
-      <AvisoDatosDeConexion cobertura={coberturaDeConexion(visibles.map((item) => item.estado))} />
-      <AvisoDeSenales cual={avisoSenales} />
-
-      <div className="flex min-h-0 flex-1 flex-col gap-3 lg:flex-row">
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <MapaPanelLateral
           items={items}
           visibles={visibles}
@@ -294,9 +247,80 @@ export default function MapaEnVivoPage() {
           onVerVehiculos={() => navigate(RUTA_VEHICULOS)}
           ahoraMs={ahoraMs}
           severidadDe={severidadDe}
+          refrescando={mapa.isFetching}
         />
 
         <div className="relative min-h-96 flex-1">
+          {/*
+            ══ LOS AVISOS FLOTAN SOBRE EL LIENZO: NI ARRIBA EN EL FLUJO, NI DENTRO DEL PANEL ══════
+            Las dos ubicaciones anteriores estaban mal por motivos DISTINTOS, y las dos se
+            corrigieron acá:
+
+            1. **Dentro del panel** (hasta slice-06): colapsar el panel —lo primero que uno hace en
+               un mapa, para ganar superficie— se llevaba puesta la única línea que explica que un
+               pin gris NO significa "el vehículo está apagado" (conexión) y que un pin sin anillo
+               NO significa "todo bien" (señales, B-38). Un click dejaba la pantalla afirmando por
+               omisión exactamente lo que estos avisos existen para desmentir.
+            2. **Apilados arriba en el flujo** (hasta acá): dejaban de ocultarse, pero empujaban el
+               mapa hacia abajo. Con los 4 activos el lienzo arrancaba ~200px más abajo, y ése es el
+               contenido de la pantalla. Encima el de señales se dibuja SIEMPRE hoy, porque
+               `DETECCION_DE_SENALES_CONECTADA = false`: el caso peor era el normal.
+
+            Flotando resuelve las dos: se ven con el panel colapsado, y no le quitan un píxel al
+            mapa. Es además el idioma del mockup, donde los estados vacíos son overlays sobre el
+            canvas y no bloques del documento (`mapa.html:168-185`).
+
+            `max-w-md` + `top-3 left-3` los deja lejos de los controles, que van arriba a la derecha.
+          */}
+          <div className="pointer-events-none absolute inset-x-3 top-3 z-(--z-dropdown) flex flex-col gap-2 lg:max-w-md">
+            {/*
+              Un refetch fallado NO borra el mapa que ya estaba dibujado: con datos en mano es
+              partial-data —el aviso, con su reintento— y no una pantalla de error. Sin datos en
+              mano sí corresponde el panel entero, porque no hay nada que preservar.
+            */}
+            {errorApi && hayDatosEnMano ? (
+              <div className="pointer-events-auto">
+                <Aviso
+                  titulo={t('mapa.error.tituloRefresco')}
+                  mensaje={resolveApiErrorMessage(errorApi, tComun)}
+                  trazaId={errorApi.traceId ?? undefined}
+                  accion={
+                    <Boton variante="secundaria" tamano="sm" onClick={() => void mapa.refetch()}>
+                      {t('mapa.error.reintentar')}
+                    </Boton>
+                  }
+                />
+              </div>
+            ) : null}
+
+            {avisoDelEnlace ? (
+              <div className="pointer-events-auto">
+                <Aviso
+                  titulo={t('mapa.enlace.titulo')}
+                  mensaje={t('mapa.enlace.descripcion')}
+                  accion={
+                    <Boton
+                      variante="secundaria"
+                      tamano="sm"
+                      onClick={() => setAvisoDelEnlaceDescartado(true)}
+                    >
+                      {t('mapa.enlace.entendido')}
+                    </Boton>
+                  }
+                />
+              </div>
+            ) : null}
+
+            <div className="pointer-events-auto empty:hidden">
+              <AvisoDatosDeConexion
+                cobertura={coberturaDeConexion(visibles.map((item) => item.estado))}
+              />
+            </div>
+            <div className="pointer-events-auto empty:hidden">
+              <AvisoDeSenales cual={avisoSenales} />
+            </div>
+          </div>
+
           <LienzoDelMapa
             cargando={mapa.isPending}
             errorSinDatos={errorApi !== null && !hayDatosEnMano}
@@ -420,13 +444,30 @@ function LienzoDelMapa(props: LienzoProps) {
            Leaflet y le borra al usuario el paneo y el zoom que tenia. Al volver el dato aterrizaria
            en la vista inicial, del otro lado del pais.
       */}
-      <MapaFlota
-        items={props.visibles}
+      {/*
+        El mapa es la pieza COMPARTIDA (`@/shared/patrones/mapa`): no sabe qué es un vehículo. Flota
+        le pasa entidades ubicadas + la patente, y le entrega como FUNCIONES la traducción de su
+        vocabulario a clases — el relleno por estado de conexión, el anillo por severidad de señales.
+
+        Los slots (`slotPanelLateral`, `slotLeyenda`, `slotPanelDetalle`) NO se usan acá: en esta
+        pantalla el panel es un hermano flex y la leyenda un overlay del contenedor, no capas del
+        lienzo. El slot existe para el módulo que quiera la composición al revés.
+      */}
+      <MapaORBI
+        items={props.visibles.map((item) => aEntidadDelMapa(item, props.severidadDe(item)))}
         seleccionadoId={props.seleccionadoId}
         onSeleccionar={props.onSeleccionar}
-        etiquetaDe={(item) => item.patente ?? t('mapa.sinPatente')}
-        severidadDe={props.severidadDe}
+        etiquetaDe={(entidad) => entidad.patente ?? t('mapa.sinPatente')}
+        claseDeEstado={(entidad) => claseDelMarcador(entidad.estado as EstadoConexion)}
+        claseDeRealce={(entidad) => claseDeAnilloDeSeveridad(entidad.realce as SeveridadAlerta | null)}
       />
+
+      {/*
+        Qué significa cada color de pin. Va acá y no dentro de `MapaFlota` porque es un overlay del
+        LIENZO, no una capa de Leaflet: adentro del `MapContainer` competiría con los panes por
+        z-index y se movería con el paneo.
+      */}
+      <LeyendaDelMapa visibles={props.visibles} />
 
       {props.items.length === 0 ? (
         <OverlayVacio

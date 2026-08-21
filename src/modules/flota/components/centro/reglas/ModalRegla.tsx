@@ -16,7 +16,7 @@ import {
   resolveApiErrorMessage,
   resolveApiFieldErrors,
 } from '@/shared/errors/parse-api-error'
-import { AvisoOperacion } from '../../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { EditorDeCondicion } from './EditorDeCondicion'
 import { SelectorWebhookDeRegla } from './SelectorWebhookDeRegla'
 import { useActualizarRegla } from '../../../hooks/useActualizarRegla'
@@ -233,7 +233,7 @@ function Formulario({
         }}
       >
         {apiError === null || tratamiento === 'condicionInvalida' ? null : (
-          <AvisoOperacion
+          <Aviso
             titulo={resolveApiErrorMessage(apiError, t)}
             mensaje={t(`flota:${claveDeGuiaDeErrorCentro(tratamiento ?? 'generico')}`)}
             trazaId={apiError.traceId}

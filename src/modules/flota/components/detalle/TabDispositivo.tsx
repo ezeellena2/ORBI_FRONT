@@ -9,7 +9,7 @@ import type {
   VehiculoDetalleDto,
 } from '@/services/contracts/flota'
 import { AccionConMotivo } from '../AccionConMotivo'
-import { usePermisos } from '../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { ParDato } from './ParDato'
 
 /**

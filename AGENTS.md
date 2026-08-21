@@ -5,6 +5,63 @@
 
 ---
 
+## MemPalace — memoria operativa
+
+Este repo tiene MemPalace conectado por MCP como `mempalace`. No reemplaza la documentacion
+autoritativa ni el codigo: sirve para recordar trabajo previo, decisiones y contexto transversal.
+
+- Al iniciar una tarea real, llamar `mempalace_status` para confirmar que el palace esta disponible.
+- Antes de responder o decidir sobre trabajo previo, decisiones, arquitectura, contratos, modulos,
+  bugs historicos o dudas de "esto ya se habia resuelto?", consultar `mempalace_search`.
+- Usar `wing: "orbi"` para ORBI.
+- Usar `wing: "maat-fabrica"` solo cuando la tarea pida comparar contra el proyecto externo Maat;
+  Maat aporta patrones de proceso/arquitectura, pero no gobierna ORBI.
+- Al cerrar una sesion sustantiva, escribir una continuidad corta con `mempalace_diary_write`:
+  que se hizo, que se decidio, que queda pendiente y que archivos/rutas importan.
+- Si MemPalace no esta disponible, decirlo explicitamente y seguir leyendo la documentacion
+  autoritativa del repo; no inventar memoria.
+
+---
+
+## Reglas que se cargan solas
+
+@docs/reglas/frontend-core.md
+
+> ### ✅ `DA-FE-31` CERRADA el 2026-08-18 — el import cruzaba de repo y NO era confiable
+>
+> **Qué decía este bloque antes:** importaba `@../TracAutoV2/docsv2/00-ai-context/reglas/frontend-core.md`
+> con una advertencia de que no estaba confirmado que resolviera.
+>
+> **Qué se comprobó** (doc oficial de Claude Code sobre imports en `CLAUDE.md` + prueba en sesión):
+>
+> - Un `@import` **sí** acepta rutas relativas y resuelve **relativo al archivo que importa**, así que
+>   `@../TracAutoV2/…` es sintácticamente válido. Hasta ahí, la mitad buena.
+> - Pero un import cuya ruta **sale del working directory** cuenta como **externo**, y un import
+>   externo queda detrás de un **diálogo de aprobación una sola vez**: *"if you decline, the imports
+>   stay disabled and the dialog doesn't appear again"*. Con la sesión abierta en este repo —el caso
+>   normal— `../TracAutoV2/…` **está afuera**. Un "no" accidental lo apaga para siempre, en silencio.
+> - En una sesión real con `cwd` en la carpeta padre, al leer un archivo de este repo llegó este
+>   `CLAUDE.md` **sin** `frontend-core.md`, mientras que el `CLAUDE.md` del repo normativo llegó
+>   **con** sus dos imports intra-repo expandidos. El mecanismo anda adentro del repo y no llegó
+>   cruzando.
+>
+> **El mecanismo que quedó:** el import de arriba es **intra-repo** (`docs/reglas/`), así que siempre
+> resuelve y nunca abre diálogo. Esa copia es **GENERADA**: el original vive en
+> `../TracAutoV2/docsv2/00-ai-context/reglas/frontend-core.md`.
+>
+> ⚠️ **No edites `docs/reglas/frontend-core.md`.** Se regenera con
+> `node docsv2/scripts/sincronizar-reglas-front.mjs` desde el repo normativo. Dos guardianes la
+> sostienen, y conviene saber qué agarra cada uno:
+>
+> | Guardián | Detecta | No detecta |
+> |---|---|---|
+> | El CI de **este** repo (paso "Regla de frontend") | que alguien **editó la copia a mano** | que el original haya cambiado — no ve el otro repo |
+> | `orbi-verificar.ps1` en **TracAutoV2** (control `reglas-front`) | que **el original cambió** y la copia quedó vieja | nada, si nadie corre la puerta |
+>
+> Registro: `../TracAutoV2/docsv2/02-arquitectura/frontend/DECISIONES.md`.
+
+---
+
 ## 🔴 LEER PRIMERO — la fundación de UI cambió (2026-08-07)
 
 El sistema de diseño y la capa de primitivas de UI se rearquitecturaron. **Lo que
@@ -18,7 +75,46 @@ está marcado como tal en cada sección. Manda la arquitectura del repo hermano:
   02-primitivas.md                ← catálogo de primitivas de UI (los 32 P0)
   03-estructura-y-convenciones.md ← dónde va cada archivo
   04-patrones-de-pantalla.md · 05-datos-y-estado.md · 06-capa-0-frontend.md
+  07-capa-compartida.md           ← qué piezas son compartidas, qué faltan, con qué contrato
+  08-enchufe-de-modulo.md         ← cómo se enchufa un módulo + las 3 trampas del routing
+  09-apariencia-y-marca.md        ← tema vs marca del cliente vs estética; qué se ofrece
+  10-plan-de-implementacion.md    ← los slices en orden, con [DOC] vs [CÓDIGO]
+  11-catalogo-de-esteticas.md     ← qué es una estética, qué puede tocar, cómo se crea una nueva
+  12-estandar-de-iconos.md        ← el catálogo por CONCEPTO: qué ícono para qué cosa, en todo ORBI
+  13-estandar-de-mensajes.md      ← las 9 familias de mensaje y cómo se redacta cada una
+  DECISIONES.md                   ← registro ÚNICO de los ids DA-FE (no inventes uno)
+  ESTADO.md                       ← ⭐ ENTRÁ POR ACÁ: dónde estamos y qué NO reconstruir
 ```
+
+> **Son 16, no 13** — `11`, `12` y `13` se agregaron el 2026-08-18 y esta lista no los tenía.
+> Antes de elegir un ícono, escribir el texto de un error o tocar un estilo, **el catálogo manda**:
+> un ícono = un concepto en todo el producto, y el texto de un error del backend no se inventa.
+
+> Los 6 últimos se agregaron el **2026-08-18**. `ESTADO.md` es la puerta de entrada: su sección "lo que
+> YA está resuelto" existe para que **no reconstruyas** el sistema de diseño, que está hecho y con
+> verificadores corriendo.
+
+### Si la pieza no existe, se pide — no se fabrica
+
+> **El mapa, el menú lateral, el aviso y la ficha de detalle NO se fabrican dentro de un módulo.**
+
+Son piezas **de la plataforma**: un mapa sirve igual para vehículos, reclamos municipales y paquetes.
+Si cada módulo hace el suyo, en doce módulos hay doce mapas y ningún arreglo se propaga.
+
+Si la pieza que necesitás no existe todavía en la capa compartida:
+
+- **No la fabriques acá "por ahora"** confiando en subirla después. No se sube nunca.
+- Si sos el **primer** consumidor: se queda en tu módulo y la declarás **candidata a extracción** en el
+  `CLAUDE.md` de tu módulo.
+- Si sos el **segundo**: se extrae **antes** de escribir la segunda copia. Es parte de tu tarea.
+- En los dos casos: `PENDIENTE (DA-FE-xx)`, pidiendo el id en `DECISIONES.md`.
+
+El catálogo de qué está compartido, qué falta y con qué contrato:
+`../TracAutoV2/docsv2/02-arquitectura/frontend/07-capa-compartida.md`.
+
+**Prueba de que esto es real y no una precaución teórica:** `src/shared/ui/BarraDeFiltros.tsx` existe
+porque Vehículos, Dispositivos y Conductores —tres pantallas del **mismo** módulo— ya divergieron una
+vez y hubo que reunificarlas.
 
 ### La regla de oro
 
@@ -202,7 +298,19 @@ src/
 
 ### Composicion de componentes
 
-- Variantes explicitas en vez de props booleanos: `<PrimaryButton>` en vez de `<Button primary={true}>`.
+- Variantes explicitas en vez de props booleanos — pero **como prop de variante, no como componente
+  nuevo**: `<Boton variante="primaria">`, no `<Button primary={true}>` ni `<PrimaryButton>`.
+  Las 6 variantes reales, leídas de `src/shared/ui/Boton.tsx`: `primaria` · `secundaria` ·
+  `fantasma` · `superficie` · `peligro` · `peligro-contorno`. El default es `primaria`.
+  > ⚠️ **Corregido el 2026-08-18.** Esta línea prescribía `<PrimaryButton>` y el catálogo define **un
+  > solo `Boton`** con variantes (`src/shared/ui/Boton.tsx`). Un componente por variante multiplica el
+  > catálogo y rompe la regla de que las primitivas de UI se adoptan y existen **una** vez.
+  >
+  > ⚠️ **Segunda corrección, 2026-08-18 (F-01 · T4).** La primera pasada dejó el ejemplo con
+  > `variante="primario"`, en masculino, y **ese valor no existe**: el tipo es
+  > `'primaria' | 'secundaria' | 'fantasma' | 'superficie' | 'peligro' | 'peligro-contorno'`, así que
+  > `"primario"` **no compila** (`npm run typecheck` en rojo). Corregir un ejemplo y dejarlo
+  > inválido es peor que no corregirlo: el que lo copia pierde el tiempo dos veces.
 - Componentes compuestos (compound components) con contexto para UI compleja.
 - Componentes chicos (< 20 lineas de JSX). Si crece, extraer.
 - Funciones con 0-2 argumentos. Si necesita mas, usar objeto de config.
@@ -383,6 +491,48 @@ Reglas:
 - errores de negocio (409, 401, 403) se muestran como alerta general arriba del form
 - errores de red (sin response) se muestran como error no recuperable
 - nunca mostrar mensajes tecnicos del backend directo al usuario sin mapear
+
+#### 3.1 Qué canal usa el resultado de una operación (toast vs inline)
+
+> **Fuente:** `../TracAutoV2/docsv2/02-arquitectura/frontend/04-patrones-de-pantalla.md` **§4**.
+> Se duplica acá **a propósito**: ese documento está en el otro repo y no se carga solo en una
+> sesión de frontend. Si los dos se contradicen, manda el §4.
+
+**La regla, en una línea:** toda operación que cambia estado termina con **evidencia visible**, y el
+canal lo deciden el **alcance** del mensaje y su **vida útil** — **no** si salió bien o mal.
+
+**Alcance → dónde va:**
+
+| Habla de… | Va en… |
+|---|---|
+| un **campo** | debajo del campo, vía `form.setError` + `Campo` |
+| la **operación** (form, fila, selección) | banner inline **arriba de los campos, dentro del modal** |
+| la **pantalla/sección** que no cargó | `EstadoError`, reemplazando el contenido |
+
+**Vida útil → cuánto dura:**
+
+> 🧪 **TEST DEL PARPADEO** — si el usuario mira para otro lado y se pierde el mensaje,
+> **¿pierde algo que no puede recuperar solo?**
+> **Sí** → persistente. **No** → toast.
+
+**Los dos defaults:**
+
+- **Error de escritura**: persistente, pegado a la acción. El toast de error es la excepción y hay
+  que justificarla.
+- **Éxito**: la pantalla actualizada. El toast se **agrega** solo cuando el efecto no se ve desde
+  donde el usuario quedó parado.
+
+**Reglas duras:**
+
+- Un `trace_id` **solo** va en superficie persistente. En un toast de 4 s no se puede copiar, y
+  copiarlo es su única razón de existir.
+- **"Cerrar el modal" no es evidencia de éxito** — lo es solo si detrás se ve el dato nuevo.
+- **El toast nunca es la única prueba de que algo pasó.**
+- Botón **Reintentar** solo donde reintentar puede funcionar (500, red). En un 409 vuelve a chocar.
+- Una ficha que dice **"toast/inline"** no decidió nada: la decisión ya está tomada en el §4.
+
+**El contenedor de toasts** se monta una sola vez, en `app/providers/AppProviders.tsx` — no en un
+shell. Las pantallas de `/auth/*` también producen resultados de operación.
 
 ### 4. Routing y guards
 
@@ -613,7 +763,17 @@ Antes de aprobar un cambio:
 2. Releer los docs normativos de frontend del backend — los 7 de
    `../TracAutoV2/docsv2/02-arquitectura/frontend/`.
 3. Abrir el mockup HTML si la tarea toca UI (`../TracAutoV2/docs/mockupsv2/`).
-4. Si falta un contrato backend, dejar el hueco visible y no inventarlo.
+4. Si la tarea toca Flota, Access/auth/sesión, permisos, rutas protegidas o contexto activo, usar
+   el mapa Graphify correspondiente:
+   `../TracAutoV2/src/Flota/docs/07-grafos/contexto-ia.md`,
+   `../TracAutoV2/src/Access/docs/07-grafos/contexto-ia.md` o
+   `../TracAutoV2/src/PlataformaCanonica/docs/07-grafos/contexto-ia.md`. Para explorar relaciones,
+   abrir el `iniciar-lab-grafos-*.cmd` de esa carpeta.
+5. Si falta un contrato backend, dejar el hueco visible y no inventarlo.
+
+Graphify no decide contrato ni UX. Sirve para orientar que rutas, `flotaKeys`, contratos TS,
+servicios HTTP, pantallas y vecinos backend debe leer una IA antes de cambiar Flota, Access o el
+contexto activo.
 
 ## Despues de codear
 

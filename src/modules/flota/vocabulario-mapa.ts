@@ -1,4 +1,5 @@
-import type { EstadoConexion, EstadoMotor, MapaItemDto } from '@/services/contracts/flota'
+import type { EstadoConexion, EstadoMotor, MapaItemDto, SeveridadAlerta } from '@/services/contracts/flota'
+import type { EntidadUbicada } from '@/shared/patrones/mapa/geometria'
 import { varianteDeConexion } from './vocabulario-conexion'
 import type { VarianteBadge } from '@/shared/ui/Badge'
 
@@ -28,18 +29,6 @@ import type { VarianteBadge } from '@/shared/ui/Badge'
  * SSE/WebSocket son **fase 2 por contrato**: no se implementan ni se "preparan".
  */
 export const POLLING_MAPA_MS = 12_000
-
-/** Zoom al que se acerca el mapa cuando se selecciona un vehiculo desde el chip o el deep-link. */
-export const ZOOM_AL_SELECCIONAR = 15
-
-/**
- * Vista inicial cuando todavia no hay ningun marcador que encuadrar.
- *
- * Las coordenadas son las de **Buenos Aires**, no las del centro geografico del pais (que cae cerca
- * de Santa Rosa). Con `zoom: 5` la vista abarca casi toda la Argentina igual, y este encuadre dura
- * milisegundos: apenas llega el primer marcador, `EncuadreDeLaFlota` hace `fitBounds`.
- */
-export const VISTA_INICIAL = { centro: [-34.6, -58.44] as const, zoom: 5 }
 
 /* ---------------------------------------------------------------------------
  * Filtros del panel izquierdo — todos CLIENT-SIDE
@@ -216,74 +205,42 @@ export function varianteDelMarcador(estado: EstadoConexion): VarianteBadge {
 }
 
 /* ---------------------------------------------------------------------------
- * Estabilidad por VALOR de las props del marcador
- *
- * `react-leaflet` compara las props del `<Marker>` por IDENTIDAD, no por valor
- * (`react-leaflet/lib/Marker.js`: `if (props.position !== prevProps.position) marker.setLatLng(...)`;
- * `@react-leaflet/core/lib/events.js`: el efecto lleva `eventHandlers` en sus deps). Un
- * `position={[lat, lng]}` escrito en el JSX es un array NUEVO en cada render, y un
- * `eventHandlers={{ click: ... }}` es un objeto nuevo: con eso, **cada** render reescribe los N
- * marcadores (`setLatLng` proyecta a layer-point y escribe el `transform` en el DOM; el `off/on`
- * desengancha y vuelve a enganchar el listener), aunque no se haya movido nada.
- *
- * Y el disparador no es solo el polling: el buscador escribe al store en cada tecla, asi que tipear
- * 8 caracteres sobre 200 vehiculos daba 1.600 reescrituras.
- *
- * Es el MISMO problema que el cache de iconos de `MapaFlota` ya resuelve, en las otras dos props.
- * Las cachés viven aca —y no en el componente— porque aca se pueden anclar por test: el archivo no
- * importa Leaflet y el runner corre en Node.
- *
- * ⚠️ **No se usa `useMemo`**, que este repo prohibe (y el compilador de React que lo reemplazaria
- * **no esta instalado**: `vite.config.ts` solo tiene `react()` + `tailwindcss()`). Son cachés de
- * modulo acotadas por el tamaño de la flota: una entrada por vehiculo, reemplazada —no acumulada—
- * cuando el vehiculo se mueve o cambia el callback.
+ * Adaptador al mapa compartido
  * ------------------------------------------------------------------------- */
 
-const posicionesEstables = new Map<string, readonly [number, number]>()
-
-/** La MISMA tupla mientras el vehiculo no se mueva. */
-export function posicionEstable(
-  vehiculoFlotaId: string,
-  latitud: number,
-  longitud: number,
-): readonly [number, number] {
-  const guardada = posicionesEstables.get(vehiculoFlotaId)
-  if (guardada !== undefined && guardada[0] === latitud && guardada[1] === longitud) return guardada
-
-  const nueva = [latitud, longitud] as const
-  posicionesEstables.set(vehiculoFlotaId, nueva)
-  return nueva
+/**
+ * Lo que Flota le pasa a `<MapaORBI>`: una entidad ubicada **más la patente**.
+ *
+ * `EntidadUbicada` es el mínimo que el mapa necesita para DIBUJAR; `etiquetaDe` lo resuelve la
+ * pantalla y necesita la patente, así que el tipo del módulo la agrega. Eso es exactamente para lo
+ * que el mapa es genérico en `T extends EntidadUbicada`: el dominio viaja, el mapa no lo mira.
+ *
+ * ⚠️ El ejemplo de `07-capa-compartida.md` §4.3 mapea SOLO a los 5 campos de `EntidadUbicada` y
+ * después llama `etiquetaDe={(i) => etiquetaDeVehiculo(i, t)}` — con ese mapeo la etiqueta no tiene
+ * de dónde salir. Es un error del ejemplo, no del contrato: el `T extends` ya lo permite.
+ */
+export interface VehiculoEnMapa extends EntidadUbicada {
+  readonly patente: string | null
 }
-
-/** Lo que Leaflet acepta como mapa de handlers; se tipa estructural para no importar Leaflet aca. */
-export interface ManejadoresDelMarcador {
-  readonly click: () => void
-}
-
-interface EntradaDeManejadores {
-  readonly onSeleccionar: (vehiculoFlotaId: string) => void
-  readonly manejadores: ManejadoresDelMarcador
-}
-
-const manejadoresEstables = new Map<string, EntradaDeManejadores>()
 
 /**
- * El MISMO objeto de handlers mientras no cambie ni el vehiculo ni el callback.
+ * Traduce un item del contrato de Flota a lo que el mapa entiende.
  *
- * Se compara el callback en vez de asumirlo estable: hoy es la accion del store de zustand (que no
- * cambia de identidad), pero un `onSeleccionar={() => …}` inline en el futuro dejaria handlers
- * apuntando al render viejo, que es un bug mucho mas caro que el churn que esto evita.
+ * `estado` (conexión) pinta el RELLENO del marcador y `realce` (severidad de señales) el ANILLO —
+ * son dos preguntas distintas y por eso no se pisan: "¿reporta?" y "¿tiene algo abierto?".
  */
-export function manejadoresDelMarcador(
-  vehiculoFlotaId: string,
-  onSeleccionar: (vehiculoFlotaId: string) => void,
-): ManejadoresDelMarcador {
-  const guardada = manejadoresEstables.get(vehiculoFlotaId)
-  if (guardada !== undefined && guardada.onSeleccionar === onSeleccionar) return guardada.manejadores
-
-  const manejadores: ManejadoresDelMarcador = { click: () => onSeleccionar(vehiculoFlotaId) }
-  manejadoresEstables.set(vehiculoFlotaId, { onSeleccionar, manejadores })
-  return manejadores
+export function aEntidadDelMapa(
+  item: MapaItemDto,
+  severidad: SeveridadAlerta | null,
+): VehiculoEnMapa {
+  return {
+    id: item.vehiculoFlotaId,
+    lat: item.ubicacion.latitud,
+    lng: item.ubicacion.longitud,
+    estado: item.estado,
+    realce: severidad,
+    patente: item.patente,
+  }
 }
 
 /**
@@ -295,7 +252,7 @@ export function manejadoresDelMarcador(
  * de lint del repo cierran.
  */
 export function claseDelMarcador(estado: EstadoConexion): string {
-  return `marcador-vehiculo--${varianteDelMarcador(estado)}`
+  return `marcador--${varianteDelMarcador(estado)}`
 }
 
 /**
@@ -348,41 +305,6 @@ export function antiguedadDeLaSenal(
   if (segundos < 3600) return { cantidad: Math.floor(segundos / 60), unidad: 'minute' }
   if (segundos < 86_400) return { cantidad: Math.floor(segundos / 3600), unidad: 'hour' }
   return { cantidad: Math.floor(segundos / 86_400), unidad: 'day' }
-}
-
-/* ---------------------------------------------------------------------------
- * Encuadre
- * ------------------------------------------------------------------------- */
-
-/** Rectangulo `[[sur, oeste], [norte, este]]`, en el shape que Leaflet acepta como `LatLngBounds`. */
-export type LimitesDelMapa = readonly [readonly [number, number], readonly [number, number]]
-
-/**
- * Rectangulo que contiene a todos los marcadores, o `null` si no hay ninguno.
- *
- * Se devuelve como tupla de numeros y no como `L.LatLngBounds` para que este archivo siga sin
- * importar Leaflet (ver el encabezado): quien lo consume ya esta dentro del mapa.
- */
-export function limitesDeLaFlota(items: readonly MapaItemDto[]): LimitesDelMapa | null {
-  if (items.length === 0) return null
-
-  let sur = Number.POSITIVE_INFINITY
-  let norte = Number.NEGATIVE_INFINITY
-  let oeste = Number.POSITIVE_INFINITY
-  let este = Number.NEGATIVE_INFINITY
-
-  for (const item of items) {
-    const { latitud, longitud } = item.ubicacion
-    if (latitud < sur) sur = latitud
-    if (latitud > norte) norte = latitud
-    if (longitud < oeste) oeste = longitud
-    if (longitud > este) este = longitud
-  }
-
-  return [
-    [sur, oeste],
-    [norte, este],
-  ]
 }
 
 /* ---------------------------------------------------------------------------

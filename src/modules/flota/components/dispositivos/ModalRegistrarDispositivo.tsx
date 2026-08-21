@@ -12,7 +12,7 @@ import {
   resolveApiErrorMessage,
   resolveApiFieldErrors,
 } from '@/shared/errors/parse-api-error'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { CampoModeloDispositivo, CampoProveedorSim } from './CamposCatalogoDispositivo'
 import { useRegistrarDispositivo } from '../../hooks/useRegistrarDispositivo'
 import {
@@ -139,7 +139,7 @@ function Formulario({ onCerrar }: { onCerrar: () => void }) {
           void enviar()
         }}
       >
-        {errorGeneral ? <AvisoOperacion titulo={errorGeneral} /> : null}
+        {errorGeneral ? <Aviso titulo={errorGeneral} /> : null}
 
         <Campo
           etiqueta={t('flota:dispositivoAlta.imei')}

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Boton } from '@/shared/ui/Boton'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { tratamientoDeErrorAsignacion } from './vocabulario-asignacion'
 
 /**
@@ -47,7 +47,7 @@ export function AvisoErrorAsignacion({
 
   if (tratamiento === 'coordinacion') {
     return (
-      <AvisoOperacion
+      <Aviso
         titulo={mensaje}
         mensaje={t('flota:asignacionDispositivo.errorCoordinacion')}
         trazaId={apiError.traceId}
@@ -64,7 +64,7 @@ export function AvisoErrorAsignacion({
 
   if (tratamiento === 'conflicto') {
     return (
-      <AvisoOperacion
+      <Aviso
         titulo={mensaje}
         mensaje={t('flota:asignacionDispositivo.errorConflicto')}
         trazaId={apiError.traceId}
@@ -81,7 +81,7 @@ export function AvisoErrorAsignacion({
 
   if (tratamiento === 'noEncontrado') {
     return (
-      <AvisoOperacion
+      <Aviso
         titulo={mensaje}
         mensaje={t('flota:asignacionDispositivo.errorNoEncontrado')}
         trazaId={apiError.traceId}
@@ -102,7 +102,7 @@ export function AvisoErrorAsignacion({
     para evitar, con el signo cambiado.
   */
   return (
-    <AvisoOperacion
+    <Aviso
       titulo={mensaje}
       mensaje={t('flota:asignacionDispositivo.errorGenerico')}
       trazaId={apiError.traceId}

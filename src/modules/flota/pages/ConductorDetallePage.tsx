@@ -12,7 +12,7 @@ import type {
   AsignacionConductorHistorialDto,
   ConductorDetalleDto,
 } from '@/services/contracts/flota'
-import { AvisoOperacion } from '../components/AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { useConductor } from '../hooks/useConductor'
 import { ModalAsignarVehiculo } from '../components/conductores/ModalAsignarVehiculo'
 import { ModalCambiarEstadoConductor } from '../components/conductores/ModalCambiarEstadoConductor'
@@ -212,7 +212,7 @@ function FichaConductor({
       <EnlaceVolver />
 
       {apiErrorRefresco ? (
-        <AvisoOperacion
+        <Aviso
           titulo={t('flota:conductorDetalle.error.tituloRefresco')}
           mensaje={resolveApiErrorMessage(apiErrorRefresco, t)}
           trazaId={apiErrorRefresco.traceId ?? undefined}

@@ -21,7 +21,7 @@ import { QUERY_CONDUCTORES_SIN_VEHICULO } from '../conductores/vocabulario-condu
 import { flotaKeysAfectadasPorAsignacionConductor } from '../../query-keys'
 import { useAsignarConductor } from '../../hooks/useAsignarConductor'
 import { useConductores } from '../../hooks/useConductores'
-import { usePermisos } from '../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import {
   aAsignarConductorVehiculoRequest,
   asignarConductorVehiculoSchema,

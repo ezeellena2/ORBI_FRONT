@@ -9,7 +9,7 @@ import { Input } from '@/shared/ui/Input'
 import { Select } from '@/shared/ui/Select'
 import type { CatalogoGrowableItemDto } from '@/services/contracts/flota'
 import { AccionConMotivo } from '../AccionConMotivo'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import {
   crearItemCatalogoSchema,
   VALORES_INICIALES_ITEM_CATALOGO,
@@ -96,7 +96,7 @@ export function SelectorCatalogoGrowable({
 
   if (mensajeErrorCarga !== null) {
     return (
-      <AvisoOperacion
+      <Aviso
         titulo={t('flota:catalogoDispositivo.error')}
         mensaje={mensajeErrorCarga}
         accion={
@@ -239,7 +239,7 @@ function PanelAltaCatalogo({
         <p className="text-xs text-fg-secundario">{textos.descripcionNuevo}</p>
       </div>
 
-      {mensajeErrorCrear ? <AvisoOperacion titulo={mensajeErrorCrear} /> : null}
+      {mensajeErrorCrear ? <Aviso titulo={mensajeErrorCrear} /> : null}
 
       <Campo etiqueta={textos.nombre} error={mensajeDe(form.formState.errors.nombre)} requerido>
         {(control) => (

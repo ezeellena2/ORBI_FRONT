@@ -13,7 +13,7 @@ import {
   resolveApiFieldErrors,
 } from '@/shared/errors/parse-api-error'
 import type { TipoDocumentoConductor } from '@/services/contracts/flota'
-import { AvisoOperacion } from '../../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { claveDeTipoDocumento } from '../vocabulario-licencia'
 import { useCargarDocumentoConductor } from '../../../hooks/useCargarDocumentoConductor'
 import {
@@ -168,7 +168,7 @@ function Formulario({
           void enviar()
         }}
       >
-        {errorGeneral ? <AvisoOperacion titulo={errorGeneral} /> : null}
+        {errorGeneral ? <Aviso titulo={errorGeneral} /> : null}
 
         <p className="rounded-lg border border-dashed border-borde bg-superficie-2 px-3 py-2 text-xs text-fg-secundario">
           {t('flota:documentoConductor.sinBinariosAviso')}

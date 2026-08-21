@@ -16,7 +16,7 @@ import { Icono } from '@/shared/ui/Icono'
  * escrito, exportado y documentado con esta misma explicación — y no lo consumía NADIE. El aviso que
  * prometía el comentario nunca llegó a la pantalla.
  *
- * No es un error de validación y por eso no bloquea el submit ni se pinta como `AvisoOperacion`
+ * No es un error de validación y por eso no bloquea el submit ni se pinta como `Aviso`
  * (rojo): el resto de los cambios del formulario SÍ se van a guardar. Es una advertencia sobre una
  * parte de la intención que el backend todavía no puede expresar.
  *

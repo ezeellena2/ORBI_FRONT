@@ -15,7 +15,7 @@ import { AltCtaImportarCsv } from '../components/onboarding/AltCtaImportarCsv'
 import { PasoConductor } from '../components/onboarding/PasoConductor'
 import { PasoDispositivo } from '../components/onboarding/PasoDispositivo'
 import { PasoVehiculo } from '../components/onboarding/PasoVehiculo'
-import { usePermisos } from '../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 
 /**
  * `/app/flota/vehiculos/onboarding` — wizard de alta del primer vehículo.

@@ -8,7 +8,7 @@ import { GrupoRadio, type OpcionRadio } from '@/shared/ui/GrupoRadio'
 import { Modal } from '@/shared/ui/Modal'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
 import type { ConductorListItemDto } from '@/services/contracts/flota'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { ConductorBadgeEstado } from './ConductorBadgeEstado'
 import {
   claveDeEstadoConductor,
@@ -142,7 +142,7 @@ function Formulario({
           void enviar()
         }}
       >
-        {errorGeneral ? <AvisoOperacion titulo={errorGeneral} /> : null}
+        {errorGeneral ? <Aviso titulo={errorGeneral} /> : null}
 
         <div className="flex items-center gap-2 text-sm text-fg-secundario">
           {t('flota:conductorEstado.estadoActual')}

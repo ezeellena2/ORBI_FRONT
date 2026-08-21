@@ -17,7 +17,7 @@ import {
 } from '@/shared/errors/parse-api-error'
 import type { ConductorDetalleDto } from '@/services/contracts/flota'
 import { AvisoCamposNoBorrables } from '../AvisoCamposNoBorrables'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { useConductor } from '../../hooks/useConductor'
 import { useEditarConductor } from '../../hooks/useEditarConductor'
 import {
@@ -98,7 +98,7 @@ export function ModalEditarConductorPorId({
   return (
     <Modal abierto onCerrar={onCerrar} titulo={t('flota:conductorEditar.titulo')}>
       {consulta.isError ? (
-        <AvisoOperacion
+        <Aviso
           titulo={t('flota:conductorEditar.errorCarga')}
           mensaje={resolveApiErrorMessage(parseApiError(consulta.error), t)}
         />
@@ -193,7 +193,7 @@ function Formulario({
           void enviar()
         }}
       >
-        {errorGeneral ? <AvisoOperacion titulo={errorGeneral} /> : null}
+        {errorGeneral ? <Aviso titulo={errorGeneral} /> : null}
 
         <IdentidadBloqueada conductor={conductor} />
 

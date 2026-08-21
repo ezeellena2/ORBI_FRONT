@@ -9,7 +9,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { AccionConMotivo } from '../AccionConMotivo'
-import { usePermisos } from '../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { PARAM_VISTA, type VistaDelCentro } from '../../vocabulario-vistas-del-centro'
 import { cn } from '@/shared/utils/cn'
 import { ColumnaLateral } from '@/shared/ui/ColumnaLateral'

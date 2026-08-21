@@ -3,7 +3,7 @@ import { FileSpreadsheet } from 'lucide-react'
 import { Boton } from '@/shared/ui/Boton'
 import { Icono } from '@/shared/ui/Icono'
 import { AccionConMotivo } from '../AccionConMotivo'
-import { usePermisos } from '../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 
 /**
  * Alt-CTA "Importar CSV" — gateada con `flota.vehiculos.importar` y **sin endpoint que la cumpla**.

@@ -777,12 +777,6 @@
       "modulos": "Módulos",
       "sistema": "Sistema",
       "dashboard": "Dashboard",
-      "flota": "Telemetría y flota",
-      "flotaMapa": "Mapa en vivo",
-      "flotaVehiculos": "Vehículos",
-      "flotaDispositivos": "Dispositivos",
-      "flotaConductores": "Conductores",
-      "flotaGeozonas": "Geozonas",
       "configuracion": "Configuración",
       "confEmpresa": "Empresa",
       "confModulos": "Módulos",
@@ -793,11 +787,9 @@
       "confApariencia": "Apariencia",
       "confRoles": "Roles y permisos",
       "usuarios": "Usuarios",
-      "flotaProblemas": "Centro de problemas",
       "grupoOperacion": "Operación",
       "alternarColumna": "Colapsar o expandir el menú del módulo",
       "sinPermiso": "Necesitás el permiso {{permiso}}",
-      "flotaBajada": "Flota conectada",
       "configuracionBajada": "Ajustes de la organización"
     },
     "sidebar": {
@@ -851,6 +843,16 @@
     "placeholder": {
       "title": "Sección en construcción",
       "comingSoon": "Próximamente disponible."
+    }
+  },
+  "mapa": {
+    "controles": {
+      "acercar": "Acercar",
+      "alejar": "Alejar",
+      "centrar": "Centrar en el mapa",
+      "centrarSinPosiciones": "No hay posiciones para centrar",
+      "pantallaCompleta": "Pantalla completa",
+      "salirPantallaCompleta": "Salir de pantalla completa"
     }
   }
 }

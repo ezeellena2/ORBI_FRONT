@@ -1,33 +1,33 @@
-import {
-  Car,
-  Cog,
-  CreditCard,
-  Bell,
-  Plug,
-  ShieldCheck,
-  Palette,
-  KeyRound,
-  Building2,
-  Blocks,
-  Map,
-  MapPin,
-  RadioTower,
-  TriangleAlert,
-  UserRound,
-  type LucideIcon,
-} from 'lucide-react'
+import { Cog, CreditCard, Bell, Plug, ShieldCheck, Palette, KeyRound, Building2, Blocks } from 'lucide-react'
+import { NAVEGACION_DE_MODULOS } from '@/app/registry'
+import type { ItemDeModulo, RegistroDeModulo } from '@/shared/types/modulo'
+
+export type { ItemDeModulo, GrupoDeModulo, RegistroDeModulo } from '@/shared/types/modulo'
 
 /**
  * Fuente ÚNICA de la navegación de módulo. Port del `docs/mockupsv2/_shared/module-nav.js`.
  *
  * ── QUÉ PROBLEMA RESUELVE ─────────────────────────────────────────────────────────────────────
- * Antes cada módulo iba a inventar su propio menú. El plan normativo
- * `docs/superpowers/plans/2026-06-13-navegacion-lateral-unificada.md` cierra eso con un modelo:
- * el **sidebar primario** muestra el módulo como **link único a su hub** —nunca como acordeón
- * desplegable (Task 16 Step 2 manda borrar ese branch)— y los items del módulo viven en una
- * **columna secundaria colapsable**. Este registro es lo que alimenta a las dos.
+ * El **sidebar primario** muestra el módulo como **link único a su hub** —nunca como acordeón
+ * desplegable (`2026-06-13-navegacion-lateral-unificada.md`, Task 16 Step 2 manda borrar ese
+ * branch)— y los items del módulo viven en una **columna secundaria colapsable**. Este registro es
+ * lo que alimenta a las dos.
  *
- * Agregar un módulo = agregar una entrada acá. No se toca ni el sidebar ni la columna.
+ * ── QUÉ CAMBIÓ EN F-03: ESTE ARCHIVO YA NO DECLARA MÓDULOS ────────────────────────────────────
+ * Antes tenía la constante `FLOTA` escrita a mano, y agregar un módulo era editar acá. Ahora los
+ * módulos llegan de `app/registry/`, que los junta de los `modulo.manifest.ts` de cada uno
+ * (`DA-FE-25`, cerrada por el PO: gana el manifiesto por módulo).
+ *
+ * **La API de este archivo NO cambió**: sus 3 consumidores —`useBreadcrumb`, `ColumnaDeModulo` y
+ * `nav-config`— siguen leyendo `REGISTRO_DE_MODULOS`, `moduloDeLaRuta` y `esItemActivo` igual que
+ * antes. Cambió de dónde salen los datos, no cómo se leen.
+ *
+ * ⚠️ **Por qué importa de `app/`, que parece al revés.** El agregador tiene que importar de
+ * `modules/`, y la regla **F9** se lo prohíbe a `features/` (*"el shell tiene que compilar con CERO
+ * módulos instalados"*). `app/` es la raíz de composición y es la única capa que puede ver las dos.
+ * El lint lo permite (no hay bloque para `src/app/**`, y `AppRouter` ya importaba de `modules/`),
+ * pero la alternativa sin esta inversión sería inyectar el registro por contexto — y eso cambiaría
+ * la firma de los 5 componentes que hoy lo leen. Se eligió no tocarlos.
  *
  * ── LO QUE NO SE PORTÓ, A PROPÓSITO ───────────────────────────────────────────────────────────
  * - **`mode: 'rail'`**: figura en el docblock del mockup y en el plan, pero el motor no tiene ni
@@ -39,117 +39,19 @@ import {
  *   sin `aria-disabled`. Acá se hace bien.
  */
 
-/** Un ítem de la columna. `panel` conmuta sin navegar; `ruta` navega. */
-export interface ItemDeModulo {
-  key: string
-  labelKey: string
-  icono: LucideIcon
-  ruta: string
-  /**
-   * Permiso que habilita el ítem. Sin él NO se oculta: se muestra **deshabilitado con el motivo**
-   * (`permisos.md` §Comportamiento UX por verbo). Ocultarlo dejaría al usuario sin saber que la
-   * sección existe y sin nada que pedirle a su admin.
-   */
-  permiso?: string
-  /**
-   * Rutas hijas que marcan activo a este ítem. Es el port de los `aliases` del mockup, que allá
-   * mapeaban `vehiculo-detalle.html → vehiculos.html`; acá una ficha de detalle deja resaltado su
-   * listado. Se comparan con `startsWith`.
-   */
-  rutasHijas?: string[]
-}
-
-export interface GrupoDeModulo {
-  /** Sin título, el grupo se renderiza sin encabezado (el mockup lo permite). */
-  tituloKey?: string
-  items: ItemDeModulo[]
-}
-
-export interface RegistroDeModulo {
-  key: string
-  labelKey: string
-  /** Bajada del encabezado de la columna. Es el `subtitle` del registro del mockup. */
-  subtituloKey?: string
-  icono: LucideIcon
-  /** Código de módulo para el gate de módulo activo. Ausente = superficie de sistema, sin gate. */
-  modulo?: string
-  /** A dónde va el link único del sidebar primario. Es la primera pantalla real del módulo. */
-  hub: string
-  grupos: GrupoDeModulo[]
-}
-
-/**
- * Orden y etiquetas tomados **literalmente** de `module-nav.js` `registry['flota']`.
- * Vehículos va primero porque es el hub — coherente con que `/app/flota` redirija ahí.
- */
-const FLOTA: RegistroDeModulo = {
-  key: 'flota',
-  labelKey: 'shell.nav.flota',
-  subtituloKey: 'shell.nav.flotaBajada',
-  icono: Car,
-  modulo: 'flota',
-  hub: '/app/flota/vehiculos',
-  grupos: [
-    {
-      tituloKey: 'shell.nav.grupoOperacion',
-      items: [
-        {
-          key: 'flota.vehiculos',
-          labelKey: 'shell.nav.flotaVehiculos',
-          icono: Car,
-          ruta: '/app/flota/vehiculos',
-          permiso: 'flota.vehiculos.leer',
-          // El wizard de alta y la ficha de detalle dejan resaltado el listado.
-          rutasHijas: ['/app/flota/vehiculos/'],
-        },
-        {
-          key: 'flota.mapa',
-          labelKey: 'shell.nav.flotaMapa',
-          icono: Map,
-          ruta: '/app/flota/mapa',
-          permiso: 'flota.vehiculos.leer',
-        },
-        {
-          key: 'flota.dispositivos',
-          labelKey: 'shell.nav.flotaDispositivos',
-          icono: RadioTower,
-          ruta: '/app/flota/dispositivos',
-          permiso: 'flota.dispositivos.leer',
-          rutasHijas: ['/app/flota/dispositivos/'],
-        },
-        {
-          key: 'flota.conductores',
-          labelKey: 'shell.nav.flotaConductores',
-          icono: UserRound,
-          ruta: '/app/flota/conductores',
-          permiso: 'flota.conductores.leer',
-          rutasHijas: ['/app/flota/conductores/'],
-        },
-        {
-          key: 'flota.geozonas',
-          labelKey: 'shell.nav.flotaGeozonas',
-          icono: MapPin,
-          ruta: '/app/flota/geozonas',
-          permiso: 'flota.geozonas.leer',
-        },
-        {
-          key: 'flota.problemas',
-          labelKey: 'shell.nav.flotaProblemas',
-          icono: TriangleAlert,
-          ruta: '/app/flota/problemas',
-          permiso: 'flota.problemas.leer',
-          // Reglas e Integraciones son configuración del Centro: se llega por el submenú de la
-          // pantalla, y desde la columna dejan resaltado el Centro.
-          rutasHijas: ['/app/flota/problemas/', '/app/flota/integraciones'],
-        },
-      ],
-    },
-  ],
-}
-
 /**
  * Configuración es el módulo `panel` del mockup: link único en el sidebar y sus secciones en la
  * columna. No lleva `modulo` porque es superficie de sistema — no la gatea `[RequiereModulo]`.
+ *
+ * ── POR QUÉ SE QUEDA ACÁ Y NO TIENE MANIFIESTO (decidido en F-03) ─────────────────────────────
+ * **No es un módulo de negocio**: no vive en `src/modules/`, no se contrata, y el shell la tiene
+ * siempre —con cero módulos instalados, Configuración sigue estando—. Además no cumple el contrato
+ * del manifiesto ni podría sin inventar código: §3 exige `basePath` + `routes: ComponentType`, y
+ * Configuración **no tiene un componente de rutas**: sus 8 secciones son placeholders sueltos en
+ * `AppRouter`, no un splat delegado. Darle un manifiesto obligaría a fabricar un
+ * `ConfiguracionRoutes` que hoy no existe.
+ *
+ * Es la entrada del SHELL en el registro, y por eso vive en el shell.
  */
 const CONFIGURACION: RegistroDeModulo = {
   key: 'configuracion',
@@ -179,7 +81,14 @@ const CONFIGURACION: RegistroDeModulo = {
   ],
 }
 
-export const REGISTRO_DE_MODULOS: RegistroDeModulo[] = [FLOTA, CONFIGURACION]
+/**
+ * Los módulos instalados **más** la superficie de sistema del shell, en ese orden.
+ *
+ * El orden importa: `moduloDeLaRuta` devuelve el PRIMERO que matchea. Los módulos ya vienen
+ * ordenados de forma determinista por el agregador (por `orden`, y a igualdad por `key`), así que
+ * no depende del orden de importación.
+ */
+export const REGISTRO_DE_MODULOS: RegistroDeModulo[] = [...NAVEGACION_DE_MODULOS, CONFIGURACION]
 
 /** El módulo cuya columna corresponde a esta ruta, o `null` si la ruta no pertenece a ninguno. */
 export function moduloDeLaRuta(pathname: string): RegistroDeModulo | null {

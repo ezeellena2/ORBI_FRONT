@@ -2122,5 +2122,15 @@
       "sinCorrelacion": "Todavía no se puede saber a qué problema pertenece cada señal, así que el enlace abre el Centro de Problemas sin preseleccionar ninguno.",
       "irAlCentro": "Ir al Centro de Problemas"
     }
+  },
+  "nav": {
+    "modulo": "Telemetría y flota",
+    "bajada": "Flota conectada",
+    "vehiculos": "Vehículos",
+    "mapa": "Mapa en vivo",
+    "dispositivos": "Dispositivos",
+    "conductores": "Conductores",
+    "geozonas": "Geozonas",
+    "problemas": "Centro de problemas"
   }
 }

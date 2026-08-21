@@ -23,8 +23,8 @@ import { RestablecerPasswordPage } from '@/features/access/pages/RestablecerPass
 import { DashboardPage } from '@/features/shell/pages/DashboardPage'
 import { ContextSelectorPage } from '@/features/context/pages/ContextSelectorPage'
 
-// Modulos de negocio
-import FlotaRoutes from '@/modules/flota/FlotaRoutes'
+// Modulos de negocio — NO se importan de a uno: los descubre el agregador (F-03).
+import { MANIFIESTOS } from '@/app/registry'
 
 function AppComingSoonPage() {
   const { t } = useTranslation()
@@ -95,7 +95,15 @@ export function AppRouter() {
             al montar sus 2 rutas (slice-04) y `flota/mapa` al montar el mapa en vivo (slice-05
             f-08), por esta misma razon.
           */}
-          <Route path="flota/*" element={<FlotaRoutes />} />
+          {/*
+            Un `<Route>` con splat por MANIFIESTO. Agregar un modulo no toca este archivo: se
+            agrega su linea en `app/registry/`. El `.map()` es seguro frente al invariante A-13
+            (`08-enchufe-de-modulo.md` §5.1): `createRoutesFromChildren` usa `React.Children`, que
+            aplana arrays — lo que voltea la app es un hijo que NO sea `<Route>`, no un array.
+          */}
+          {MANIFIESTOS.map((m) => (
+            <Route key={m.key} path={`${m.basePath}/*`} element={<m.routes />} />
+          ))}
           <Route path="flota/geozonas" element={<AppComingSoonPage />} />
 
           {/* Configuracion */}

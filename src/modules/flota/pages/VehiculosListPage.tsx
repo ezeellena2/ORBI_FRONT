@@ -5,7 +5,7 @@ import { Plus, SearchX, Truck } from 'lucide-react'
 import { TablaVehiculos } from '../components/vehiculos/TablaVehiculos'
 import { VehiculoFiltros } from '../components/vehiculos/VehiculoFiltros'
 import { AvisoDatosDeConexion } from '../components/AvisoDatosDeConexion'
-import { AvisoOperacion } from '../components/AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { AvisoDeSenales } from '../components/senales/AvisoDeSenales'
 import { useEliminarVehiculo } from '../hooks/useEliminarVehiculo'
 import { useSenales } from '../hooks/useSenales'
@@ -310,7 +310,7 @@ export default function VehiculosListPage() {
       />
 
       {errorApi && hayDatosEnMano ? (
-        <AvisoOperacion
+        <Aviso
           titulo={t('vehiculosListado.error.tituloRefresco')}
           mensaje={resolveApiErrorMessage(errorApi, tComun)}
           trazaId={errorApi.traceId ?? undefined}

@@ -7,7 +7,7 @@ import { Campo } from '@/shared/ui/Campo'
 import { GrupoRadio, type OpcionRadio } from '@/shared/ui/GrupoRadio'
 import { Modal } from '@/shared/ui/Modal'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { useResolverProblema } from '../../hooks/useResolverProblema'
 import {
   claveDeGuiaDeErrorCentro,
@@ -122,7 +122,7 @@ function Formulario({
         }}
       >
         {apiError === null ? null : (
-          <AvisoOperacion
+          <Aviso
             titulo={resolveApiErrorMessage(apiError, t)}
             mensaje={t(
               `flota:${claveDeGuiaDeErrorCentro(tratamientoDeErrorCentro(apiError.code, apiError.args))}`,

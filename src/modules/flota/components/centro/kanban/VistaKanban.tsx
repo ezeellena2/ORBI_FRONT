@@ -6,7 +6,7 @@ import { EstadoError } from '@/shared/ui/EstadoError'
 import { EstadoVacio } from '@/shared/ui/EstadoVacio'
 import { Paginacion } from '@/shared/ui/Paginacion'
 import { ColumnaDelTablero } from './ColumnaDelTablero'
-import { usePermisos } from '../../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import {
   ARRASTRE_DE_CARDS_DISPONIBLE,
   COLUMNAS_DEL_TABLERO,

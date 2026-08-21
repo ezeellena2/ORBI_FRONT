@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { ProblemaOperativoDetalleDto } from '@/services/contracts/flota'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { BloqueDelCentro } from './BloqueDelCentro'
 import { SIN_DATO, formatearFechaHora } from '../detalle/formato'
 
@@ -40,7 +40,7 @@ export function EstadoEnVivoDelVehiculo({
   if (detalle.contextoOperativo === null) {
     return (
       <BloqueDelCentro titulo={t('centro.sala.contexto.operativo')}>
-        <AvisoOperacion
+        <Aviso
           titulo={t('centro.problemas.datosParciales.titulo')}
           mensaje={t('centro.problemas.datosParciales.descripcion')}
         />

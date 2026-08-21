@@ -260,9 +260,9 @@ describe('el marcador SUPERPONE la severidad, nunca reemplaza el estado de conex
   })
 
   it('cada severidad tiene su clase, y el color se resuelve en el CSS por token', () => {
-    expect(claseDeAnilloDeSeveridad('alta')).toBe('marcador-vehiculo--senal-peligro')
-    expect(claseDeAnilloDeSeveridad('media')).toBe('marcador-vehiculo--senal-advertencia')
-    expect(claseDeAnilloDeSeveridad('baja')).toBe('marcador-vehiculo--senal-neutro')
+    expect(claseDeAnilloDeSeveridad('alta')).toBe('marcador--senal-peligro')
+    expect(claseDeAnilloDeSeveridad('media')).toBe('marcador--senal-advertencia')
+    expect(claseDeAnilloDeSeveridad('baja')).toBe('marcador--senal-neutro')
   })
 
   it('con la deteccion apagada el marcador NO gana anillo, aunque llegara una señal', () => {

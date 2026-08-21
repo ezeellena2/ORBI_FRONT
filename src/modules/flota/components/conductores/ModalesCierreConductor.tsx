@@ -7,7 +7,7 @@ import { Select } from '@/shared/ui/Select'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
 import type { MotivoCierreAsignacion } from '@/services/contracts/flota'
 import { AvisoErrorAsignacionConductor } from './AvisoErrorAsignacionConductor'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { useCerrarVinculoDispositivoConductor } from '../../hooks/useCerrarVinculoDispositivoConductor'
 import { useDesasignarConductor } from '../../hooks/useDesasignarConductor'
 
@@ -250,7 +250,7 @@ function FormularioDesvincular({
       }
     >
       <div className="flex flex-col gap-4">
-        {error ? <AvisoOperacion titulo={error} /> : null}
+        {error ? <Aviso titulo={error} /> : null}
 
         <Campo
           etiqueta={t('flota:vinculoDispositivoConductor.motivo')}

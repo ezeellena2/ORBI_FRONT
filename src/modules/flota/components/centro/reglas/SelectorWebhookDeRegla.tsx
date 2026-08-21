@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Campo } from '@/shared/ui/Campo'
 import { Select, type OpcionSelect } from '@/shared/ui/Select'
-import { usePermisos } from '../../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { useWebhooks } from '../../../hooks/useWebhooks'
 import type { WebhooksPageQuery } from '@/services/contracts/flota'
 

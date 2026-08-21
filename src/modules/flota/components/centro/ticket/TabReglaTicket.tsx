@@ -4,7 +4,7 @@ import { SlidersHorizontal } from 'lucide-react'
 import { Boton } from '@/shared/ui/Boton'
 import { EstadoVacio } from '@/shared/ui/EstadoVacio'
 import { AccionConMotivo } from '../../AccionConMotivo'
-import { usePermisos } from '../../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { CONTEXTO_DE_REGLA_DISPONIBLE } from '../../../vocabulario-ticket-problema'
 
 const RUTA_REGLAS = '/app/flota/problemas/reglas'

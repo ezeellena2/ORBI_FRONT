@@ -5,7 +5,7 @@ import { Boton } from '@/shared/ui/Boton'
 import { BotonIcono } from '@/shared/ui/BotonIcono'
 import { MenuAcciones, type ItemMenuAcciones } from '@/shared/ui/MenuAcciones'
 import { AccionConMotivo } from '../AccionConMotivo'
-import { usePermisos } from '../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 
 /**
  * Acciones del hero: "Ver en mapa" · "Editar" · kebab.

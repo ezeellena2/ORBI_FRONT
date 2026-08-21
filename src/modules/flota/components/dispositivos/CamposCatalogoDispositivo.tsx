@@ -4,7 +4,7 @@ import { SelectorCatalogoGrowable } from './SelectorCatalogoGrowable'
 import { useCrearModeloDispositivo } from '../../hooks/useCrearModeloDispositivo'
 import { useCrearProveedorSim } from '../../hooks/useCrearProveedorSim'
 import { useModelosDispositivo } from '../../hooks/useModelosDispositivo'
-import { usePermisos } from '../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { useProveedoresSim } from '../../hooks/useProveedoresSim'
 import {
   aCrearModeloDispositivoRequest,

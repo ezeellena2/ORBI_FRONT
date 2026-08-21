@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Plus, SlidersHorizontal } from 'lucide-react'
 import { AccionConMotivo } from '../components/AccionConMotivo'
-import { AvisoOperacion } from '../components/AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { SubmenuDelCentro } from '../components/centro/SubmenuDelCentro'
 import { ModalProbarWebhook } from '../components/centro/integraciones/ModalProbarWebhook'
 import { ModalRegla } from '../components/centro/reglas/ModalRegla'
 import { ResumenDeReglas } from '../components/centro/reglas/ResumenDeReglas'
 import { TablaDeReglas } from '../components/centro/reglas/TablaDeReglas'
 import { useAlternarEstadoDeRegla } from '../hooks/useAlternarEstadoDeRegla'
-import { usePermisos } from '../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { useReglasProblemas } from '../hooks/useReglasProblemas'
 import { nombreDeLaCopia, resumenDeReglas, type AccionDeRegla } from '../vocabulario-reglas-problemas'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
@@ -124,7 +124,7 @@ export default function ReglasProblemasPage() {
         />
 
         {errorApi && hayDatosEnMano ? (
-          <AvisoOperacion
+          <Aviso
             titulo={t('centro.reglas.error.tituloRefresco')}
             mensaje={resolveApiErrorMessage(errorApi, tComun)}
             trazaId={errorApi.traceId}
@@ -142,7 +142,7 @@ export default function ReglasProblemasPage() {
           visible — el modo de falla que este módulo corrigió 3 veces.
         */}
         {alternar.error === null ? null : (
-          <AvisoOperacion
+          <Aviso
             titulo={t('centro.reglas.error.tituloAlternar')}
             mensaje={resolveApiErrorMessage(parseApiError(alternar.error), tComun)}
             trazaId={parseApiError(alternar.error).traceId}

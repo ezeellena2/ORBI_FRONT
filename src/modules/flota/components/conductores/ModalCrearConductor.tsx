@@ -8,7 +8,7 @@ import { GrupoRadio } from '@/shared/ui/GrupoRadio'
 import { Input } from '@/shared/ui/Input'
 import { Modal } from '@/shared/ui/Modal'
 import { Select } from '@/shared/ui/Select'
-import { AvisoOperacion } from '../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { repartirErroresDelAlta } from './errores-alta-conductor'
 import { useCrearConductor } from '../../hooks/useCrearConductor'
 import {
@@ -144,7 +144,7 @@ function Formulario({ onCerrar }: { onCerrar: () => void }) {
           void enviar()
         }}
       >
-        {errorGeneral ? <AvisoOperacion titulo={errorGeneral} /> : null}
+        {errorGeneral ? <Aviso titulo={errorGeneral} /> : null}
 
         <Controller
           control={form.control}

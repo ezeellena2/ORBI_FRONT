@@ -64,7 +64,11 @@ export function MapaPanelDetalle(props: MapaPanelDetalleProps) {
   const { t } = useTranslation('flota')
 
   return (
-    <aside className="flex w-full shrink-0 flex-col gap-3 overflow-y-auto rounded-xl border border-borde bg-superficie-1 p-4 lg:w-80">
+    /*
+      Cromo pegado al lienzo, como el panel izquierdo: sin `rounded`, separado por un **borde
+      izquierdo**. El mockup lo declara igual (`.map-detail-panel`, `components.css:4266`).
+    */
+    <aside className="flex w-full shrink-0 flex-col gap-3 overflow-y-auto border-t border-borde bg-superficie-1 p-4 lg:w-80 lg:border-t-0 lg:border-l">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-1">
           <span className="truncate font-mono text-sm font-semibold text-fg-primario">

@@ -3,7 +3,7 @@ import { Badge } from '@/shared/ui/Badge'
 import { Boton } from '@/shared/ui/Boton'
 import { Modal } from '@/shared/ui/Modal'
 import { parseApiError, resolveApiErrorMessage } from '@/shared/errors/parse-api-error'
-import { AvisoOperacion } from '../../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { useProbarWebhook } from '../../../hooks/useProbarWebhook'
 import {
   claveDeEstadoEntrega,
@@ -94,7 +94,7 @@ function Contenido({
         </p>
 
         {apiError === null ? null : (
-          <AvisoOperacion
+          <Aviso
             titulo={resolveApiErrorMessage(apiError, t)}
             mensaje={t(
               `flota:${claveDeGuiaDeErrorCentro(tratamientoDeErrorCentro(apiError.code, apiError.args))}`,
@@ -111,7 +111,7 @@ function Contenido({
 
 /**
  * ⚠️ **Una prueba que falla NO es un error de la pantalla**: es el resultado. Por eso se pinta como
- * dato (badge del estado + status) y no como `AvisoOperacion` rojo — el que fallo es el sistema del
+ * dato (badge del estado + status) y no como `Aviso` rojo — el que fallo es el sistema del
  * cliente, y lo accionable es su status HTTP.
  *
  * `errorResumen` **no se muestra**: desde el cierre de slice-06 persiste la constante `http_error` y

@@ -1,0 +1,12 @@
+# Local/generated artifacts
+graphify-out/cost.json
+node_modules/
+dist/
+storybook-static/
+playwright-report/
+test-results/
+coverage/
+
+# Build and tool noise
+*.log
+*.local

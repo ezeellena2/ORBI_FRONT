@@ -143,6 +143,12 @@ const PUEDEN_LEER_PRIMITIVAS = [
   join('src', 'styles', 'primitivas.css'),
   join('src', 'styles', 'semanticas.css'),
   join('src', 'styles', 'temas') + sep,
+  // Una ESTÉTICA remapea la capa semántica leyendo primitivas, igual que un tema: por eso está
+  // acá y no es una excepción. La carpeta todavía no existe — la crea el slice de estéticas
+  // (`TracAutoV2/docsv2/02-arquitectura/frontend/11-catalogo-de-esteticas.md`) — y se agrega ANTES
+  // a propósito: sin esta línea, el primer `var(--p-*)` de la primera estética falla F2 y deja el
+  // CI en rojo con un mensaje que apunta a la regla equivocada.
+  join('src', 'styles', 'esteticas') + sep,
 ]
 
 for (const ruta of [...css, ...codigo]) {

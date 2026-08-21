@@ -7,7 +7,7 @@ import { Boton } from '@/shared/ui/Boton'
 import { EstadoVacio } from '@/shared/ui/EstadoVacio'
 import { AccionConMotivo } from '../../AccionConMotivo'
 import { formatearFechaHora } from '../../detalle/formato'
-import { usePermisos } from '../../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import {
   claveDeEstadoEntrega,
   varianteDeEstadoEntrega,

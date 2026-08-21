@@ -21,7 +21,7 @@ import {
 import { ModalCargarDocumento } from './ModalCargarDocumento'
 import { useDocumentosConductor } from '../../../hooks/useDocumentosConductor'
 import { useEliminarDocumentoConductor } from '../../../hooks/useEliminarDocumentoConductor'
-import { usePermisos } from '../../../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { ParDato } from '../../detalle/ParDato'
 import { formatearFechaSola } from '../../detalle/formato'
 

@@ -13,7 +13,7 @@ import {
   resolveApiErrorMessage,
   resolveApiFieldErrors,
 } from '@/shared/errors/parse-api-error'
-import { AvisoOperacion } from '../../AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { useActualizarWebhook } from '../../../hooks/useActualizarWebhook'
 import { useCrearWebhook } from '../../../hooks/useCrearWebhook'
 import {
@@ -183,7 +183,7 @@ function Formulario({
         }}
       >
         {apiError === null || tratamiento === 'urlNoPermitida' ? null : (
-          <AvisoOperacion
+          <Aviso
             titulo={resolveApiErrorMessage(apiError, t)}
             mensaje={t(`flota:${claveDeGuiaDeErrorCentro(tratamiento ?? 'generico')}`)}
             trazaId={apiError.traceId}

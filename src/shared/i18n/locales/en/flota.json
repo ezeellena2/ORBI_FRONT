@@ -2122,5 +2122,15 @@
       "sinCorrelacion": "Which problem each signal belongs to is not available yet, so the link opens the Problem Center without preselecting one.",
       "irAlCentro": "Go to the Problem Center"
     }
+  },
+  "nav": {
+    "modulo": "Telemetry and fleet",
+    "bajada": "Connected fleet",
+    "vehiculos": "Vehicles",
+    "mapa": "Live map",
+    "dispositivos": "Devices",
+    "conductores": "Drivers",
+    "geozonas": "Geofences",
+    "problemas": "Problem center"
   }
 }

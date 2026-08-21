@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { AvisoOperacion } from '../components/AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { SubmenuDelCentro } from '../components/centro/SubmenuDelCentro'
 import { VistaKanban } from '../components/centro/kanban/VistaKanban'
 import { VistaSala } from '../components/centro/sala/VistaSala'
@@ -155,7 +155,7 @@ function ShellDeListas() {
         panel de error lo pinta cada vista, que es la que sabe qué superficie reemplazar.
       */}
       {apiError !== null && hayDatosEnMano ? (
-        <AvisoOperacion
+        <Aviso
           titulo={t('centro.problemas.error.tituloRefresco')}
           mensaje={resolveApiErrorMessage(apiError, tComun)}
           trazaId={apiError.traceId}

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Plug, Plus, SearchX } from 'lucide-react'
 import { AccionConMotivo } from '../components/AccionConMotivo'
-import { AvisoOperacion } from '../components/AvisoOperacion'
+import { Aviso } from '@/shared/ui/Aviso'
 import { SubmenuDelCentro } from '../components/centro/SubmenuDelCentro'
 import { CardEventosDisponibles } from '../components/centro/integraciones/CardEventosDisponibles'
 import { CardFirmaHmac } from '../components/centro/integraciones/CardFirmaHmac'
@@ -23,7 +23,7 @@ import { SaludDeIntegraciones } from '../components/centro/integraciones/SaludDe
 import { TablaDeEntregas } from '../components/centro/integraciones/TablaDeEntregas'
 import { useAlternarEstadoDeWebhook } from '../hooks/useAlternarEstadoDeWebhook'
 import { useEntregasWebhook } from '../hooks/useEntregasWebhook'
-import { usePermisos } from '../hooks/usePermisos'
+import { usePermisos } from '@/shared/auth/permissions/usePermisos'
 import { useWebhooks } from '../hooks/useWebhooks'
 import {
   FILTROS_DE_WEBHOOKS_INICIALES,
@@ -166,7 +166,7 @@ export default function FlotaIntegracionesPage() {
           error. Sin este aviso, el usuario toca "Pausar" y no pasa nada visible.
         */}
         {alternar.error === null ? null : (
-          <AvisoOperacion
+          <Aviso
             titulo={t('centro.integraciones.error.tituloAlternar')}
             mensaje={resolveApiErrorMessage(parseApiError(alternar.error), tComun)}
             trazaId={parseApiError(alternar.error).traceId}
